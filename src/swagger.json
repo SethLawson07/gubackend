@@ -133,7 +133,38 @@
             "tags":["auth"],
             "summary":"Creer un compte admin",
             "produces":["application/json"],
-            "consumes":["application/json"]
+            "consumes":["application/json"],
+            "parameters":[
+                {
+                    "name":"body",
+                    "in":"body",
+                    "required": true,
+                    "description":"Admin infos",
+                    "schema":{
+                        "type":"object",
+                        "email":{
+                            "type":"string",
+                        },
+                        "password":{
+                            "type":"string"
+                        }
+                    }
+                }
+            ],
+            "responses":{
+                "201":{
+                    "description":"Compte admin cree"
+                },
+                "400":{
+                    "description":"parametres non passes ou types incorrects"
+                },
+                "409":{
+                    "description":"Email deja en cours d'utilisation"
+                },
+                "500":{
+                    "description":"Une erreur est survenue. Reessayer ou contacter les devs"
+                }
+            }
         }
     }
   }
