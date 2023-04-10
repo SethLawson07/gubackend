@@ -1,0 +1,21 @@
+import express, { Request, Response } from "express"
+import * as dotenv from "dotenv"
+dotenv.config()
+import morgan from "morgan"
+import cors from "cors"
+
+const PORT = process.env.PORT || 5000
+
+const app = express()
+
+app.use(cors())
+app.use(express.json())
+app.use(morgan("tiny"))
+
+app.get("/health", (_req: Request, res: Response)=>{
+    return res.status(200).send()
+})
+
+app.listen(PORT, ()=>{
+    console.log(`App listening on ${PORT}`)
+})
