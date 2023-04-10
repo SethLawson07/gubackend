@@ -7,7 +7,7 @@
   "paths":{
       "/health":{
             "get":{
-                "summary":"Get server health status",
+                "summary":"Get server health check",
                 "produces":["application/json"],
                 "responses":{
                     "200":{
