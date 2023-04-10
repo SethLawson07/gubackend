@@ -18,6 +18,45 @@
                     }
                 }
             }
+      },
+      "/auth/register":{
+          "post":{
+              "summary":"Créer un compte en tant qu'utilisateur",
+              "produces":["application/json"],
+              "parameters":{
+                    {
+                        "name":"email",
+                        "in":"body",
+                        "description":"email de l'utilisateur",
+                        "required": true,
+                        "type":"string",
+                        "format":"email@host.com",
+                    },
+                    {
+                        "name":"password",
+                        "in":"body",
+                        "description":"mot de passe",
+                        "required": true,
+                        "type":"string",
+                        "format":"mySuperSecretPassword123456789"
+                    },
+                    {
+                        "name":"phone",
+                        "in":"body",
+                        "description":"numero de telephone",
+                        "required": true,
+                        "type":"string",
+                        "format":"90696969"
+                    },
+                    {
+                        "name":"profile_picture",
+                        "in":"body",
+                        "description":"Lien vers la photo de profil",
+                        "required": false,
+                        "format":"https://cloudinary.com/blabla.png"
+                    }
+              }
+          }
       }
   }
 }
