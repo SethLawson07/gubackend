@@ -14,6 +14,14 @@
           "description":"Authentication"
       }
   ],
+  "securityDefinitions":{
+    "Bearer": {
+        "type":"apiKey",
+        "name":"Authorization",
+        "in":"header",
+        "description":"JWT auth token"
+    }
+  },
   "paths":{
       "/health":{
             "get":{
@@ -31,7 +39,7 @@
       },
       "/auth/register":{
           "post":{
-              "tags":["auth"]
+              "tags":["auth"],
               "summary":"Créer un compte en tant qu'utilisateur",
               "produces":["application/json"],
               "consumes":["application/json"],
@@ -130,6 +138,7 @@
       },
     "/auth/create_admin":{
         "post":{
+            "security":[{ "Bearer":[] }]
             "tags":["auth"],
             "summary":"Creer un compte admin",
             "produces":["application/json"],
@@ -142,11 +151,13 @@
                     "description":"Admin infos",
                     "schema":{
                         "type":"object",
-                        "email":{
-                            "type":"string",
-                        },
-                        "password":{
-                            "type":"string"
+                        "properties":{
+                            "email":{
+                                "type":"string",
+                            },
+                            "password":{
+                                "type":"string"
+                            }
                         }
                     }
                 }

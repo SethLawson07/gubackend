@@ -61,9 +61,25 @@ export async function login(req: Request, res: Response){
     }
 }
 
-export async function create_admin(_req: Request, res: Response){
+export async function create_admin(req: Request, res: Response){
     try {
-       return res.status(200).send() 
+        const data_schema = z.object({
+            email: z.string({ required_error:"email est un parametre requis", invalid_type_error:"email doit etre un string" }).email(),
+            password: z.string({ required_error:"password est un parametre requis", invalid_type_error:"password doit etre un string" })
+        })
+        const validation_result = data_schema.safeParse(req.body)
+        if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
+        const admin_data = { ...validation_result.data, password: hash_pwd(validation_result.data.password), profile_picture:"", is_admin:true, phone:"" }
+        const potential_duplicate = await prisma.user.findUnique({
+            where:{
+                email : admin_data.email
+            }
+        })
+        if(potential_duplicate) return res.status(409).send({ message:"email deja en cours d'utilisation" })
+        await prisma.user.create({
+            data:admin_data
+        })
+        return res.status(201).send({ message:"Nouveau compte admin cree" })
     } catch (err) {
         console.error(`Error while creating admin ${err}`)
         return res.status(500).send({ message:"Une erreur est survenue, veuillez reesayer ou contacter les developpeurs" })

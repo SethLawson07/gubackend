@@ -5,9 +5,7 @@ export function Auth(req: Request, res: Response, next: NextFunction){
     try {
         const bearer = req.headers.authorization ?? ""        
         if(bearer==="") return res.status(401).send({ message:"Utilisateur non authentifié" })
-        const token = bearer.split(" ")[1] ?? ""
-        if(token==="") return res.status(401).send({ message:"Token invalide" })
-        const token_verification_result = verify_token(token)
+        const token_verification_result = verify_token(bearer)
         if(token_verification_result==="") return res.status(401).send({ message: "token invalide ou expiré" })
         req.body.user = token_verification_result
         next()
