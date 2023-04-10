@@ -1,5 +1,5 @@
 import { Request, Response} from "express"
-import prisma from "../utils/prisma"
+import { prisma } from "../server"
 import { sign_token, hash_pwd } from "../utils"
 import { z } from "zod"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime"
