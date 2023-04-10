@@ -2,70 +2,67 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
 }
 
 model User {
-    id String @id @default(auto()) @map("_id") @db.ObjectId()
-    email String @unique
-    password String
-    phone String 
+    id              String  @id @default(auto()) @map("_id") @db.ObjectId()
+    email           String  @unique
+    password        String
+    phone           String
     profile_picture String
-    is_admin Boolean
-
+    is_admin        Boolean
 }
 
 model Category {
-        id String @id @default((auto())) @map("_id") @db.ObjectId()
-        name String
-        featured Boolean
-    }
+    id String @id @default((auto())) @map("_id") @db.ObjectId()
+    name     String
+    featured Boolean
+}
 
 model SubCategory {
-        id String @id @default(auto()) @map("_id") @db.ObjectId()
-        name String
-        featured Boolean
-        category String
-    }
+    id       String  @id @default(auto()) @map("_id") @db.ObjectId()
+    name     String
+    featured Boolean
+    category String
+}
 
 model Item {
-        id String @id @default(auto()) @map("_id") @db.ObjectId()
-        sub_category String
-        featured Boolean
-        schema Json
-    }
+    id           String  @id @default(auto()) @map("_id") @db.ObjectId()
+    sub_category String
+    featured     Boolean
+    schema       Json
+}
 
 model Product {
-        id String @id @default(auto()) @map("_id") @db.ObjectId()
-        item String
-        featured Boolean
-        in_stock Int
-        price Float
-        pay_at_delivery Boolean
-        is_in_discount Boolean
-        discount_price Float
-        fields Json
-    }
+    id              String  @id @default(auto()) @map("_id") @db.ObjectId()
+    item            String
+    featured        Boolean
+    in_stock        Int
+    price           Float
+    pay_at_delivery Boolean
+    is_in_discount  Boolean
+    discount_price  Float
+    fields          Json
+}
 
 model PromoCode {
-        id String @id @default(auto()) @map("_id") @db.ObjectId()
-        name String
-        valid Boolean
-        discount Int
-        conditions Json
-        featured Boolean
-    }
+    id         String  @id @default(auto()) @map("_id") @db.ObjectId()
+    name       String
+    valid      Boolean
+    discount   Int
+    conditions Json
+    featured   Boolean
+}
 
 model Slider {
-        id String @id @default(auto()) @map("_id") @db.ObjectId()
-        big_text String
-        alt_text String
-        featured Boolean
-    }
-
-
+    id       String  @id @default(auto()) @map("_id") @db.ObjectId()
+    big_text String
+    alt_text String
+    featured Boolean
+}
