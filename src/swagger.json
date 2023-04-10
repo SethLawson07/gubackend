@@ -186,7 +186,7 @@
         "post":{
             "security":[{ "Bearer":[] }],
             "tags":["category"],
-            "summary":"Creer un compte admin",
+            "summary":"Creer une categorie",
             "produces":["application/json"],
             "consumes":["application/json"],
             "parameters":[
@@ -208,7 +208,79 @@
                         }
                     }
                 }
-            ]
+            ],
+            "responses":{
+                "201":{"description":"categorie cree"},
+                "400":{"description":"Mauvaise requete, types incorrects ou champs manquants"},
+                "409":{"description":"Une categorie porte deja le nom "},
+                "500":{"description":"Une erreur est survenue. Reessayer ou contacter les devs"}
+            }
+        },
+        "get":{
+            "tags":["category"],
+            "summary":"Liste des categories",
+            "produces":["application/json"],
+            "responses":{
+                "200":{
+                    "description":"Donnees retournees"
+                },
+                "500":{
+                    "description":"Une erreur est survenue. Reessayer ou contacter les devs"
+                }
+            }
+        },
+        "put":{
+            "security":[{ "Bearer":[] }],
+            "tags":["category"],
+            "summary":"Modifier une categorie",
+            "produces":["application/json"],
+            "consumes":["application/json"],
+            "parameters":[
+                {
+                    "name":"body",
+                    "in":"body",
+                    "required": true,
+                    "schema":{
+                        "type":"object",
+                        "properties":{
+                            "name":{"type":"string"},
+                            "featured":{"type":"boolean"}
+                        }
+                    }
+                }
+            ],
+            "responses":{
+                "200":{"description":"categorie mise a jour"},
+                "400":{"description":"Mauvaise requete, types incorrects ou champ id manquant"},
+                "404":{"description":"categorie non trouvee"},
+                "409":{"description":"duplicat, une categorie porte deja le meme nom"},
+                "500":{"description":"Une erreur est survenue...."}
+            }
+        },
+        "delete":{
+            "security":[{ "Bearer":[] }],
+            "tags":["category"],
+            "summary":"Supprimer une categorie",
+            "produces":["application/json"],
+            "consumes":["application/json"],
+            "parameters":[
+                {
+                    "name":"body",
+                    "in":"body",
+                    "required": true,
+                    "schema":{
+                        "type":"object",
+                        "properties":{
+                            "id":{"type":"string"}
+                        }
+                    }
+                }
+            ],
+            "responses":{
+                "200":{"description":"categorie supprimee"},
+                "404":{"description":"categorie non trouvee"},
+                "500":{"description":"Une erreur est survenue...."}
+            }
         }
     },
     "/subcategory":{},
