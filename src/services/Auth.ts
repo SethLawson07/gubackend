@@ -2,7 +2,7 @@ import { Request, Response} from "express"
 import { prisma } from "../server"
 import { sign_token, hash_pwd } from "../utils"
 import { z } from "zod"
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime"
+import { Prisma } from "@prisma/client"
 
 
 export async function register(req: Request, res: Response){
@@ -26,7 +26,7 @@ export async function register(req: Request, res: Response){
         const token = sign_token(user_data.email)
         return res.status(201).send({ token })
     } catch (err) {
-        if(err instanceof PrismaClientKnownRequestError){
+        if(err instanceof Prisma.PrismaClientKnownRequestError){
             if(err.code==="P2002"){
                 return res.status(409).send({ message:"Adresse email ou numéro de téléphone déjà en cours d'utilisation" })
             }
