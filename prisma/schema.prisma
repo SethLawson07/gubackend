@@ -19,3 +19,53 @@ model User {
     is_admin Boolean
 
 }
+
+model Category {
+        id String @id @default((auto())) @map("_id") @db.ObjectId()
+        name String
+        featured Boolean
+    }
+
+model SubCategory {
+        id String @id @default(auto()) @map("_id") @db.ObjectId()
+        name String
+        featured Boolean
+        category String
+    }
+
+model Item {
+        id String @id @default(auto()) @map("_id") @db.ObjectId()
+        sub_category String
+        featured Boolean
+        schema Json
+    }
+
+model Product {
+        id String @id @default(auto()) @map("_id") @db.ObjectId()
+        item String
+        featured Boolean
+        in_stock Int
+        price Float
+        pay_at_delivery Boolean
+        is_in_discount Boolean
+        discount_price Float
+        fields Json
+    }
+
+model PromoCode {
+        id String @id @default(auto()) @map("_id") @db.ObjectId()
+        name String
+        valid Boolean
+        discount Int
+        conditions Json
+        featured Boolean
+    }
+
+model Slider {
+        id String @id @default(auto()) @map("_id") @db.ObjectId()
+        big_text String
+        alt_text String
+        featured Boolean
+    }
+
+
