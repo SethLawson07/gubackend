@@ -33,7 +33,7 @@ export async function register(req: Request, res: Response){
         return res.status(201).send({ token })
     } catch (err) {
         console.error(`Error while registering ${err}`)
-        return res.status(500).send({ message:"Une erreur est survenue, veuillez réessayer ou contacter les développeurs" })
+        return res.status(500).send()
     }
 }
 
@@ -57,7 +57,7 @@ export async function login(req: Request, res: Response){
         return res.status(200).send({ token })
     } catch (err) {
         console.error(`Error while loging in ${err}`)
-        return res.status(500).send({ message:"Une erreur est survenue, veuillez reesayer ou contacter les developpeurs" })
+        return res.status(500).send()
     }
 }
 
@@ -82,6 +82,6 @@ export async function create_admin(req: Request, res: Response){
         return res.status(201).send({ message:"Nouveau compte admin cree" })
     } catch (err) {
         console.error(`Error while creating admin ${err}`)
-        return res.status(500).send({ message:"Une erreur est survenue, veuillez reesayer ou contacter les developpeurs" })
+        return res.status(500).send()
     }
 }
