@@ -6,16 +6,31 @@
   },
   "tags": [
       {
-          "name":"health",
-          "description":"Server health"
+          "name":"health"
       },
       {
-          "name":"auth",
-          "description":"Authentication"
+          "name":"auth"
       },
       {
-          "name":"category",
-          "description":"Category related routes"
+          "name":"category"
+      },
+      {
+          "name":"slider"
+      },
+      {
+          "name":"subcategory"
+      },
+      {
+          "name":"promocode"
+      },
+      {
+          "name":"item"
+      },
+      {
+          "name":"product"
+      },
+      {
+          "name":"order"
       }
   ],
   "securityDefinitions":{
