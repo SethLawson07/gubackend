@@ -12,6 +12,10 @@
       {
           "name":"auth",
           "description":"Authentication"
+      },
+      {
+          "name":"category",
+          "description":"Category related routes"
       }
   ],
   "securityDefinitions":{
@@ -138,7 +142,7 @@
       },
     "/auth/create_admin":{
         "post":{
-            "security":[{ "Bearer":[] }]
+            "security":[{ "Bearer":[] }],
             "tags":["auth"],
             "summary":"Creer un compte admin",
             "produces":["application/json"],
@@ -177,6 +181,41 @@
                 }
             }
         }
-    }
+    },
+    "/category":{
+        "post":{
+            "security":[{ "Bearer":[] }],
+            "tags":["category"],
+            "summary":"Creer un compte admin",
+            "produces":["application/json"],
+            "consumes":["application/json"],
+            "parameters":[
+                {
+                    "name":"body",
+                    "in":"body",
+                    "description":"Category data",
+                    "required": true,
+                    "schema":{
+                        "type":"object",
+                        "properties":{
+                            "name":{
+                                "type":"string",
+                                "description":"Nom de la categorie"
+                            },
+                            "featured":{
+                                "type":"boolean",
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "/subcategory":{},
+    "/item":{},
+    "/product":{},
+    "/slider":{},
+    "/promocode":{},
+    "/pay":{}
   }
 }
