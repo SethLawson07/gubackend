@@ -9,15 +9,19 @@ export function hash_pwd( plain_text_password: string ){
     return hash
 }
 
-export function sign_token( user: string ){
-   const token = jwt.sign({ user }, JWT_TOKEN, { expiresIn:"31d" }) 
+export function password_is_valid( plain_text_password:string, db_hash:string ){
+    return bcrypt.compareSync(plain_text_password, db_hash)
+}
+
+export function sign_token( user: string, is_admin: boolean ){
+   const token = jwt.sign({ user, is_admin }, JWT_TOKEN, { expiresIn:"31d" }) 
    return token
 }
 
 export function verify_token(token: string){
     try {
-        const { user } = jwt.verify(token, JWT_TOKEN) as { user: string }  
-        return user
+        const { user, is_admin } = jwt.verify(token, JWT_TOKEN) as { user: string, is_admin: boolean }  
+        return { user, is_admin }
     } catch (err) {
         console.error(`Error while verifying token ${err}`)
         return ""

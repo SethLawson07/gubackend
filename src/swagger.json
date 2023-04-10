@@ -4,6 +4,16 @@
     "title": "Simple API overview",
     "version": "v2"
   },
+  "tags": [
+      {
+          "name":"health",
+          "description":"Server health"
+      },
+      {
+          "name":"auth",
+          "description":"Authentication"
+      }
+  ],
   "paths":{
       "/health":{
             "get":{
@@ -21,6 +31,7 @@
       },
       "/auth/register":{
           "post":{
+              "tags":["auth"]
               "summary":"Créer un compte en tant qu'utilisateur",
               "produces":["application/json"],
               "consumes":["application/json"],
@@ -71,6 +82,59 @@
                   }
               }
           }
-      }
+      },
+      "/auth/login":{
+          "post":{
+              "tags":["auth"],
+              "summary":"Se connecter",
+              "produces":["application/json"],
+              "consumes":["application/json"],
+              "parameters":[
+                  {
+                      "name":"body",
+                      "in":"body",
+                      "description":"user details",
+                      "required": true,
+                      "schema": {
+                          "type":"object",
+                          "properties":{
+                              "email":{
+                                  "type":"string",
+                                  "description":"email de l'utilisateur",
+                                  "example":"email@gmail.com"
+                              },
+                              "password":{
+                                  "type":"string",
+                                  "description":"mot de passe",
+                                  "example":""
+                              }
+                          }
+                      }
+                  }
+              ],
+              "responses":{
+                  "200":{
+                      "description":"Authentification reussie, l'API devrait retourner un token"
+                  },
+                  "400":{
+                      "description":"Mot de passe incorrect"
+                  },
+                  "404":{
+                      "description":"Utilisateur non trouve"
+                  },
+                  "500":{
+                      "description":"Une erreur est survenue. Reessayer ou contacter les devs"
+                  }
+              }
+          }
+      },
+    "/auth/create_admin":{
+        "post":{
+            "tags":["auth"],
+            "summary":"Creer un compte admin",
+            "produces":["application/json"],
+            "consumes":["application/json"]
+        }
+    }
   }
 }

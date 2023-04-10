@@ -14,7 +14,8 @@ model User {
     id String @id @default(auto()) @map("_id") @db.ObjectId()
     email String @unique
     password String
-    phone String @unique
-    profile_picture String?
+    phone String 
+    profile_picture String
+    is_admin Boolean
 
 }
