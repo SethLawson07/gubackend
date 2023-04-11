@@ -14,14 +14,14 @@ model User {
     id              String  @id @default(auto()) @map("_id") @db.ObjectId()
     email           String  @unique
     password        String
-    phone           String
+    phone           String  @unique
     profile_picture String
     is_admin        Boolean
 }
 
 model Category {
     id       String  @id @default(auto()) @map("_id") @db.ObjectId()
-    name     String @unique
+    name     String  @unique
     featured Boolean
 }
 
@@ -53,7 +53,7 @@ model Product {
 
 model PromoCode {
     id         String  @id @default(auto()) @map("_id") @db.ObjectId()
-    name       String @unique
+    name       String  @unique
     valid      Boolean
     discount   Int
     conditions Json
