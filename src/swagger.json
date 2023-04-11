@@ -462,7 +462,43 @@
             }
         }
     },
-    "/item":{},
+    "/item":{
+        "post":{
+            "tags":["item"], "summary":"Creer un item", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[] }],
+            "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
+                "type":"object", "properties":{
+                    "name":{"type":"string"}, "featured":{"type":"boolean"}, "sub_category":{"type":"string"}
+                }
+            } }], "responses":{
+            "201":{"description":"Item cree"}, "400":{"description":"Mauvaise requete, champs manquants ou types incorrects"}, 
+            "404":{"description":"sous categorie non trouvee"}, "409":{"description":"un item porte deja le meme nom dans la sous categorie specifiee"}, "500":{"description":"erreur serveur..."}
+            }
+        },
+        "get":{
+            "tags":["item"], "summary":"Recevoir la liste des items", "consumes":["application/json"], "produces":["application/json"], 
+            "responses":{ "200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur..."} }
+        },
+        "put":{
+            "tags":["item"], "summary":"Modifier un item", "consumes":["application/json"], "produces":["application/json"], "security": [{ "Bearer":[] }],
+            "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
+                "type":"object", "properties":{
+                    "name":{"type":"string"}, "featured":{"type":"string"}, "id":{"type":"string"}
+                }
+            }}], "responses":{
+            "200":{"description":"modifications appliquees"}, "400":{"description":"champs manquants ou types incorrects"}, "404":{"description":"item non trouve"},
+            "409":{"description":"un item porte deja le meme nom dans la sous categorie"}, "500":{"description":"erreur serveur"}
+            }
+        },
+        "delete":{
+            "tags":["item"], "summary":"Supprimer un item", "consumes":["application/json"], "produces":["application/json"], "security": [{ "Bearer":[] }],
+            "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
+                "type":"object",
+                "properties":{ "id":{"type":"string"} }
+            }}], "responses":{
+            "200":{"description":"Item supprime"}, "404":{"description":"item non trouve"}, "500":{"description":"erreur server..."}
+            }
+        }
+    },
     "/product":{},
     "/promocode":{},
     "/pay":{}
