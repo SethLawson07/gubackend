@@ -330,7 +330,7 @@
         },
         "get":{
             "summary":"Recevoir la liste des sliders",
-            "tags":["slider"]
+            "tags":["slider"],
             "produces":["application/json"],
             "responses":{
                 "200":{"description":"Liste des sliders renvoyee"},
@@ -364,6 +364,31 @@
                 "200":{"description":"slider modifie avec succes"},
                 "400":{"description":"id manquant ou types incorrects"},
                 "500":{"description":"Une erreur est survenue....."}
+            }
+        },
+        "delete":{
+            "tags":["slider"],
+            "summary":"Supprimer un slider",
+            "produces":["application/json"],
+            "consumes":["application/json"],
+            "security":[{ "Bearer":[] }],
+            "parameters":[
+                {
+                    "name":"body",
+                    "in":"body",
+                    "required":"true",
+                    "schema":{
+                        "type":"object",
+                        "properties":{
+                            "id":{"type":"string"}
+                        }
+                    }
+                }
+            ],
+            "responses":{
+                "200":{"description":"slider supprime avec succes"},
+                "400":{"description":"id manquant ou de type incorrect"},
+                "500":{"description":"une erreur est survenue........"}
             }
         }
     },
