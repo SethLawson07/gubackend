@@ -1,8 +1,6 @@
-import { Request, Response, response} from "express"
+import { Request, Response} from "express"
 import { z } from "zod"
 import { prisma } from "../server"
-import { error } from "console"
-import { request } from "http"
 
 export async function create(req: Request, res: Response){
     try {

@@ -302,7 +302,8 @@
     "/slider":{
         "post":{
             "summary":"Creer un slider",
-            "security":[],
+            "security":[{ "Bearer":[] }],
+            "tags":["slider"],
             "produces":["application/json"],
             "consumes":["application/json"],
             "parameters":[
@@ -315,7 +316,8 @@
                         "properties":{
                             "big_text":{"type":"string"},
                             "alt_text":{"type":"string"},
-                            "featured":{"type":"boolean"}
+                            "featured":{"type":"boolean"},
+                            "image":{"type":"string"}
                         }
                     }
                 }
@@ -328,9 +330,39 @@
         },
         "get":{
             "summary":"Recevoir la liste des sliders",
+            "tags":["slider"]
             "produces":["application/json"],
             "responses":{
                 "200":{"description":"Liste des sliders renvoyee"},
+                "500":{"description":"Une erreur est survenue....."}
+            }
+        },
+        "put":{
+            "summary":"Modifier un slider",
+            "tags":["slider"],
+            "produces":["application/json"],
+            "consumes":["application/json"],
+            "security":[{ "Bearer":[] }],
+            "parameters":[
+                {
+                    "name":"body",
+                    "in":"body",
+                    "required": true,
+                    "schema":{
+                        "type":"object",
+                        "properties":{
+                            "id":{"type":"string"},
+                            "big_text":{"type":"string"},
+                            "alt_text":{"type":"string"},
+                            "featured":{"type":"string"},
+                            "image":{"type":"string"}
+                        }
+                    }
+                }
+            ],
+            "responses":{
+                "200":{"description":"slider modifie avec succes"},
+                "400":{"description":"id manquant ou types incorrects"},
                 "500":{"description":"Une erreur est survenue....."}
             }
         }
