@@ -9,6 +9,8 @@ import { PrismaClient } from "@prisma/client"
 
 import auth from "./routes/auth"
 import category from "./routes/category"
+import slider from "./routes/slider"
+
 
 const PORT = process.env.PORT || 5000
 
@@ -23,6 +25,7 @@ app.use('/docs', swagger.serve, swagger.setup(swagger_doc))
 
 app.use("/auth", auth)
 app.use("/category", category)
+app.use("/slider", slider)
 
 app.get("/health", (_req: Request, res: Response)=>{
     return res.status(200).send()

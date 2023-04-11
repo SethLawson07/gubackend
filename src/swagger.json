@@ -299,10 +299,45 @@
             }
         }
     },
+    "/slider":{
+        "post":{
+            "summary":"Creer un slider",
+            "security":[],
+            "produces":["application/json"],
+            "consumes":["application/json"],
+            "parameters":[
+                {
+                    "name":"body",
+                    "in":"body",
+                    "required": true,
+                    "schema":{
+                        "type":"object",
+                        "properties":{
+                            "big_text":{"type":"string"},
+                            "alt_text":{"type":"string"},
+                            "featured":{"type":"boolean"}
+                        }
+                    }
+                }
+            ],
+            "responses":{
+                "201":{"description":"Slider cree"},
+                "400":{"description":"Mauvaise requete: champs manquants ou types invalides"},
+                "500":{"description":"Une erreur est survenue......."}
+            }
+        },
+        "get":{
+            "summary":"Recevoir la liste des sliders",
+            "produces":["application/json"],
+            "responses":{
+                "200":{"description":"Liste des sliders renvoyee"},
+                "500":{"description":"Une erreur est survenue....."}
+            }
+        }
+    },
     "/subcategory":{},
     "/item":{},
     "/product":{},
-    "/slider":{},
     "/promocode":{},
     "/pay":{}
   }
