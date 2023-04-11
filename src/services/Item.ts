@@ -106,8 +106,10 @@ export async function delete_(req: Request, res: Response){
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message:"id manquand ou de type incorrect"})
         const { id } = validation_result.data
-        return targetted_item = await prisma.item.findUnique({
-            id
+        const targetted_item = await prisma.item.findUnique({
+            where:{
+                id
+            }    
         })
         if(!targetted_item) return res.status(404).send()
         return res.status(200).send()
