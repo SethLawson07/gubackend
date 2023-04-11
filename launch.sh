@@ -5,4 +5,4 @@ npx prisma generate
 
 npx prisma db push
 
-node dist/server.js
+node ./dist/server.js
