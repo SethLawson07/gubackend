@@ -423,7 +423,11 @@
             }
         },
         "get":{
-            "tags":["subcategory"], "summary":"Liste des sous categories", "consumes":["application/json"], "produces":["application/json"]
+            "tags":["subcategory"], "summary":"Liste des sous categories", "consumes":["application/json"], "produces":["application/json"],
+            "responses":{
+                "200":{"description":"Liste des sous categories retournee"},
+                "500":{"description":"Une erreur est survenue........"}
+            }
         },
         "put":{
             "tags":["subcategory"], "summary":"Modifier une sous categorie", "consumes":["application/json"], "produces":["application/json"],
@@ -440,7 +444,9 @@
                         }
                     }
                 }
-            ]
+            ], "responses":{
+                "200":{"description":"sous categorie modifiee"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"une erreur est survenue...."}
+            }
         },
         "delete":{
             "tags":["subcategory"], "summary":"Supprimer une sous categorie", "consumes":["application/json"], "produces":["application/json"],
@@ -449,7 +455,11 @@
                 "type":"object", "properties":{
                     "id":{"type":"string"}
                 }
-            } }]
+            } }],
+            "responses":{
+                "200":{"description":"sous categorie supprimee"},
+                "500":{"description":"une erreur est survenue......"}
+            }
         }
     },
     "/item":{},
