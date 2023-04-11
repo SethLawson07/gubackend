@@ -40,9 +40,24 @@ export async function create(req: Request, res: Response){
             }
         })
         if(potential_duplicate) return res.status(409).send()
-
+        await prisma.item.create({
+            data:{
+                ...validation_result.data
+            }
+        })
+        return res.status(201).send()
     } catch (err) {
         console.error(`Error while creating item ${err}`)
+        return res.status(500).send()
+    }
+}
+
+export async function get(_req: Request, res: Response){
+    try {
+        const data = await prisma.item.findMany()
+        return res.status(200).send({ data })
+    } catch (err) {
+        console.error(`Error while getting list of all items ${err}`)
         return res.status(500).send()
     }
 }
