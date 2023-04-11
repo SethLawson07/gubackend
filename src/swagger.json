@@ -392,7 +392,40 @@
             }
         }
     },
-    "/subcategory":{},
+    "/subcategory":{
+        "post":{
+            "tags":["subcategory"],
+            "summary":"Creer une sous categorie",
+            "consumes":["application/json"],
+            "produces":["application/json"],
+            "security":[{ "Bearer":[] }],
+            "parameters":[
+                {
+                    "name":"body",
+                    "in":"body",
+                    "required": true,
+                    "schema":{
+                        "type":"object",
+                        "properties":{
+                            "name":{"type":"string"},
+                            "featured":{"type":"boolean"},
+                            "category":{"type":"string"}
+                        }
+                    }
+                }
+            ],
+            "responses":{
+                "201":{"description":"sous categorie cree"},
+                "400":{"description":"champs manquants ou types incorrects"},
+                "404":{"description":"categorie specifiee non trouvee"},
+                "409":{"description":"une sous categorie porte deja ce nom dans la categorie specifiee"},
+                "500":{"description":"Une erreur est survenue...."}
+            }
+        },
+        "get":{
+            "tags":["subcategory"], "summary":"Liste des sous categories", "consumes":["application/json"], "produces":["application/json"]
+        }
+    },
     "/item":{},
     "/product":{},
     "/promocode":{},
