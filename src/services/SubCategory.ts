@@ -28,8 +28,19 @@ export async function create(req: Request, res: Response){
         await prisma.subCategory.create({
             data
         })
+        return res.status(201).send()
     } catch (err) {
-        console.error(err)
+        console.error(`Error while creating subcategory ${err}`)
+        return res.status(500).send()
+    }
+}
+
+export async function get(_req: Request, res: Response){
+    try {
+        const data = await prisma.subCategory.findMany()
+        return res.status(200).send({ data })
+    } catch (err){
+        console.error(`Error while getting list of subcategories ${err}`)
         return res.status(500).send()
     }
 }
