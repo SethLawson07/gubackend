@@ -1,7 +1,35 @@
 import { Request, Response} from "express"
 import { z } from "zod"
 import { prisma } from "../server"
+import { error } from "console"
 
 export async function create(req: Request, res: Response){
+    try {
+       const schema = z.object({
+            big_text: z.string({ required_error:"big_text est un parametre requis", invalid_type_error:"bif_text doit etre un string"}),
+            alt_text: z.string({ required_error:"alt_text est un parametre requis", invalid_type_error:"alt_text doit etre un string" }),
+            image: z.string({ required_error:"image est un parametre requis", invalid_type_error:"image doit etre un string"}),
+            featured: z.boolean({ required_error:"featured est un parametre requis", invalid_type_error:"featured doit etre un string"})
+       }) 
+       const validation_result = schema.safeParse(req.body)
+       if(!validation_result.success) return res.status(400).send({message:JSON.parse(validation_result.error.message)})
+       const {data} = validation_result
+       await prisma.slider.create({
+           data
+       })
+       return res.status(201).send()
+    } catch (error) {
+       console.error(`Error while creating slider ${error}`) 
+       return res.status(500).send()
+    }
+}
 
+export async function get_sliders(req: Request, res: Response){
+    try {
+        const data = await prisma.slider.findMany()
+        return res.status(200).send({ data })
+    } catch (err) {
+        console.error(`Error while getting sliders ${err}`)
+        return res.status(500).send()
+    }
 }
