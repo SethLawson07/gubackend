@@ -14,7 +14,7 @@ model User {
     id              String  @id @default(auto()) @map("_id") @db.ObjectId()
     email           String  @unique
     password        String
-    phone           String  
+    phone           String
     profile_picture String
     is_admin        Boolean
 }
@@ -34,7 +34,7 @@ model SubCategory {
 
 model Item {
     id           String  @id @default(auto()) @map("_id") @db.ObjectId()
-    name String
+    name         String
     sub_category String
     featured     Boolean
     schema       Json
@@ -42,14 +42,15 @@ model Item {
 
 model Product {
     id              String  @id @default(auto()) @map("_id") @db.ObjectId()
+    name            String
     item            String
     featured        Boolean
     in_stock        Int
     price           Float
     pay_at_delivery Boolean
     is_in_discount  Boolean
-    discount_price  Float
-    fields          Json
+    discount_price  Float?
+    fields          Json?
 }
 
 model PromoCode {
