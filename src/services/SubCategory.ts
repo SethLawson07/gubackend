@@ -83,3 +83,19 @@ export async function update(req: Request, res: Response){
         return res.status(500).send()
     }
 }
+
+export async function delete_(req: Request, res: Response){
+    try {
+        const schema = z.object({
+            id: z.string({ required_error:"id est un parametre requis", invalid_type_error:"id doit etre un string"})
+        })
+        const validation_result = schema.safeParse(req.body)
+        if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.errors.toString())})
+        //Delete
+        return res.status(200).send()
+    } catch (err) {
+        console.error(`Error while deleting subCategory ${err}`)
+        return res.status(500).send()
+        
+    }
+}
