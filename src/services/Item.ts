@@ -5,28 +5,23 @@ import { z } from "zod";
 export async function create(req: Request, res: Response){
     try {
         const schema = z.object({
-            name: z.string({ required_error:"name est un parametre requis", invalid_type_error:"name doit etre un string"}),
-            sub_category: z.string({ required_error:"sub_category est un parametre requis", invalid_type_error:"sub_category doit etre un string"}),
-            featured: z.boolean({ required_error:"featured est un parametre requis", invalid_type_error:"featured doit etre un booleen"}),
-            schema: z.string({ required_error:"schema est un champ requis", invalid_type_error:"schema doit etre un string"})
+            name: z.string(),
+            sub_category: z.string(),
+            featured: z.boolean(),
+            schema: z.string(),
+            image: z.string()
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
         const schema_is_valid = (()=>{
             try {
-               const parsed_schema = JSON.parse(validation_result.data.schema)
-               return {
-                   success: true,
-                   data: parsed_schema
-               }
-            } catch (err) {
-                return {
-                    success: false,
-                    data: null
-                }
+               JSON.parse(validation_result.data.schema)
+               return true
+            } catch (_) {
+                return false
             }
         })()
-        if(!schema_is_valid.success) return res.status(400).send({ message:"schema invalide. Impossible de parser le schema"})
+        if(!schema_is_valid) return res.status(400).send({ message:"schema invalide. Impossible de parser le schema"})
         const targetted_subcategory = await prisma.subCategory.findUnique({
             where:{
                 id: validation_result.data.sub_category
@@ -43,6 +38,7 @@ export async function create(req: Request, res: Response){
         await prisma.item.create({
             data:{
                 ...validation_result.data
+                
             }
         })
         return res.status(201).send()
