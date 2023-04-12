@@ -512,7 +512,7 @@
                 "properties":{
                     "name":{"type":"string"}, "item":{"type":"string"}, "price":{"type":"number"}, "featured":{"type":"boolean"},
                     "in_stock":{"type":"number"}, "is_in_discount":{"type":"boolean"}, "discount_price":{"type":"number"}, "pay_at_delivery":{"type":"boolean"},
-                    "fields":{"type":"string"}, "images":{"type":"array"}
+                    "fields":{"type":"string"}, "images":{"type":"array", "items":{"type":"string"}}
                 }
             }}], "responses":{
             "201":{"description":"Produit cree"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}
@@ -529,7 +529,7 @@
                 "properties":{
                     "id":{"type":"string"}, "name":{"type":"string"}, "price":{"type":"number"}, "featured":{"type":"boolean"},
                     "in_stock":{"type":"number"}, "is_in_discount":{"type":"boolean"}, "discount_price":{"type":"number"}, "pay_at_delivery":{"type":"boolean"},
-                    "fields":{"type":"string"}, "images":{"type":"array"}
+                    "fields":{"type":"string"}, "images":{"type":"array", "items":{ "type":"string" }}
                 }
             }}], "responses":{
             "200":{"description":"modifications effectuees"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}
