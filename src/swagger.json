@@ -220,6 +220,9 @@
                             },
                             "featured":{
                                 "type":"boolean",
+                            },
+                            "image":{
+                                "type":"string"
                             }
                         }
                     }
@@ -261,7 +264,8 @@
                         "properties":{
                             "id":{"type":"string"},
                             "name":{"type":"string"},
-                            "featured":{"type":"boolean"}
+                            "featured":{"type":"boolean"},
+                            "image":{"type":"string"}
                         }
                     }
                 }
@@ -410,7 +414,7 @@
                         "properties":{
                             "name":{"type":"string"},
                             "featured":{"type":"boolean"},
-                            "category":{"type":"string"}
+                            "category":{"type":"string"}, "image":{"type":"string"}
                         }
                     }
                 }
@@ -441,7 +445,7 @@
                     "schema":{
                         "type":"object",
                         "properties":{
-                            "name":{"type":"string"}, "featured":{"type":"boolean"}
+                            "name":{"type":"string"}, "featured":{"type":"boolean"}, "image":{"type":"string"}
                         }
                     }
                 }
@@ -468,7 +472,7 @@
             "tags":["item"], "summary":"Creer un item", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[] }],
             "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
                 "type":"object", "properties":{
-                    "name":{"type":"string"}, "featured":{"type":"boolean"}, "sub_category":{"type":"string"}
+                    "name":{"type":"string"}, "featured":{"type":"boolean"}, "sub_category":{"type":"string"}, "image":{"type":"string"}
                 }
             } }], "responses":{
             "201":{"description":"Item cree"}, "400":{"description":"Mauvaise requete, champs manquants ou types incorrects"}, 
@@ -483,7 +487,7 @@
             "tags":["item"], "summary":"Modifier un item", "consumes":["application/json"], "produces":["application/json"], "security": [{ "Bearer":[] }],
             "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
                 "type":"object", "properties":{
-                    "name":{"type":"string"}, "featured":{"type":"string"}, "id":{"type":"string"}
+                    "name":{"type":"string"}, "featured":{"type":"string"}, "id":{"type":"string"}, "image":{"type":"string"}
                 }
             }}], "responses":{
             "200":{"description":"modifications appliquees"}, "400":{"description":"champs manquants ou types incorrects"}, "404":{"description":"item non trouve"},
@@ -508,7 +512,7 @@
                 "properties":{
                     "name":{"type":"string"}, "item":{"type":"string"}, "price":{"type":"number"}, "featured":{"type":"boolean"},
                     "in_stock":{"type":"number"}, "is_in_discount":{"type":"boolean"}, "discount_price":{"type":"number"}, "pay_at_delivery":{"type":"boolean"},
-                    "fields":{"type":"string"}
+                    "fields":{"type":"string"}, "images":{"type":"array"}
                 }
             }}], "responses":{
             "201":{"description":"Produit cree"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}
@@ -525,7 +529,7 @@
                 "properties":{
                     "id":{"type":"string"}, "name":{"type":"string"}, "price":{"type":"number"}, "featured":{"type":"boolean"},
                     "in_stock":{"type":"number"}, "is_in_discount":{"type":"boolean"}, "discount_price":{"type":"number"}, "pay_at_delivery":{"type":"boolean"},
-                    "fields":{"type":"string"}
+                    "fields":{"type":"string"}, "images":{"type":"array"}
                 }
             }}], "responses":{
             "200":{"description":"modifications effectuees"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}
