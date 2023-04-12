@@ -15,13 +15,7 @@
           "name":"category"
       },
       {
-          "name":"slider"
-      },
-      {
           "name":"subcategory"
-      },
-      {
-          "name":"promocode"
       },
       {
           "name":"item"
@@ -30,7 +24,13 @@
           "name":"product"
       },
       {
+          "name":"promocode"
+      },
+      {
           "name":"order"
+      },
+      {
+          "name":"slider"
       }
   ],
   "securityDefinitions":{
@@ -44,6 +44,7 @@
   "paths":{
       "/health":{
             "get":{
+                "tags":["health"],
                 "summary":"Get server health check",
                 "produces":["application/json"],
                 "responses":{
@@ -499,7 +500,47 @@
             }
         }
     },
-    "/product":{},
+    "/product":{
+        "post":{
+            "tags":["product"], "summary":"Creer un produit", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
+                "type":"object",
+                "properties":{
+                    "name":{"type":"string"}, "item":{"type":"string"}, "price":{"type":"number"}, "featured":{"type":"boolean"},
+                    "in_stock":{"type":"number"}, "is_in_discount":{"type":"boolean"}, "discount_price":{"type":"number"}, "pay_at_delivery":{"type":"boolean"},
+                    "fields":{"type":"string"}
+                }
+            }}], "responses":{
+            "201":{"description":"Produit cree"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}
+            }
+        },
+        "get":{
+            "tags":["product"], "summary":"Liste des produits", "produces":["application/json"],
+            "responses":{ "200":{"description":"Liste retourne"}, "500":{"description":"erreur serveur "} }
+        },
+        "put":{
+            "tags":["product"], "summary":"Modifier un produit", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[] }],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
+                "type":"object",
+                "properties":{
+                    "id":{"type":"string"}, "name":{"type":"string"}, "price":{"type":"number"}, "featured":{"type":"boolean"},
+                    "in_stock":{"type":"number"}, "is_in_discount":{"type":"boolean"}, "discount_price":{"type":"number"}, "pay_at_delivery":{"type":"boolean"},
+                    "fields":{"type":"string"}
+                }
+            }}], "responses":{
+            "200":{"description":"modifications effectuees"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}
+            }
+        },
+        "delete":{
+            "tags":["product"], "summary":"Supprimer un produit", "consumes":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
+                "type":"object",
+                "properties":{
+                    "id":{"type":"string"}
+                }
+            }}], "responses":{ "200":{"description":"Produit supprime"}, "500":{"description":"erreur serveur"} }
+        }
+    },
     "/promocode":{},
     "/pay":{}
   }
