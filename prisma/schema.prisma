@@ -74,3 +74,11 @@ model Slider {
     image    String
     featured Boolean
 }
+
+model Order {
+    id       String   @id @default(auto()) @map("_id") @db.ObjectId
+    client   String
+    amount   Float
+    paid     Boolean
+    products String[]
+}
