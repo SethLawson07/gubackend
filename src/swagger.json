@@ -198,10 +198,10 @@
             }
         }
     },
-    "/auth/order":{
+    "/order":{
         "post":{},
         "get":{
-            "tags":["auth"], "summary":"Recevoir la liste de mes commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "tags":["order"], "summary":"Recevoir la liste de mes commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
             "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
         }
     },

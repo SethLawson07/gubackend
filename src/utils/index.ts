@@ -27,3 +27,36 @@ export function verify_token(token: string){
         return ""
     }
 }
+
+export async function generate_payment_link(amount: number, user:string){
+    const transaction_id = Math.floor(Math.random() * 100000000).toString()
+    const data = {
+        "apikey":"25443723563ef760b99c2b5.76392442",
+        "site_id":"636165",
+        "transaction_id":transaction_id,
+        "amount":amount,
+        "currency":"XOF",
+        "description":"Reglement de commande",
+        "customer_id": user,
+        "notify_url":"",
+        "return_url":"",
+        "channels":"ALL",
+        "lang":"FR"
+    }
+    const payment_request_response = await fetch(
+        "https://api-checkout.cinetpay.com/v2/payment",
+            {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify(data)
+        }
+    )
+    if(payment_request_response.status!==201) return { status: false, data: null }
+    const { payment_url } = await payment_request_response.json() as { payment_url:string }
+    return {
+        status: true,
+        data: payment_url
+    }
+}
