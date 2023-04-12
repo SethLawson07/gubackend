@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../server";
 import { z } from "zod";
+import { generate_payment_link } from "../utils";
 
 export async function pay(req: Request, res: Response) {
     try {
@@ -20,13 +21,15 @@ export async function pay(req: Request, res: Response) {
         if(!targetted_order) return res.status(404).send({ message:"order non trouve"})
         if(data.amount>targetted_order.amount) return res.status(400).send({ message:"montant a payer invalide"})
 
-        const current_user_id = await prisma.user.findUnique({
+        const current_user = await prisma.user.findUnique({
             where:{
                 email: user
             }
         })
-        if(!current_user_id) return res.status(401).send({ message:"Utilisateur non trouve, veuillez vous reconnecter"})
-        return res.status(200).send()
+        if(!current_user) return res.status(401).send({ message:"Utilisateur non trouve, veuillez vous reconnecter"})
+        const payment_link_generation_result = await generate_payment_link(data.amount, current_user.id)
+        if(!payment_link_generation_result.status) return res.status(500).send({ message:"Erreur lors de la generation du lien de payement, reessayer ou contacter les devs"})
+        return res.status(200).send({ url: payment_link_generation_result.data })
     } catch (err) {
         console.error(`Error while generating payment url ${err}`)
         return res.status(500).send()
