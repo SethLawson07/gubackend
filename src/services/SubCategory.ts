@@ -94,7 +94,34 @@ export async function delete_(req: Request, res: Response){
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.errors.toString())})
-        //Delete
+        const { id } = validation_result.data
+        const targetted_subcategory = await prisma.subCategory.findUnique({
+            where:{id}
+        })
+        if(!targetted_subcategory) return res.status(404).send()
+        const items_to_delete = await prisma.item.findMany({
+            where:{
+                sub_category:id
+            }
+        })
+        //Delete products in items 
+        items_to_delete.map(async (item)=>{
+            await prisma.product.deleteMany({
+                where:{
+                    item: item.id
+                }
+            })
+        })
+        //Delete items in subcategory
+        await prisma.item.deleteMany({
+            where:{
+                sub_category: id
+            }
+        })
+        //Delete subcategory
+        await prisma.subCategory.delete({
+            where:{id}
+        })
         return res.status(200).send()
     } catch (err) {
         console.error(`Error while deleting subCategory ${err}`)
