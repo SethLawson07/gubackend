@@ -57,6 +57,46 @@ export async function get(_req: Request, res:Response){
     }
 }
 
+export async function update(req: Request, res: Response){
+    try {
+        const schema = z.object({
+            id: z.string({ required_error:"id est un parametre requis"}),
+            name: z.string().optional(),
+            featured: z.boolean().optional(),
+            in_stock: z.number().int().positive().optional(),
+            price: z.number().positive().optional(),
+            pay_at_delivery: z.boolean().optional(),
+            is_in_discount: z.boolean().optional(),
+            discount_price: z.number().positive().optional(),
+            fields: z.string().optional()
+        })
+        const validation_result = schema.safeParse(req.body)
+        if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
+        const { data } = validation_result
+        let fields_data = {}
+        if(data.fields){
+            try {
+                fields_data = JSON.parse(data.fields)
+            } catch (err) {
+                return res.status(400).send({ message:"fields invalide"})
+            }
+        }
+        await prisma.product.update({
+            where:{
+                id:data.id
+            },
+            data:{
+                ...data,
+                fields: fields_data
+            }
+        })
+        return res.status(200).send()
+    } catch (err) {
+        console.error(`Error while updating product ${err}`)
+        return res.status(500).send()
+    }
+}
+
 export async function delete_(req: Request, res: Response){
     try {
         const schema = z.object({
