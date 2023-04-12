@@ -205,6 +205,14 @@
             "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
         }
     },
+    "/pay":{
+        "post":{
+            "tags":["order"], "summary":"Recevoir un lien de paiement", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
+                "type":"object","properties":{ "amount":{"type":"number"}, "order":{"type":"string"} }
+            }}], "responses":{ "200":{"description":"Lien retourne"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}}
+        }
+    },
     "/category":{
         "post":{
             "security":[{ "Bearer":[] }],
