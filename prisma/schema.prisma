@@ -22,14 +22,14 @@ model User {
 model Category {
     id       String  @id @default(auto()) @map("_id") @db.ObjectId()
     name     String  @unique
-    image String
+    image    String
     featured Boolean
 }
 
 model SubCategory {
     id       String  @id @default(auto()) @map("_id") @db.ObjectId()
     name     String
-    image String
+    image    String
     featured Boolean
     category String
 }
@@ -37,16 +37,16 @@ model SubCategory {
 model Item {
     id           String  @id @default(auto()) @map("_id") @db.ObjectId()
     name         String
-    image String
+    image        String
     sub_category String
     featured     Boolean
     schema       Json
 }
 
 model Product {
-    id              String  @id @default(auto()) @map("_id") @db.ObjectId()
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId()
     name            String
-    images String[]
+    images          String[]
     item            String
     featured        Boolean
     in_stock        Int
@@ -58,18 +58,19 @@ model Product {
 }
 
 model PromoCode {
-    id         String  @id @default(auto()) @map("_id") @db.ObjectId()
-    name       String  @unique
-    valid      Boolean
-    discount   Int
-    conditions Json
-    featured   Boolean
+    id              String  @id @default(auto()) @map("_id") @db.ObjectId()
+    name            String  @unique
+    valid           Boolean
+    discount        Int
+    conditions      Json
+    featured        Boolean
+    expiration_date String
 }
 
 model Slider {
     id       String  @id @default(auto()) @map("_id") @db.ObjectId()
     big_text String
     alt_text String
-    image String
+    image    String
     featured Boolean
 }

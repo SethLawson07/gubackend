@@ -39,7 +39,8 @@ export async function update(req: Request, res: Response){
             id: z.string({ required_error:"id est un parametre requis", invalid_type_error:"id doit etre un string" }),
             featured: z.boolean({ invalid_type_error:"featured doit etre un boolen"}).optional(),
             big_text: z.string({ invalid_type_error:"bif_text doit etre un string"}).optional(),
-            alt_text: z.string({ invalid_type_error:"alt_text doit etre un string"}).optional()
+            alt_text: z.string({ invalid_type_error:"alt_text doit etre un string"}).optional(),
+            image: z.string().optional()
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
