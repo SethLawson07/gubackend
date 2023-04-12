@@ -85,3 +85,24 @@ export async function create_admin(req: Request, res: Response){
         return res.status(500).send()
     }
 }
+
+export async function get_orders(req: Request, res: Response){
+    try {
+        const { user } = req.body.user as { user: string }
+        const current_user = await prisma.user.findUnique({
+            where:{
+                email:user
+            }
+        })
+        if(!current_user) return res.status(401).send()
+        const data = await prisma.order.findMany({
+            where:{
+                user: current_user.id
+            }
+        })
+        return res.status(200).send({ data})
+    } catch (err) {
+        console.error(`Error while getting list of user orders ${err}`)
+        return res.status(500).send()
+    }
+}
