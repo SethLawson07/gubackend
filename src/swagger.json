@@ -198,7 +198,7 @@
             }
         }
     },
-    "/auth/orders":{
+    "/auth/order":{
         "post":{},
         "get":{
             "tags":["auth"], "summary":"Recevoir la liste de mes commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
