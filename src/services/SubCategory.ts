@@ -5,9 +5,10 @@ import { z } from "zod"
 export async function create(req: Request, res: Response){
     try {
         const schema = z.object({
-            name: z.string({ required_error:"name est un parametre requis", invalid_type_error:"name doit etre un string" }),
-            featured: z.boolean({ required_error:"featured est un parametre requis", invalid_type_error:"featured doit etre un boolen" }),
-            category: z.string({ required_error:"category est un parametre requis", invalid_type_error:"category doit etre un string"})
+            name: z.string(),
+            featured: z.boolean(),
+            category: z.string(),
+            image: z.string()
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
@@ -48,9 +49,10 @@ export async function get(_req: Request, res: Response){
 export async function update(req: Request, res: Response){
     try {
         const schema = z.object({
-            id: z.string({ required_error:"id est un parametre requis", invalid_type_error:"id doit etre un string"}),
-            name: z.string({ invalid_type_error:"name doit etre un string" }).optional(),
-            featured: z.boolean({ invalid_type_error:"featured doit etre un booleen"}).optional()
+            id: z.string(),
+            name: z.string().optional(),
+            featured: z.boolean().optional(),
+            image: z.string().optional()
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
@@ -74,7 +76,8 @@ export async function update(req: Request, res: Response){
             },
             data:{
                 name:data.name,
-                featured:data.featured
+                featured:data.featured,
+                image:data.image
             }
         })
         return res.status(200).send()
