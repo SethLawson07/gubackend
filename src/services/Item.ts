@@ -108,6 +108,14 @@ export async function delete_(req: Request, res: Response){
             }    
         })
         if(!targetted_item) return res.status(404).send()
+        await prisma.product.deleteMany({
+            where:{
+                item: id
+            }
+        })
+        await prisma.item.delete({
+            where:{id}
+        })
         return res.status(200).send()
     } catch (err) {
         console.error(`Error while deleting item ${err}`)
