@@ -13,6 +13,7 @@ import slider from "./routes/slider"
 import subcategory from "./routes/subcategory"
 import item from "./routes/item"
 import product from "./routes/product"
+import payment from "./routes/payment"
 
 const PORT = process.env.PORT || 5000
 
@@ -31,12 +32,13 @@ app.use("/slider", slider)
 app.use("/subcategory", subcategory)
 app.use("/item", item)
 app.use("/product", product)
+app.use("/pay", payment)
 
-app.get("/health", (_req: Request, res: Response)=>{
+app.get("/health", (_req: Request, res: Response) => {
     return res.status(200).send()
 })
 
-app.listen(PORT, async ()=>{
+app.listen(PORT, async () => {
     try {
         await prisma.$connect()
         console.info("Connected to database")

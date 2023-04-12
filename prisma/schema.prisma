@@ -77,8 +77,16 @@ model Slider {
 
 model Order {
     id       String   @id @default(auto()) @map("_id") @db.ObjectId
-    client   String
+    user     String
     amount   Float
     paid     Boolean
     products String[]
+}
+
+model Transaction {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    user String
+    date String
+    amount String
+    status String
 }
