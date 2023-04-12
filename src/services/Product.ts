@@ -1,5 +1,5 @@
 import { Request, Response} from "express"
-import { date, z } from "zod"
+import { z } from "zod"
 import { prisma } from "../server"
 
 export async function create(req: Request, res: Response){
@@ -13,21 +13,23 @@ export async function create(req: Request, res: Response){
             pay_at_delivery: z.boolean({ required_error:"pay_at_delivery est un parametre requis", invalid_type_error:"pay_at_delivery doit etre un boolen"}),
             is_in_discount: z.boolean({ required_error:"is_in_discount est un parametre requis", invalid_type_error:"is_in_discount doit etre un boolen"}),
             discount_price: z.number({ invalid_type_error:"discount_price doit etre un nombre valide"}).optional(),
-            fields: z.string({ invalid_type_error:"fields doit etre un string"}).optional()
+            fields: z.string({ invalid_type_error:"fields doit etre un string"}),
+            images: z.array(z.string())
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
         let { data } = validation_result
         if(data.is_in_discount && !data.discount_price) return res.status(400).send({ message:"discount_price est requis si le produit est en reduction"})
         data.discount_price = data.discount_price? data.discount_price : 0
-        let fields_data = {}
-        if(data.fields){
+        const fields_is_valid = (()=>{
             try {
-                fields_data = JSON.parse(data.fields)
-            } catch (err) {
-                return res.status(400).send({ message:"fields invalide. Fields doit etre la forme stringifiee d'un json valide"})
+                JSON.parse(data.fields)
+                return true
+            } catch (_) {
+                return false
             }
-        }
+        })()
+        if(!fields_is_valid) return res.status(400).send({ message:"fields invalide. fields doit contenir un string provenant d'un json valide"})
         const targetted_item = await prisma.item.findUnique({
             where:{
                 id:data.item
@@ -35,10 +37,7 @@ export async function create(req: Request, res: Response){
         })
         if(!targetted_item) return res.status(404).send()
         await prisma.product.create({
-            data:{
-               ...data,
-               fields: fields_data
-            }
+            data
         })
         return res.status(201).send()
     } catch (err) {
@@ -68,27 +67,26 @@ export async function update(req: Request, res: Response){
             pay_at_delivery: z.boolean().optional(),
             is_in_discount: z.boolean().optional(),
             discount_price: z.number().positive().optional(),
-            fields: z.string().optional()
+            fields: z.string().optional(),
+            images: z.array(z.string()).optional()
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
         const { data } = validation_result
-        let fields_data = {}
-        if(data.fields){
+        const fields_is_valid = (()=>{
             try {
-                fields_data = JSON.parse(data.fields)
-            } catch (err) {
-                return res.status(400).send({ message:"fields invalide"})
+                JSON.parse(data.fields as string)
+                return true
+            } catch (_) {
+                return false
             }
-        }
+        })()
+        if(!fields_is_valid) return res.status(400).send({ message:"fields invalide. fields doit provenir d'un json valide"})
         await prisma.product.update({
             where:{
                 id:data.id
             },
-            data:{
-                ...data,
-                fields: fields_data
-            }
+            data
         })
         return res.status(200).send()
     } catch (err) {

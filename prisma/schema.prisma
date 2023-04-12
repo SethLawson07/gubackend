@@ -54,7 +54,7 @@ model Product {
     pay_at_delivery Boolean
     is_in_discount  Boolean
     discount_price  Float?
-    fields          String
+    fields          String?
 }
 
 model PromoCode {
