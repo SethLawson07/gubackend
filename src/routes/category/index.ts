@@ -1,4 +1,4 @@
-import { create_category, get_categories, update_category } from "../../services/Category"
+import { create_category, get_categories, update_category, delete_ } from "../../services/Category"
 import { UserIsAdmin, Auth } from "../../utils/middlewares"
 import { Router } from "express"
 
@@ -10,6 +10,6 @@ router.route("/").get( get_categories )
 
 router.route("/").put( Auth, UserIsAdmin, update_category )
 
-router.route("/").delete()
+router.route("/").delete( Auth, UserIsAdmin, delete_ )
 
 export default router
