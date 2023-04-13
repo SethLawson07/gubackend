@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
 
+type OrderStatus = "PENDING" | "CANCELLED"
+
 export async function create(req: Request, res: Response){
     try {
         const schema = z.object({
