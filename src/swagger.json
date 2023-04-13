@@ -199,7 +199,14 @@
         }
     },
     "/order":{
-        "post":{"tags":["order"]},
+        "post":{"tags":["order"], "summary":"Creer une commande", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
+                "type":"object", "properties":{
+                    "amount":{"type":"number"}, "cart":{"type":"array", "items":{"type":"object", "properties":{ "id":{"type":"string"}, "quantity":{"type":"number"} }}},
+                    "promocodes":{"type":"array", "items":{"type":"string"}}
+                }
+            }}]
+        },
         "get":{
             "tags":["order"], "summary":"Recevoir la liste de mes commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
             "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
