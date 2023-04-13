@@ -560,7 +560,6 @@
             }}], "responses":{ "200":{"description":"Produit supprime"}, "500":{"description":"erreur serveur"} }
         }
     },
-    "/promocode":{},
     "/pay":{
         "post":{
             "tags":["pay"], "summary":"Obtenir un lien de payment", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
@@ -568,6 +567,19 @@
                 "type":"object", "properties":{ "amount":{"type":"number"} }
             }}], "responses":{"200":{"description":"Lien retourne"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}}
         }
-    }
+    },
+    "/promocode":{
+        "post":{
+            "tags":["promocode"], "summary":"Creer un code promo", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
+                "type":"object", "properties":{ "code":{"type":"string"}, "valid":{"type":"boolean"}, "conditions":{"type":"array", "items":{"type":"string"}}, 
+                "featured":{"type":"boolean"}, "expiration_date":{"type":"string"}, "discount":{"type":"number"}}
+            }}], "responses":{"201":{"description":"code cree"}, "400":{"description":"champs manquants ou types incorrects"}, "409":{"description":"ce code existe deja"}, "500":{"description":"erreur serveur"}}
+        },
+        "get":{
+            "tags":["promocode"], "summary":"Liste des code promo", "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
+        }
+    },
   }
 }

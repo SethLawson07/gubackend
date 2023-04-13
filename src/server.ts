@@ -14,6 +14,7 @@ import subcategory from "./routes/subcategory"
 import item from "./routes/item"
 import product from "./routes/product"
 import payment from "./routes/payment"
+import promocode from "./routes/promocode"
 
 const PORT = process.env.PORT || 5000
 
@@ -33,6 +34,7 @@ app.use("/subcategory", subcategory)
 app.use("/item", item)
 app.use("/product", product)
 app.use("/pay", payment)
+app.use("/promocode", promocode)
 
 app.get("/health", (_req: Request, res: Response) => {
     return res.status(200).send()
