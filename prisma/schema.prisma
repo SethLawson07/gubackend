@@ -59,10 +59,10 @@ model Product {
 
 model PromoCode {
     id              String  @id @default(auto()) @map("_id") @db.ObjectId()
-    name            String  @unique
+    code            String  @unique
     valid           Boolean
     discount        Int
-    conditions      Json
+    conditions      String[]
     featured        Boolean
     expiration_date String
 }

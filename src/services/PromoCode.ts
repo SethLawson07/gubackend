@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Request, Response } from "express";
 import { prisma } from "../server";
+import { Prisma } from "@prisma/client";
 
 export async function create(req: Request, res: Response) {
     try {
@@ -8,7 +9,7 @@ export async function create(req: Request, res: Response) {
             code: z.string(),
             valid: z.boolean(),
             discount: z.number().int().positive(),
-            conditions: z.array(z.number().int().positive()),
+            conditions: z.array(z.string()),
             featured: z.boolean(),
             expiration_date: z.string()
         })
@@ -16,8 +17,19 @@ export async function create(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
         const { data } = validation_result
         if (isNaN(Date.parse(data.expiration_date))) return res.status(400).send({ message: "date invalide" })
-
+        const current_conditions = ["0", "1"]
+        const code_conditions = data.conditions.map((c)=>c.split(":")[0])
+        for(const condition of code_conditions){
+            if(!current_conditions.includes(condition)) return res.status(400).send({ message:"condition invalide"})
+        }
+        await prisma.promoCode.create({
+            data
+        })
+        return res.status(201).send()
     } catch (err) {
+        if(err instanceof Prisma.PrismaClientKnownRequestError){
+            if(err.code==="P2002") return res.status(409).send()
+        }
         console.error(`Error while creating promocode ${err}`)
         return res.status(500).send()
     }
