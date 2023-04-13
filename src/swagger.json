@@ -579,6 +579,12 @@
         "get":{
             "tags":["promocode"], "summary":"Liste des code promo", "produces":["application/json"], "security":[{ "Bearer":[]}],
             "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
+        },
+        "delete":{
+            "tags":["promocode"], "summary":"Supprimer code promo", "produces":["application/json"], "consumes":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{"id":{"type":"string"}}}}], "responses":{
+                "200":{"description":"code supprime"}, "500":{"description":"erreur serveur"}
+            }
         }
     },
   }
