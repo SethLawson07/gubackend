@@ -45,6 +45,27 @@ export async function get(_req: Request, res: Response) {
     }
 }
 
+export async function delete_(req: Request, res: Response){
+    try {
+        const schema = z.object({
+            id: z.string()
+        })
+        const validation_result = schema.safeParse(req.body)
+        if(!validation_result.success) return res.status(400).send()
+        const { id } = validation_result.data
+        await prisma.promoCode.delete({
+            where:{
+                id
+            }
+        })
+        return res.status(200).send()
+    } catch (err) {
+        console.log(`Error while deleting promo code ${err}`)
+        return res.status(500).send()
+    }
+}
+
+
 export async function verify(req: Request, res: Response) {
     try {
         const schema = z.object({
