@@ -58,8 +58,8 @@ model Product {
 }
 
 model PromoCode {
-    id              String  @id @default(auto()) @map("_id") @db.ObjectId()
-    code            String  @unique
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId()
+    code            String   @unique
     valid           Boolean
     discount        Int
     conditions      String[]
@@ -76,12 +76,13 @@ model Slider {
 }
 
 model Order {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    user      String
-    amount    Float
-    remainder Float
-    paid      Boolean
-    products  String[]
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    user       String
+    amount     Float
+    remainder  Float
+    paid       Boolean
+    cart       Json
+    promocodes String[]
 }
 
 model Transaction {
