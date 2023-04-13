@@ -210,6 +210,19 @@
         "get":{
             "tags":["order"], "summary":"Recevoir la liste de mes commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
             "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
+        },
+        "put":{
+            "tags":["order"], "summary":"Annuler une commande", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{"id":{"type":"string"}}}}],
+            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
+
+        }
+    },
+    "/order/all":{
+        "get":{
+            "tags":["order"], "summary":"Recevoir la liste de toutes les commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
+
         }
     },
     "/pay":{
