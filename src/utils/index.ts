@@ -60,3 +60,4 @@ export async function generate_payment_link(amount: number, user:string){
         data: payment_url
     }
 }
+
