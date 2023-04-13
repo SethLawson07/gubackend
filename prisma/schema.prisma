@@ -91,3 +91,9 @@ model Transaction {
     amount String
     status String
 }
+
+model PromoCodeUsage {
+    id   String @id @default(auto()) @map("_id") @db.ObjectId
+    code String
+    user String
+}

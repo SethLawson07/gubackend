@@ -32,3 +32,29 @@ export async function get(_req: Request, res: Response){
         return res.status(500).send()
     }
 }
+
+export async function verify(req: Request, res: Response){
+    try {
+        const schema = z.object({
+            amount: z.number().positive(),
+            products: z.array(z.object({
+                id: z.string(),
+                quantity: z.number().int().positive()
+            })),
+            code: z.string()
+        })
+        const { user }  = req.body.user as { user: string }
+        const current_user = await prisma.user.findUnique({
+            where:{
+                email: user
+            }
+        })
+        if(!current_user) return res.status(401).send()
+        const validation_result = schema.safeParse(req.body)
+        if(!validation_result.success) return res.status(400).send()
+        const { data } = validation_result
+    } catch (err) {
+        console.error(`Error while verifying promo code ${err}`)
+        return res.status(500).send()
+    }
+}
