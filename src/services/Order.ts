@@ -10,7 +10,7 @@ export async function create(req: Request, res: Response){
                 id: z.string(),
                 quantity: z.number().int().positive()
             })),
-            promocodes: z.array(z.string())
+            promocodes: z.array(z.string()),
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
@@ -21,7 +21,8 @@ export async function create(req: Request, res: Response){
                 user,
                 ...data,
                 remainder: data.amount,
-                paid: false
+                paid: false,
+                status: "PENDING"
             }
         })
     } catch (err) {
@@ -57,6 +58,21 @@ export async function get_user_orders(req: Request, res: Response){
         return res.status(200).send({ data })
     } catch (err) {
         console.error(`Error while getting user orders ${err}`)
+        return res.status(500).send()
+    }
+}
+
+export async function cancel_order(req: Request, res: Response){
+    try {
+        const schema = z.object({
+            id: z.string()
+        })
+        const validation_result = schema.safeParse(req.body)
+        if(!validation_result.success) return res.status(400).send()
+        const { id } = validation_result.data
+        
+    } catch (err) {
+        console.error(`Error while cancelling order ${err}`)
         return res.status(500).send()
     }
 }

@@ -74,15 +74,15 @@ model Slider {
     image    String
     featured Boolean
 }
-
 model Order {
-    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    id         String      @id @default(auto()) @map("_id") @db.ObjectId
     user       String
     amount     Float
     remainder  Float
     paid       Boolean
     cart       Json
     promocodes String[]
+    status     String
 }
 
 model Transaction {
