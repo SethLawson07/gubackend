@@ -30,7 +30,7 @@ export async function create(req: Request, res: Response){
     }
 }
 
-export async function get_all(req: Request, res: Response){
+export async function get_all(_req: Request, res: Response){
     try {
         const data = await prisma.order.findMany()
         return res.status(200).send({ data })
