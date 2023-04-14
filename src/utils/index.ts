@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt"
 import * as jwt from "jsonwebtoken"
+import { prisma } from "../server"
 
 const JWT_TOKEN = "goodnessunitsupertoken"
 const salt_rounds = 10
@@ -59,5 +60,16 @@ export async function generate_payment_link(amount: number, user:string){
         status: true,
         data: payment_url
     }
+}
+
+export async function create_promocode_usage( promocodes: string[], user: string){
+   promocodes.map(async (code)=>{
+       await prisma.promoCodeUsage.create({
+           data:{
+               code,
+               user
+           }
+       })
+   })
 }
 

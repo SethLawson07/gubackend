@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
+import { create_promocode_usage } from "../utils"
 
 export async function create(req: Request, res: Response){
     try {
@@ -25,6 +26,8 @@ export async function create(req: Request, res: Response){
                 status: "PENDING"
             }
         })
+        await create_promocode_usage(data.promocodes, user)
+        return res.status(200).send()
     } catch (err) {
         console.log(`Error while creating order ${err}`)
         return res.status(500).send()

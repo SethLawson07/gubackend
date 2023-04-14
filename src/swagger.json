@@ -480,7 +480,7 @@
                     "schema":{
                         "type":"object",
                         "properties":{
-                            "name":{"type":"string"}, "featured":{"type":"boolean"}, "image":{"type":"string"}
+                            "id":{"type":"string"}, "name":{"type":"string"}, "featured":{"type":"boolean"}, "image":{"type":"string"}
                         }
                     }
                 }

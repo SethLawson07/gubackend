@@ -63,13 +63,17 @@ export async function update(req: Request, res: Response){
             }
         })
         if(!targetted_subcategory) return res.status(404).send()
-        const potential_duplicate = await prisma.subCategory.findFirst({
-            where:{
-                category:targetted_subcategory.category,
-                name:data.name
-            }
-        })
-        if(potential_duplicate) return res.status(409).send()
+        if(data.name){
+            const potential_duplicate = await prisma.subCategory.findFirst({
+                where:{
+                    AND: [
+                        { category: targetted_subcategory.category },
+                        { name: data.name}
+                    ]
+                }
+            })
+            if(potential_duplicate && potential_duplicate.id!==targetted_subcategory.id) return res.status(409).send()
+        }
         await prisma.subCategory.update({
             where:{
                 id: data.id
