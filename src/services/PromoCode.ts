@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Request, Response } from "express";
 import { prisma } from "../server";
 import { Prisma } from "@prisma/client";
+import { apply_conditions } from "../utils/conditions";
 
 export async function create(req: Request, res: Response) {
     try {
@@ -70,10 +71,6 @@ export async function verify(req: Request, res: Response) {
     try {
         const schema = z.object({
             amount: z.number().positive(),
-            products: z.array(z.object({
-                id: z.string(),
-                quantity: z.number().int().positive()
-            })),
             code: z.string()
         })
         const { user } = req.body.user as { user: string }
@@ -84,11 +81,26 @@ export async function verify(req: Request, res: Response) {
         })
         if (!current_user) return res.status(401).send()
         const validation_result = schema.safeParse(req.body)
-        if (!validation_result.success) return res.status(400).send()
+        if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
         const { data } = validation_result
-        //check if user did not already use promo code
-        //check if order is elligible for promo code or if promo code is still valid
-        return res.status(200).send({ new_amount: 100 })
+        const targetted_code = await prisma.promoCode.findUnique({
+            where:{
+                code: data.code
+            }
+        })
+        console.log(targetted_code)
+        if(!targetted_code) return res.status(404).send()
+        const user_code_usage = await prisma.promoCodeUsage.findFirst({
+            where:{
+                user: current_user.id,
+                code: targetted_code.code
+            }
+        })
+        if(user_code_usage) return res.status(400).send()
+        const valid = await apply_conditions(targetted_code.conditions, data.amount, current_user.email)
+        if(!valid) return res.status(400).send({ message:"Utilisateur ne remplit pas les conditions pour utiliser ce code promo"})
+        const new_amount = (data.amount * targetted_code.discount)/100
+        return res.status(200).send({ new_amount })
     } catch (err) {
         console.error(`Error while verifying promo code ${err}`)
         return res.status(500).send()
