@@ -507,7 +507,7 @@
             "tags":["item"], "summary":"Creer un item", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[] }],
             "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
                 "type":"object", "properties":{
-                    "name":{"type":"string"}, "featured":{"type":"boolean"}, "sub_category":{"type":"string"}, "image":{"type":"string"}
+                    "name":{"type":"string"}, "featured":{"type":"boolean"}, "sub_category":{"type":"string"}, "image":{"type":"string"}, "schema":{"type":"string"}
                 }
             } }], "responses":{
             "201":{"description":"Item cree"}, "400":{"description":"Mauvaise requete, champs manquants ou types incorrects"}, 
@@ -522,7 +522,7 @@
             "tags":["item"], "summary":"Modifier un item", "consumes":["application/json"], "produces":["application/json"], "security": [{ "Bearer":[] }],
             "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
                 "type":"object", "properties":{
-                    "name":{"type":"string"}, "featured":{"type":"string"}, "id":{"type":"string"}, "image":{"type":"string"}
+                    "name":{"type":"string"}, "featured":{"type":"boolean"}, "id":{"type":"string"}, "image":{"type":"string"}
                 }
             }}], "responses":{
             "200":{"description":"modifications appliquees"}, "400":{"description":"champs manquants ou types incorrects"}, "404":{"description":"item non trouve"},
