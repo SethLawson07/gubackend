@@ -37,6 +37,35 @@ export async function register(req: Request, res: Response){
     }
 }
 
+export async function set_financepro_id(req: Request, res: Response){
+    try {
+        const schema = z.object({
+            id: z.string(),
+            user: z.string()
+        })
+        const validation_result = schema.safeParse(req.body)
+        if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
+        const { id, user } = validation_result.data
+        const targetted_user = await prisma.user.findUnique({
+            where:{
+                email: user
+            }
+        })
+        if(!targetted_user) return res.status(400).send({ message:"Utilisateur non  trouve"})
+        await prisma.user.update({
+            where:{
+                email: user
+            },
+            data:{
+                
+            }
+        })
+    } catch (err) {
+        console.error(`Error while setting user Financepro id ${err}`);
+        return res.status(500).send()
+    }
+}
+
 export async function login(req: Request, res: Response){
     try {
        const login_schema = z.object({
