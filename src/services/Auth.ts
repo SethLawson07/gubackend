@@ -3,7 +3,6 @@ import { prisma } from "../server"
 import { sign_token, hash_pwd, password_is_valid } from "../utils"
 import { z } from "zod"
 
-
 export async function register(req: Request, res: Response){
     try {
        const user_schema = z.object({
@@ -57,9 +56,11 @@ export async function set_financepro_id(req: Request, res: Response){
                 email: user
             },
             data:{
-                
+                is_verified: true,
+                finance_pro_id: id
             }
         })
+        return res.status(200).send()
     } catch (err) {
         console.error(`Error while setting user Financepro id ${err}`);
         return res.status(500).send()

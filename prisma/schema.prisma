@@ -17,8 +17,8 @@ model User {
     phone           String
     profile_picture String
     is_admin        Boolean
-    finance_pro_id  String
-    is_verified     String
+    finance_pro_id  String?
+    is_verified     Boolean?
 }
 
 model Category {
