@@ -29,7 +29,7 @@ const conditions: Condition[] = [
     },
     {
         id:"1",
-        description:"Applicable seulement pour les commandes au dela d'un montant donne",
+        description:"Applicable seulement pour les commandes au delà d'un montant donné",
         condition: async (amount:number, param: string|undefined, _user:string)=>{
             console.log(amount, param, _user)
             if(!param) return false

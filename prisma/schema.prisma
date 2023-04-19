@@ -17,6 +17,8 @@ model User {
     phone           String
     profile_picture String
     is_admin        Boolean
+    finance_pro_id  String
+    is_verified     String
 }
 
 model Category {
@@ -74,8 +76,9 @@ model Slider {
     image    String
     featured Boolean
 }
+
 model Order {
-    id         String      @id @default(auto()) @map("_id") @db.ObjectId
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
     user       String
     amount     Float
     remainder  Float

@@ -609,7 +609,7 @@
     },
     "/promocode/verify":{
         "post":{
-            "tags":["promocode"], "summary":"Verifier si user peut utiliser le code promo", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "tags":["promocode"], "summary":"Verifier si l'utilisateur peut utiliser le code promo", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
             "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{"type":"object", "properties":{
                 "code":{"type":"string"}, "amount":{"type":"number"},
             }}}], "responses":{"200":{"description":"Code valide pour cette commande"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}}

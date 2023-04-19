@@ -88,7 +88,6 @@ export async function verify(req: Request, res: Response) {
                 code: data.code
             }
         })
-        console.log(targetted_code)
         if(!targetted_code) return res.status(404).send()
         const user_code_usage = await prisma.promoCodeUsage.findFirst({
             where:{
