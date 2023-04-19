@@ -14,6 +14,6 @@ router.route("/orders").get( Auth, get_orders )
 
 router.route("/change_password").put( Auth, change_password)
 
-router.route("/set_financepro_id").post( Auth, UserIsAdmin, set_financepro_id )
+router.route("/set_id").post( Auth, UserIsAdmin, set_financepro_id )
 
 export default router

@@ -198,6 +198,22 @@
             }
         }
     },
+    "/auth/change_password":{
+        "put":{"tags":["auth"], "summary":"Mettre a jour son mot de passe", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
+                "old":{"type":"string"}, "new":{"type":"string"}
+            }}}]
+
+        }
+    },
+    "/auth/set_id":{
+        "post":{"tags":["auth"], "summary":"Donner une valeur à l'id finance pro d'un utilisateur", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
+                "user":{"type":"string"}, "id":{"type":"string"}
+            }}}]
+
+        }
+    },
     "/order":{
         "post":{"tags":["order"], "summary":"Creer une commande", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
             "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
@@ -210,12 +226,6 @@
         "get":{
             "tags":["order"], "summary":"Recevoir la liste de mes commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
             "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
-        },
-        "put":{
-            "tags":["order"], "summary":"Annuler une commande", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{"id":{"type":"string"}}}}],
-            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
-
         }
     },
     "/order/all":{
@@ -580,14 +590,6 @@
             }}], "responses":{ "200":{"description":"Produit supprime"}, "500":{"description":"erreur serveur"} }
         }
     },
-    "/pay":{
-        "post":{
-            "tags":["pay"], "summary":"Obtenir un lien de payment", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
-                "type":"object", "properties":{ "amount":{"type":"number"} }
-            }}], "responses":{"200":{"description":"Lien retourne"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}}
-        }
-    },
     "/promocode":{
         "post":{
             "tags":["promocode"], "summary":"Creer un code promo", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
@@ -613,6 +615,19 @@
             "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{"type":"object", "properties":{
                 "code":{"type":"string"}, "amount":{"type":"number"},
             }}}], "responses":{"200":{"description":"Code valide pour cette commande"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}}
+        }
+    },
+    "/hook/momo_event":{
+        "post":{
+            "tags":["hook"], "summary":"Alerter lorsqu'un utilisateur effectue un payment depuis l'application mobile", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
+                "order_id":{"type":"string"}, "user_id":{"type":"string"}, "amount_paid":{"type":"number"}
+            }}}], "responses":{"200":{"description":"Informations mises à jour"}, "404":{"description":"Utilisateur ou commande non trouvée"}, "400":{"description":"Propriétés manquantes ou types incorrects."}, "500":{"description":"erreur serveur. contacter les devs"}}
+        }
+    },
+    "/hook/payment_event":{
+        "post":{
+            "tags":["hook"], "summary":"Gerer les payments par cinetpay", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}]
         }
     }
   }
