@@ -7,10 +7,10 @@ import { z } from "zod"
 export async function register(req: Request, res: Response){
     try {
        const user_schema = z.object({
-           email: z.string({ required_error:"email est un paramètre requis", invalid_type_error:"email doit être un email valid" }).email(),
-           phone: z.string({ required_error:"phone est un paramètre requis", invalid_type_error:"phone doit être un string" }),
-           password: z.string({ required_error:"password est un paramètre requis", invalid_type_error:"password doit être un string" }),
-           profile_picture: z.string({ invalid_type_error:"profile_picture n'est pas requis mais si passé dans le body, doit être un string valide" })
+           email: z.string().email(),
+           phone: z.string(),
+           password: z.string(),
+           profile_picture: z.string()
        }) 
        const validation_result = user_schema.safeParse(req.body)
        if(!validation_result.success){
@@ -40,8 +40,8 @@ export async function register(req: Request, res: Response){
 export async function login(req: Request, res: Response){
     try {
        const login_schema = z.object({
-           email: z.string({ required_error:"email est un paramètre requis", invalid_type_error:"email doit être un email valid" }).email(),
-           password: z.string({ required_error:"email est un parametre requis", invalid_type_error:"email doit etre un string" }),
+           email: z.string().email(),
+           password: z.string(),
        })
         const validation_result = login_schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
@@ -64,8 +64,8 @@ export async function login(req: Request, res: Response){
 export async function create_admin(req: Request, res: Response){
     try {
         const data_schema = z.object({
-            email: z.string({ required_error:"email est un parametre requis", invalid_type_error:"email doit etre un string" }).email(),
-            password: z.string({ required_error:"password est un parametre requis", invalid_type_error:"password doit etre un string" })
+            email: z.string().email(),
+            password: z.string()
         })
         const validation_result = data_schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
