@@ -36,6 +36,38 @@ export async function register(req: Request, res: Response){
     }
 }
 
+export async function change_password(req: Request, res: Response){
+    try {
+        const schema = z.object({
+            old: z.string(),
+            new: z.string()
+        })
+        const validation_result = schema.safeParse(req.body)
+        if(!validation_result.success) return res.status(400).send({message: validation_result.error.message})
+        const { data } = validation_result
+        const current_user = req.body.user as string
+        const targetted_user = await prisma.user.findUnique({
+            where:{
+                email: current_user
+            }
+        })
+        if(!targetted_user) return res.status(404).send({ message:"Utilisateur non trouve"})
+        if(!password_is_valid(data.old, targetted_user.password)) return res.status(400).send({ message:"Mot de passe invalide"})
+        await prisma.user.update({
+            where:{
+                email: targetted_user.email
+            },
+            data:{
+                password: hash_pwd(data.new)
+            }
+        })
+        return res.status(200).send()
+    } catch (err) {
+        console.log(`Error while changing user password ${err}`);
+        return res.status(500).send()
+    }
+}
+
 export async function set_financepro_id(req: Request, res: Response){
     try {
         const schema = z.object({
