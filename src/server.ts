@@ -25,7 +25,7 @@ export const prisma = new PrismaClient()
 
 app.use(cors())
 app.use(express.json())
-app.use(morgan("tiny"))
+app.use(morgan("short"))
 app.use('/docs', swagger.serve, swagger.setup(swagger_doc))
 
 app.use("/auth", auth)
