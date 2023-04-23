@@ -92,8 +92,7 @@ model Transaction {
     id     String @id @default(auto()) @map("_id") @db.ObjectId
     user   String
     date   String
-    amount String
-    status String
+    amount Float
 }
 
 model PromoCodeUsage {

@@ -51,7 +51,8 @@ export async function payment_event(req: Request, res: Response){
             cpm_trans_id: z.string(),
             payment_method: z.string(),
             cel_phone_num: z.string(),
-            cpm_error_message: z.string()
+            cpm_error_message: z.string(),
+            cpm_trans_date: z.string()
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success){
@@ -73,6 +74,13 @@ export async function payment_event(req: Request, res: Response){
                 console.log(`Order not found ${order_id}`)
                 return res.status(404).send()
             }
+            await prisma.transaction.create({
+                data:{
+                    user: targetted_order.user,
+                    amount: targetted_order.remainder,
+                    date: data.cpm_trans_date,
+                }
+            })
             await prisma.order.update({
                 where:{
                     id: targetted_order.id
@@ -83,7 +91,7 @@ export async function payment_event(req: Request, res: Response){
                     remainder:0
                 }
             })
-            console.log("Process payment here")
+            console.log("Payment processed")
             return res.status(200).send()
         }
         console.log(`A payment failed`)
