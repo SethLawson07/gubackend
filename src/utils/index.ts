@@ -2,6 +2,7 @@ import bcrypt from "bcrypt"
 import * as jwt from "jsonwebtoken"
 import { prisma } from "../server"
 import * as crypto from "crypto"
+import fetch from "node-fetch"
 
 const JWT_TOKEN = "goodnessunitsupertoken"
 const salt_rounds = 10
