@@ -45,6 +45,8 @@ export async function momo_payment_event(req: Request, res: Response){
 export async function payment_event(req: Request, res: Response){
     try {
         const order_id = new URL(req.url).searchParams.get("order_id")!
+        const test = req.path
+        console.log(test)
         console.log(order_id)
         console.log(`Received something ${req.body}`)
         const schema = z.object({

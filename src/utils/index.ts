@@ -55,14 +55,14 @@ export async function generate_payment_link(amount: number, user:string, order_i
             body:JSON.stringify(data)
         }
     )
-    if(payment_request_response.status!==201) {
-        console.log(`Error while getting payment url ${payment_request_response}`)
+    if(payment_request_response.status!==200) {
+        console.log(`Error while getting payment url `)
         return { status: false, url: "" }
     }
-    const { payment_url } = await payment_request_response.json() as { payment_url:string }
+    const response = await payment_request_response.json() as { data:{ payment_url: string } }     
     return {
         status: true,
-        url: payment_url
+        url: response.data.payment_url
     }
 }
 

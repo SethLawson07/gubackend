@@ -227,7 +227,7 @@
                     "amount":{"type":"number"}, "cart":{"type":"array", "items":{"type":"object", "properties":{ "id":{"type":"string"}, "quantity":{"type":"number"} }}},
                     "promocodes":{"type":"array", "items":{"type":"string"}}
                 }
-            }}]
+            }}], "responses":{"200":{"description":"commande cree, lien de paiement retourne"}, "500":{"description":"Erreur serveur"}}
         },
         "get":{
             "tags":["order"], "summary":"Recevoir la liste de mes commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
