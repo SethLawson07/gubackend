@@ -17,17 +17,27 @@ export async function create(req: Request, res: Response){
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
         const { data } = validation_result
         const { user } = req.body.user as { user: string }
-        await prisma.order.create({
-            data:{
-                user,
-                ...data,
-                remainder: data.amount,
-                paid: false,
-                status: "PENDING"
+        const current_user = await prisma.user.findUnique({
+            where:{
+                email: user
             }
         })
-        await create_promocode_usage(data.promocodes, user)
-        return res.status(200).send()
+        if(!current_user) return res.status(401).send()
+        if(current_user.is_verified){
+            await prisma.order.create({
+                    data:{
+                    user: current_user.id,
+                    ...data,
+                    remainder: data.amount,
+                    paid: false,
+                    status: "PENDING"
+                }
+            })
+            await create_promocode_usage(data.promocodes, user)
+            return res.status(200).send()
+        }
+        const url = ""
+        return res.status(200).send({ url })
     } catch (err) {
         console.log(`Error while creating order ${err}`)
         return res.status(500).send()

@@ -16,6 +16,7 @@ import product from "./routes/product"
 import payment from "./routes/payment"
 import promocode from "./routes/promocode"
 import order from "./routes/order"
+import users from "./routes/users"
 
 const PORT = process.env.PORT || 5000
 
@@ -25,7 +26,10 @@ export const prisma = new PrismaClient()
 
 app.use(cors())
 app.use(express.json())
-app.use(morgan("dev"))
+
+const verboseFormat = ':remote-addr :method :url HTTP/:http-version :status :res[content-length] - :response-time ms';
+
+app.use(morgan(verboseFormat))
 app.use('/docs', swagger.serve, swagger.setup(swagger_doc))
 
 app.use("/auth", auth)
@@ -37,6 +41,7 @@ app.use("/product", product)
 app.use("/pay", payment)
 app.use("/promocode", promocode)
 app.use("/order", order)
+app.use("/users", users)
 
 app.get("/health", (_req: Request, res: Response) => {
     return res.status(200).send()

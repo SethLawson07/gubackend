@@ -168,3 +168,13 @@ export async function get_orders(req: Request, res: Response){
         return res.status(500).send()
     }
 }
+
+export async function get_all_users(req: Request, res: Response){
+    try {
+        const data = await prisma.user.findMany()
+        return res.status(200).send({ data })
+    } catch (err) {
+        console.log(`Error while getting list of all users ${err}`)
+        return res.status(500).send()
+    }
+}

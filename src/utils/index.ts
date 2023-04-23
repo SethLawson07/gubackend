@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt"
 import * as jwt from "jsonwebtoken"
 import { prisma } from "../server"
+import * as crypto from "crypto"
 
 const JWT_TOKEN = "goodnessunitsupertoken"
 const salt_rounds = 10
@@ -29,8 +30,8 @@ export function verify_token(token: string){
     }
 }
 
-export async function generate_payment_link(amount: number, user:string){
-    const transaction_id = Math.floor(Math.random() * 100000000).toString()
+export async function generate_payment_link(amount: number, user:string, metadata?: string){
+    const transaction_id = crypto.randomUUID()
     const data = {
         "apikey":"25443723563ef760b99c2b5.76392442",
         "site_id":"636165",
@@ -42,7 +43,8 @@ export async function generate_payment_link(amount: number, user:string){
         "notify_url":"",
         "return_url":"",
         "channels":"ALL",
-        "lang":"FR"
+        "lang":"FR",
+        "metadata": metadata??""
     }
     const payment_request_response = await fetch(
         "https://api-checkout.cinetpay.com/v2/payment",
@@ -54,11 +56,11 @@ export async function generate_payment_link(amount: number, user:string){
             body:JSON.stringify(data)
         }
     )
-    if(payment_request_response.status!==201) return { status: false, data: null }
+    if(payment_request_response.status!==201) return { status: false, url: "" }
     const { payment_url } = await payment_request_response.json() as { payment_url:string }
     return {
         status: true,
-        data: payment_url
+        url: payment_url
     }
 }
 

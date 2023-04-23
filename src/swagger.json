@@ -214,6 +214,12 @@
 
         }
     },
+    "/users":{
+        "get":{
+            "tags":["users"], "summary":"Recevoir la liste des utilisateurs enregistres", "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "responses":{"200":{"description":"Liste retournee"}, "401":{"description":"Utilisateur non authentifie"}, "500":{"description":"erreur serveur"}}
+        }
+    },
     "/order":{
         "post":{"tags":["order"], "summary":"Creer une commande", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
             "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
