@@ -36,7 +36,18 @@ export async function create(req: Request, res: Response){
             await create_promocode_usage(data.promocodes, user)
             return res.status(200).send()
         }
-        const response = await generate_payment_link(data.amount, current_user.id)
+        const order = await prisma.order.create({
+            data:{
+                user: current_user.id,
+                remainder: data.amount,
+                promocodes: data.promocodes,
+                paid: false,
+                status: "PENDING",
+                cart: data.cart,
+                amount: data.amount
+            }
+        })
+        const response = await generate_payment_link(data.amount, current_user.id, order.id)
         return res.status(200).send({ data: response })
     } catch (err) {
         console.log(`Error while creating order ${err}`)
