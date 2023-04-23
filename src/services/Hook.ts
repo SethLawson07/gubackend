@@ -45,7 +45,6 @@ export async function momo_payment_event(req: Request, res: Response){
 export async function payment_event(req: Request, res: Response){
     try {
         const order_id = req.params.id
-        console.log(`Received something ${req.body}`)
         const schema = z.object({
             cpm_amount: z.string(),
             cpm_trans_id: z.string(),
@@ -64,6 +63,7 @@ export async function payment_event(req: Request, res: Response){
             console.log(`Found duplicate id in store ${data.cpm_trans_id} : Aborting processing`)
             return res.status(409).send()
         }
+        store.push(data.cpm_trans_id)
         if(data.cpm_error_message==="SUCCES"){
             const targetted_order = await prisma.order.findUnique({
                 where:{
