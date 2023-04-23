@@ -72,20 +72,20 @@ export async function set_financepro_id(req: Request, res: Response){
     try {
         const schema = z.object({
             id: z.string(),
-            user: z.string()
+            user_mail: z.string()
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
-        const { id, user } = validation_result.data
+        const { id, user_mail } = validation_result.data
         const targetted_user = await prisma.user.findUnique({
             where:{
-                email: user
+                email: user_mail
             }
         })
         if(!targetted_user) return res.status(400).send({ message:"Utilisateur non  trouve"})
         await prisma.user.update({
             where:{
-                email: user
+                id: targetted_user.id
             },
             data:{
                 is_verified: true,

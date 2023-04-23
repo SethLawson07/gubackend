@@ -209,8 +209,8 @@
     "/auth/set_id":{
         "post":{"tags":["auth"], "summary":"Donner une valeur à l'id finance pro d'un utilisateur", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
             "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
-                "user":{"type":"string"}, "id":{"type":"string"}
-            }}}]
+                "user_mail":{"type":"string"}, "id":{"type":"string"}
+            }}}], "responses":{ "200":{"description":"Mises a jour apportees"}, "400":{"description":"Champs manquants ou types incorrects"}, "500":{"description":"Erreur serveur"}}
 
         }
     },
