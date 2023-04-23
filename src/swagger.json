@@ -635,6 +635,18 @@
         "post":{
             "tags":["hook"], "summary":"Gerer les payments par cinetpay", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}]
         }
-    }
+    },
+    "/transaction":{
+        "get":{
+            "tags":["transaction"], "summary":"Liste des transactions du user connecte", "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}, "401":{"description":"Utilisateur non connecte"}}
+        }
+    },
+    "/transaction/all":{
+        "get":{
+            "tags":["transaction"], "summary":"Liste de toutes les transactions effectuees", "produces":["application/json"], "security":[{ "Bearer":[]}],
+            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}, "401":{"description":"Utilisateur non connecte ou non admin"} }
+        }
+    },
   }
 }
