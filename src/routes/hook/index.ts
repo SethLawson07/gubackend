@@ -5,6 +5,6 @@ const router = Router()
 
 router.route("/momo_event").post( momo_payment_event)
 
-router.route("/payment_event").all( payment_event )
+router.route("/payment_event").post( payment_event )
 
 export default router
