@@ -17,6 +17,7 @@ import payment from "./routes/payment"
 import promocode from "./routes/promocode"
 import order from "./routes/order"
 import users from "./routes/users"
+import hook from "./routes/hook"
 
 const PORT = process.env.PORT || 5000
 
@@ -53,6 +54,7 @@ app.use("/pay", payment)
 app.use("/promocode", promocode)
 app.use("/order", order)
 app.use("/users", users)
+app.use("/hook", hook)
 
 app.get("/health", (_req: Request, res: Response) => {
     return res.status(200).send()
