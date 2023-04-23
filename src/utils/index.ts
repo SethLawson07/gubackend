@@ -54,22 +54,9 @@ export async function generate_payment_link(amount: number, user:string, order_i
             console.log(`Error while getting payment url`)
             return { status: false, url:"" }
         }
-        console.log(res.data)
         const response = res.data as { data:{ payment_url: string}}
         return { status: true, url:response.data.payment_url}
     })
-    /**
-    const payment_request_response = await fetch(
-        "https://api-checkout.cinetpay.com/v2/payment",
-            {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify(data)
-        }
-    )
-    */
     return payment_request_response
 }
 
