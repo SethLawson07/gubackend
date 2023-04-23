@@ -40,11 +40,12 @@ export async function generate_payment_link(amount: number, user:string, order_i
         "currency":"XOF",
         "description":"Reglement de commande",
         "customer_id": user,
-        "notify_url":`https://goodness-api.onrender.com/hook/payment_event?order_id=${order_id}`,
+        "notify_url":`https://goodness-api.onrender.com/hook/payment_event/${order_id}`,
         "return_url":"https://google.com",
         "channels":"ALL",
         "lang":"FR"
     }
+    console.log(data.notify_url)
     const payment_request_response = await fetch(
         "https://api-checkout.cinetpay.com/v2/payment",
             {
