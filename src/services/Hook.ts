@@ -64,7 +64,30 @@ export async function payment_event(req: Request, res: Response){
             console.log(`Found duplicate id in store ${data.cpm_trans_id} : Aborting processing`)
             return res.status(409).send()
         }
-        console.log(data)
+        if(data.cpm_error_message==="SUCCES"){
+            const targetted_order = await prisma.order.findUnique({
+                where:{
+                    id: order_id
+                }
+            })
+            if(!targetted_order){
+                console.log(`Order not found ${order_id}`)
+                return res.status(404).send()
+            }
+            await prisma.order.update({
+                where:{
+                    id: targetted_order.id
+                },
+                data:{
+                    paid: true,
+                    status:"PAID",
+                    remainder:0
+                }
+            })
+            console.log("Process payment here")
+            return res.status(200).send()
+        }
+        console.log(`A payment failed`)
         return res.status(200).send()
     } catch (err) {
         console.error(`Error while handling payment event ${err}`)
