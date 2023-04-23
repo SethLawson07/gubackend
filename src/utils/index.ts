@@ -30,7 +30,7 @@ export function verify_token(token: string){
     }
 }
 
-export async function generate_payment_link(amount: number, user:string, metadata?: string){
+export async function generate_payment_link(amount: number, user:string, order_id: string){
     const transaction_id = crypto.randomUUID()
     const data = {
         "apikey":"25443723563ef760b99c2b5.76392442",
@@ -40,11 +40,10 @@ export async function generate_payment_link(amount: number, user:string, metadat
         "currency":"XOF",
         "description":"Reglement de commande",
         "customer_id": user,
-        "notify_url":"",
-        "return_url":"",
+        "notify_url":`https://goodness-api.onrender.com/hook/payment_event?order_id=${order_id}`,
+        "return_url":"https://google.com",
         "channels":"ALL",
-        "lang":"FR",
-        "metadata": metadata??""
+        "lang":"FR"
     }
     const payment_request_response = await fetch(
         "https://api-checkout.cinetpay.com/v2/payment",
