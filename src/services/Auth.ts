@@ -169,7 +169,7 @@ export async function get_orders(req: Request, res: Response){
     }
 }
 
-export async function get_all_users(req: Request, res: Response){
+export async function get_all_users(_req: Request, res: Response){
     try {
         const data = await prisma.user.findMany()
         return res.status(200).send({ data })

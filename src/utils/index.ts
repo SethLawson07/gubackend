@@ -2,7 +2,7 @@ import bcrypt from "bcrypt"
 import * as jwt from "jsonwebtoken"
 import { prisma } from "../server"
 import * as crypto from "crypto"
-import fetch from "node-fetch"
+import axios from "axios"
 
 const JWT_TOKEN = "goodnessunitsupertoken"
 const salt_rounds = 10
@@ -46,6 +46,19 @@ export async function generate_payment_link(amount: number, user:string, order_i
         "channels":"ALL",
         "lang":"FR"
     }
+    const payment_request_response = await axios.post(
+        "https://api-checkout.cinetpay.com/v2/payment",
+            data
+    ).then(res=>{
+        if(res.status!==200){
+            console.log(`Error while getting payment url`)
+            return { status: false, url:"" }
+        }
+        console.log(res.data)
+        const response = res.data as { data:{ payment_url: string}}
+        return { status: true, url:response.data.payment_url}
+    })
+    /**
     const payment_request_response = await fetch(
         "https://api-checkout.cinetpay.com/v2/payment",
             {
@@ -56,15 +69,8 @@ export async function generate_payment_link(amount: number, user:string, order_i
             body:JSON.stringify(data)
         }
     )
-    if(payment_request_response.status!==200) {
-        console.log(`Error while getting payment url `)
-        return { status: false, url: "" }
-    }
-    const response = await payment_request_response.json() as { data:{ payment_url: string } }     
-    return {
-        status: true,
-        url: response.data.payment_url
-    }
+    */
+    return payment_request_response
 }
 
 export async function create_promocode_usage( promocodes: string[], user: string){
