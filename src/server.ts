@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express"
+import express, { NextFunction, Request, Response } from "express"
 import * as dotenv from "dotenv"
 dotenv.config()
 import morgan from "morgan"
@@ -26,6 +26,17 @@ export const prisma = new PrismaClient()
 
 app.use(cors())
 app.use(express.json())
+
+app.use((req: Request, res: Response, next: NextFunction)=>{
+    const content_type = req.get("content-type")??""
+    if(content_type.startsWith("application/json")){
+        express.json()(req, res, next)
+    }else if(content_type.startsWith("application/x-www-form-urlencoded")) {
+        express.urlencoded({ extended: true})(req, res, next)
+    }else{
+        next()
+    }
+})
 
 const verboseFormat = ':remote-addr :method :url HTTP/:http-version :status :res[content-length] - :response-time ms';
 

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
+import { store } from "../utils/store";
 
 
 export async function momo_payment_event(req: Request, res: Response){
@@ -41,8 +42,27 @@ export async function momo_payment_event(req: Request, res: Response){
     }
 }
 
-export async function payment_event(_req: Request, res: Response){
+export async function payment_event(req: Request, res: Response){
     try {
+        const schema = z.object({
+            cpm_trans_date: z.string(),
+            cpm_amount: z.string(),
+            cpm_trans_id: z.string(),
+            payment_method: z.string(),
+            cel_phone_num: z.string(),
+            cpm_error_message: z.string()
+        })
+        const validation_result = schema.safeParse(req.body)
+        if(!validation_result.success){
+            console.log(`Error while parsing response from cinet pay ${req.body}`)
+            return res.status(500).send()
+        }
+        const { data } = validation_result
+        if(store.includes(data.cpm_trans_id)){
+            console.log(`Found duplicate id in store ${data.cpm_trans_id} : Aborting processing`)
+            return res.status(409).send()
+        }
+        console.log(data)
         return res.status(200).send()
     } catch (err) {
         console.error(`Error while handling payment event ${err}`)

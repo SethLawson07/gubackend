@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
-import { create_promocode_usage } from "../utils"
+import { create_promocode_usage, generate_payment_link } from "../utils"
 
 export async function create(req: Request, res: Response){
     try {
@@ -36,8 +36,8 @@ export async function create(req: Request, res: Response){
             await create_promocode_usage(data.promocodes, user)
             return res.status(200).send()
         }
-        const url = ""
-        return res.status(200).send({ url })
+        const response = await generate_payment_link(data.amount, current_user.id)
+        return res.status(200).send({ data: response })
     } catch (err) {
         console.log(`Error while creating order ${err}`)
         return res.status(500).send()
