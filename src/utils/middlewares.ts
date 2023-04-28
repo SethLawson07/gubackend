@@ -4,6 +4,7 @@ import { verify_token } from ".";
 export function Auth(req: Request, res: Response, next: NextFunction){
     try {
         const bearer = req.headers.authorization ?? ""        
+        console.log(bearer)
         if(bearer==="") return res.status(401).send({ message:"Utilisateur non authentifié" })
         const token_verification_result = verify_token(bearer)
         if(token_verification_result==="") return res.status(401).send({ message: "token invalide ou expiré" })
