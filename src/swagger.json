@@ -648,5 +648,31 @@
             "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}, "401":{"description":"Utilisateur non connecte ou non admin"} }
         }
     },
+    "/brand":{
+        "post":{
+            "tags":["brand"], "summary":"Creer une nouvelle marque", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}], "parameters":[{
+                "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
+                    "name":{ "type":"string" }, "featured":{ "type":"boolean"}, "image":{ "type":"string"}
+                } }
+            }]
+        },
+        "get":{
+            "tags":["brand"], "summary":"Liste des marques", "produces":["application/json"], "responses":{ "200":{"description":"Liste retournee"}, "500":{"description":"Erreur serveur"}}
+        },
+        "put":{
+            "tags":["brand"], "summary":"Modifier une marque", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],  "parameters":[{
+                "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
+                    "featured":{ "type":"boolean"}, "image":{"type":"string"}
+                } }
+            }]
+        },
+        "delete":{
+            "tags":["brand"], "summary":"Creer une nouvelle marque", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}]  "parameters":[{
+                "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
+                    "id":{ "type":"string"}
+                } }
+            }]
+        }
+    }
   }
 }
