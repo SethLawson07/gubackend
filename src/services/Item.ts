@@ -31,13 +31,13 @@ export async function create(req: Request, res: Response) {
         const potential_duplicate = await prisma.item.findFirst({
             where: {
                 name: validation_result.data.name,
-                sub_category: validation_result.data.sub_category
+                subcategory: validation_result.data.sub_category
             }
         })
         if (potential_duplicate) return res.status(409).send()
         await prisma.item.create({
             data: {
-                ...validation_result.data
+                ...validation_result.data, subcategory: validation_result.data.sub_category
 
             }
         })
@@ -50,7 +50,16 @@ export async function create(req: Request, res: Response) {
 
 export async function get(_req: Request, res: Response) {
     try {
-        const data = await prisma.item.findMany()
+        const data = await prisma.item.findMany({
+            include:{
+                subcategory_data:{
+                    select:{
+                        name: true,
+                        id: true
+                    }
+                }
+            }
+        })
         return res.status(200).send({ data })
     } catch (err) {
         console.error(`Error while getting list of all items ${err}`)
@@ -80,7 +89,7 @@ export async function update(req: Request, res: Response) {
                 where: {
                     AND:[
                         { name: data.name},
-                        { sub_category: targetted_item.sub_category}
+                        { subcategory: targetted_item.subcategory}
                     ]
                 }
             })

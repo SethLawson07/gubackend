@@ -38,7 +38,16 @@ export async function create(req: Request, res: Response){
 
 export async function get(_req: Request, res: Response){
     try {
-        const data = await prisma.subCategory.findMany()
+        const data = await prisma.subCategory.findMany({
+            include:{
+                category_data:{
+                    select:{
+                        name: true,
+                        id: true
+                    }
+                }
+            }
+        })
         return res.status(200).send({ data })
     } catch (err){
         console.error(`Error while getting list of subcategories ${err}`)

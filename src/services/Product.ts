@@ -49,7 +49,17 @@ export async function create(req: Request, res: Response) {
 
 export async function get(_req: Request, res: Response) {
   try {
-    const data = await prisma.product.findMany()
+    const data = await prisma.product.findMany({
+        include:{
+            item_data:{
+                select:{
+                    id: true,
+                    name: true,
+                    schema: true
+                }
+            }
+        }
+    })
     return res.status(200).send({ data })
   } catch (err) {
     console.error(`Error while getting list of products`)
