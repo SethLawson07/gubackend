@@ -114,7 +114,7 @@ export async function delete_(req: Request, res: Response){
         if(!targetted_subcategory) return res.status(404).send()
         const items_to_delete = await prisma.item.findMany({
             where:{
-                sub_category:id
+                subcategory:id
             }
         })
         //Delete products in items 
@@ -128,7 +128,7 @@ export async function delete_(req: Request, res: Response){
         //Delete items in subcategory
         await prisma.item.deleteMany({
             where:{
-                sub_category: id
+                subcategory: id
             }
         })
         //Delete subcategory
