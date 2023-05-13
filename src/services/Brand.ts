@@ -69,7 +69,8 @@ export async function update_brand(req: Request, res: Response){
         const schema = z.object({
             id: z.string(),
             featured: z.boolean().optional(),
-            image: z.string().optional()
+            image: z.string().optional(),
+            name: z.string().optional()
         })
         const validation_result = schema.safeParse(req.body)
         if(!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message)})
@@ -80,7 +81,8 @@ export async function update_brand(req: Request, res: Response){
             },
             data:{
                 featured: data.featured,
-                image: data.image
+                image: data.image,
+                name: data.name
             }
         })
         return res.status(200).send()
