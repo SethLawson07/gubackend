@@ -6,7 +6,7 @@ export async function create(req: Request, res: Response) {
     try {
         const schema = z.object({
             name: z.string(),
-            sub_category: z.string(),
+            subcategory: z.string(),
             featured: z.boolean(),
             schema: z.string(),
             image: z.string()
@@ -24,20 +24,20 @@ export async function create(req: Request, res: Response) {
         if (!schema_is_valid) return res.status(400).send({ message: "schema invalide. Impossible de parser le schema" })
         const targetted_subcategory = await prisma.subCategory.findUnique({
             where: {
-                id: validation_result.data.sub_category
+                id: validation_result.data.subcategory
             }
         })
         if (!targetted_subcategory) return res.status(404).send()
         const potential_duplicate = await prisma.item.findFirst({
             where: {
                 name: validation_result.data.name,
-                subcategory: validation_result.data.sub_category
+                subcategory: validation_result.data.subcategory
             }
         })
         if (potential_duplicate) return res.status(409).send()
         await prisma.item.create({
             data: {
-                ...validation_result.data, subcategory: validation_result.data.sub_category
+                ...validation_result.data, subcategory: validation_result.data.subcategory
 
             }
         })
