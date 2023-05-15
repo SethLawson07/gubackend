@@ -62,7 +62,8 @@ model Product {
     is_in_discount  Boolean
     discount_price  Float?
     fields          String?
-    brand           String
+    brand           String   @db.ObjectId()
+    brand_data      Brand    @relation(fields: [brand], references: [id])
     item_data       Item     @relation(fields: [item], references: [id])
 }
 
@@ -109,8 +110,9 @@ model PromoCodeUsage {
 }
 
 model Brand {
-    id       String  @id @default(auto()) @map("_id") @db.ObjectId
-    name     String  @unique
+    id       String    @id @default(auto()) @map("_id") @db.ObjectId
+    name     String    @unique
     image    String
     featured Boolean
+    Product  Product[]
 }
