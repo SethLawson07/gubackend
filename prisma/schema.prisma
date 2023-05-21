@@ -53,6 +53,7 @@ model Item {
 model Product {
     id              String   @id @default(auto()) @map("_id") @db.ObjectId()
     name            String
+    description     String?
     images          String[]
     item            String   @db.ObjectId()
     featured        Boolean
@@ -62,7 +63,7 @@ model Product {
     is_in_discount  Boolean
     discount_price  Float?
     fields          String?
-    brand           String   @db.ObjectId()
+    brand           String?   @db.ObjectId()
     brand_data      Brand    @relation(fields: [brand], references: [id])
     item_data       Item     @relation(fields: [item], references: [id])
 }
