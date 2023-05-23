@@ -15,7 +15,8 @@ export async function create(req: Request, res: Response) {
             discount_price: z.number({ invalid_type_error: "discount_price doit etre un nombre valide" }).optional(),
             fields: z.string({ invalid_type_error: "fields doit etre un string" }),
             images: z.array(z.string()),
-            brand: z.string()
+            brand: z.string(),
+            description: z.string()
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })

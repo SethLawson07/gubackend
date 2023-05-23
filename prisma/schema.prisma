@@ -63,7 +63,7 @@ model Product {
     is_in_discount  Boolean
     discount_price  Float?
     fields          String?
-    brand           String?   @db.ObjectId()
+    brand           String   @db.ObjectId()
     brand_data      Brand    @relation(fields: [brand], references: [id])
     item_data       Item     @relation(fields: [item], references: [id])
 }
