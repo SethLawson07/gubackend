@@ -1,678 +1,1826 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "title": "Simple API overview",
-    "version": "v2"
-  },
-  "tags": [
-      {
-          "name":"health"
-      },
-      {
-          "name":"auth"
-      },
-      {
-          "name":"category"
-      },
-      {
-          "name":"subcategory"
-      },
-      {
-          "name":"item"
-      },
-      {
-          "name":"product"
-      },
-      {
-          "name":"promocode"
-      },
-      {
-          "name":"order"
-      },
-      {
-          "name":"slider"
-      }
-  ],
-  "securityDefinitions":{
-    "Bearer": {
-        "type":"apiKey",
-        "name":"Authorization",
-        "in":"header",
-        "description":"JWT auth token"
-    }
-  },
-  "paths":{
-      "/health":{
-            "get":{
-                "tags":["health"],
-                "summary":"Get server health check",
-                "produces":["application/json"],
-                "responses":{
-                    "200":{
-                        "description":"Server is healthy and running"
+    "swagger": "2.0",
+    "info": {
+        "title": "Simple API overview",
+        "version": "v2"
+    },
+    "tags": [
+        {
+            "name": "health"
+        },
+        {
+            "name": "auth"
+        },
+        {
+            "name": "category"
+        },
+        {
+            "name": "subcategory"
+        },
+        {
+            "name": "item"
+        },
+        {
+            "name": "product"
+        },
+        {
+            "name": "promocode"
+        },
+        {
+            "name": "order"
+        },
+        {
+            "name": "slider"
+        }
+    ],
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT auth token"
+        }
+    },
+    "paths": {
+        "/health": {
+            "get": {
+                "tags": [
+                    "health"
+                ],
+                "summary": "Get server health check",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Server is healthy and running"
                     },
-                    "500":{
-                        "description":"Server is unhealthy"
+                    "500": {
+                        "description": "Server is unhealthy"
                     }
                 }
             }
-      },
-      "/auth/register":{
-          "post":{
-              "tags":["auth"],
-              "summary":"Créer un compte en tant qu'utilisateur",
-              "produces":["application/json"],
-              "consumes":["application/json"],
-              "parameters":[
-                  {
-                      "name":"body",
-                      "in":"body",
-                      "description":"user details",
-                      "required": true,
-                      "schema": {
-                          "type":"object",
-                          "properties": {
-                              "email":{
-                                  "type":"string",
-                                  "description":"email de l'utilisateur",
-                                  "example":"jo@gmail.com"
-                              },
-                              "password":{
-                                    "type":"string",
-                                    "description":"mot de passe",
-                                    "example":"password1234567890"
-                              },
-                              "phone":{
-                                    "type":"string",
-                                    "description":"numero de telephone",
-                                    "example":"90696969"
-                              },
-                              "profile_picture":{
-                                  "type":"string",
-                                  "required": false,
-                                  "description":"Lien vers une eventuelle photo de profil",
-                                  "example":"https://cloudinary.com/pic.png"
-                              }
-                          }
-                      }
-                  }
-                                  ],
-
-              "responses":{
-                  "201":{
-                      "description":"utilisateur enregistre"
-                  },
-                  "409":{
-                      "description":"Conflit: Email ou numero de telephone deja en cours d'utilisation"
-                  },
-                  "500":{
-                      "description":"Une erreur est survenue. Reessayer ou contacter les devs"
-                  }
-              }
-          }
-      },
-      "/auth/login":{
-          "post":{
-              "tags":["auth"],
-              "summary":"Se connecter",
-              "produces":["application/json"],
-              "consumes":["application/json"],
-              "parameters":[
-                  {
-                      "name":"body",
-                      "in":"body",
-                      "description":"user details",
-                      "required": true,
-                      "schema": {
-                          "type":"object",
-                          "properties":{
-                              "email":{
-                                  "type":"string",
-                                  "description":"email de l'utilisateur",
-                                  "example":"email@gmail.com"
-                              },
-                              "password":{
-                                  "type":"string",
-                                  "description":"mot de passe",
-                                  "example":""
-                              }
-                          }
-                      }
-                  }
-              ],
-              "responses":{
-                  "200":{
-                      "description":"Authentification reussie, l'API devrait retourner un token"
-                  },
-                  "400":{
-                      "description":"Mot de passe incorrect"
-                  },
-                  "404":{
-                      "description":"Utilisateur non trouve"
-                  },
-                  "500":{
-                      "description":"Une erreur est survenue. Reessayer ou contacter les devs"
-                  }
-              }
-          }
-      },
-    "/auth/create_admin":{
-        "post":{
-            "security":[{ "Bearer":[] }],
-            "tags":["auth"],
-            "summary":"Creer un compte admin",
-            "produces":["application/json"],
-            "consumes":["application/json"],
-            "parameters":[
-                {
-                    "name":"body",
-                    "in":"body",
-                    "required": true,
-                    "description":"Admin infos",
-                    "schema":{
-                        "type":"object",
-                        "properties":{
-                            "email":{
-                                "type":"string",
-                            },
-                            "password":{
-                                "type":"string"
+        },
+        "/auth/register": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Créer un compte en tant qu'utilisateur",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "user details",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "description": "email de l'utilisateur",
+                                    "example": "jo@gmail.com"
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "description": "mot de passe",
+                                    "example": "password1234567890"
+                                },
+                                "phone": {
+                                    "type": "string",
+                                    "description": "numero de telephone",
+                                    "example": "90696969"
+                                },
+                                "profile_picture": {
+                                    "type": "string",
+                                    "required": false,
+                                    "description": "Lien vers une eventuelle photo de profil",
+                                    "example": "https://cloudinary.com/pic.png"
+                                }
                             }
                         }
                     }
-                }
-            ],
-            "responses":{
-                "201":{
-                    "description":"Compte admin cree"
-                },
-                "400":{
-                    "description":"parametres non passes ou types incorrects"
-                },
-                "409":{
-                    "description":"Email deja en cours d'utilisation"
-                },
-                "500":{
-                    "description":"Une erreur est survenue. Reessayer ou contacter les devs"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "utilisateur enregistre"
+                    },
+                    "409": {
+                        "description": "Conflit: Email ou numero de telephone deja en cours d'utilisation"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue. Reessayer ou contacter les devs"
+                    }
                 }
             }
-        }
-    },
-    "/auth/change_password":{
-        "put":{"tags":["auth"], "summary":"Mettre a jour son mot de passe", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
-                "old":{"type":"string"}, "new":{"type":"string"}
-            }}}]
-
-        }
-    },
-    "/auth/set_id":{
-        "post":{"tags":["auth"], "summary":"Donner une valeur à l'id finance pro d'un utilisateur", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
-                "user_mail":{"type":"string"}, "id":{"type":"string"}
-            }}}], "responses":{ "200":{"description":"Mises a jour apportees"}, "400":{"description":"Champs manquants ou types incorrects"}, "500":{"description":"Erreur serveur"}}
-
-        }
-    },
-    "/users":{
-        "get":{
-            "tags":["users"], "summary":"Recevoir la liste des utilisateurs enregistres", "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "responses":{"200":{"description":"Liste retournee"}, "401":{"description":"Utilisateur non authentifie"}, "500":{"description":"erreur serveur"}}
-        }
-    },
-    "/order":{
-        "post":{"tags":["order"], "summary":"Creer une commande", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
-                "type":"object", "properties":{
-                    "amount":{"type":"number"}, "cart":{"type":"array", "items":{"type":"object", "properties":{ "id":{"type":"string"}, "quantity":{"type":"number"} }}},
-                    "promocodes":{"type":"array", "items":{"type":"string"}}
-                }
-            }}], "responses":{"200":{"description":"commande cree, lien de paiement retourne"}, "500":{"description":"Erreur serveur"}}
         },
-        "get":{
-            "tags":["order"], "summary":"Recevoir la liste de mes commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
-        }
-    },
-    "/order/all":{
-        "get":{
-            "tags":["order"], "summary":"Recevoir la liste de toutes les commandes", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
-
-        }
-    },
-    "/pay":{
-        "post":{
-            "tags":["order"], "summary":"Recevoir un lien de paiement", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
-                "type":"object","properties":{ "order":{"type":"string"} }
-            }}], "responses":{ "200":{"description":"Lien retourne"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}}
-        }
-    },
-    "/category":{
-        "post":{
-            "security":[{ "Bearer":[] }],
-            "tags":["category"],
-            "summary":"Creer une categorie",
-            "produces":["application/json"],
-            "consumes":["application/json"],
-            "parameters":[
-                {
-                    "name":"body",
-                    "in":"body",
-                    "description":"Category data",
-                    "required": true,
-                    "schema":{
-                        "type":"object",
-                        "properties":{
-                            "name":{
-                                "type":"string",
-                                "description":"Nom de la categorie"
-                            },
-                            "featured":{
-                                "type":"boolean",
-                            },
-                            "image":{
-                                "type":"string"
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Se connecter",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "user details",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "description": "email de l'utilisateur",
+                                    "example": "email@gmail.com"
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "description": "mot de passe",
+                                    "example": ""
+                                }
                             }
                         }
                     }
-                }
-            ],
-            "responses":{
-                "201":{"description":"categorie cree"},
-                "400":{"description":"Mauvaise requete, types incorrects ou champs manquants"},
-                "409":{"description":"Une categorie porte deja le nom "},
-                "500":{"description":"Une erreur est survenue. Reessayer ou contacter les devs"}
-            }
-        },
-        "get":{
-            "tags":["category"],
-            "summary":"Liste des categories",
-            "produces":["application/json"],
-            "responses":{
-                "200":{
-                    "description":"Donnees retournees"
-                },
-                "500":{
-                    "description":"Une erreur est survenue. Reessayer ou contacter les devs"
-                }
-            }
-        },
-        "put":{
-            "security":[{ "Bearer":[] }],
-            "tags":["category"],
-            "summary":"Modifier une categorie",
-            "produces":["application/json"],
-            "consumes":["application/json"],
-            "parameters":[
-                {
-                    "name":"body",
-                    "in":"body",
-                    "required": true,
-                    "schema":{
-                        "type":"object",
-                        "properties":{
-                            "id":{"type":"string"},
-                            "name":{"type":"string"},
-                            "featured":{"type":"boolean"},
-                            "image":{"type":"string"}
-                        }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Authentification reussie, l'API devrait retourner un token"
+                    },
+                    "400": {
+                        "description": "Mot de passe incorrect"
+                    },
+                    "404": {
+                        "description": "Utilisateur non trouve"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue. Reessayer ou contacter les devs"
                     }
                 }
-            ],
-            "responses":{
-                "200":{"description":"categorie mise a jour"},
-                "400":{"description":"Mauvaise requete, types incorrects ou champ id manquant"},
-                "404":{"description":"categorie non trouvee"},
-                "409":{"description":"duplicat, une categorie porte deja le meme nom"},
-                "500":{"description":"Une erreur est survenue...."}
             }
         },
-        "delete":{
-            "security":[{ "Bearer":[] }],
-            "tags":["category"],
-            "summary":"Supprimer une categorie",
-            "produces":["application/json"],
-            "consumes":["application/json"],
-            "parameters":[
-                {
-                    "name":"body",
-                    "in":"body",
-                    "required": true,
-                    "schema":{
-                        "type":"object",
-                        "properties":{
-                            "id":{"type":"string"}
+        "/auth/create_admin": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Creer un compte admin",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "description": "Admin infos",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
-                }
-            ],
-            "responses":{
-                "200":{"description":"categorie supprimee"},
-                "404":{"description":"categorie non trouvee"},
-                "500":{"description":"Une erreur est survenue...."}
-            }
-        }
-    },
-    "/slider":{
-        "post":{
-            "summary":"Creer un slider",
-            "security":[{ "Bearer":[] }],
-            "tags":["slider"],
-            "produces":["application/json"],
-            "consumes":["application/json"],
-            "parameters":[
-                {
-                    "name":"body",
-                    "in":"body",
-                    "required": true,
-                    "schema":{
-                        "type":"object",
-                        "properties":{
-                            "big_text":{"type":"string"},
-                            "alt_text":{"type":"string"},
-                            "featured":{"type":"boolean"},
-                            "image":{"type":"string"}
-                        }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Compte admin cree"
+                    },
+                    "400": {
+                        "description": "parametres non passes ou types incorrects"
+                    },
+                    "409": {
+                        "description": "Email deja en cours d'utilisation"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue. Reessayer ou contacter les devs"
                     }
                 }
-            ],
-            "responses":{
-                "201":{"description":"Slider cree"},
-                "400":{"description":"Mauvaise requete: champs manquants ou types invalides"},
-                "500":{"description":"Une erreur est survenue......."}
             }
         },
-        "get":{
-            "summary":"Recevoir la liste des sliders",
-            "tags":["slider"],
-            "produces":["application/json"],
-            "responses":{
-                "200":{"description":"Liste des sliders renvoyee"},
-                "500":{"description":"Une erreur est survenue....."}
-            }
-        },
-        "put":{
-            "summary":"Modifier un slider",
-            "tags":["slider"],
-            "produces":["application/json"],
-            "consumes":["application/json"],
-            "security":[{ "Bearer":[] }],
-            "parameters":[
-                {
-                    "name":"body",
-                    "in":"body",
-                    "required": true,
-                    "schema":{
-                        "type":"object",
-                        "properties":{
-                            "id":{"type":"string"},
-                            "big_text":{"type":"string"},
-                            "alt_text":{"type":"string"},
-                            "featured":{"type":"string"},
-                            "image":{"type":"string"}
+        "/auth/change_password": {
+            "put": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Mettre a jour son mot de passe",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "old": {
+                                    "type": "string"
+                                },
+                                "new": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
-                }
-            ],
-            "responses":{
-                "200":{"description":"slider modifie avec succes"},
-                "400":{"description":"id manquant ou types incorrects"},
-                "500":{"description":"Une erreur est survenue....."}
+                ]
             }
         },
-        "delete":{
-            "tags":["slider"],
-            "summary":"Supprimer un slider",
-            "produces":["application/json"],
-            "consumes":["application/json"],
-            "security":[{ "Bearer":[] }],
-            "parameters":[
-                {
-                    "name":"body",
-                    "in":"body",
-                    "required":"true",
-                    "schema":{
-                        "type":"object",
-                        "properties":{
-                            "id":{"type":"string"}
+        "/auth/set_id": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Donner une valeur à l'id finance pro d'un utilisateur",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "user_mail": {
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
-                }
-            ],
-            "responses":{
-                "200":{"description":"slider supprime avec succes"},
-                "400":{"description":"id manquant ou de type incorrect"},
-                "500":{"description":"une erreur est survenue........"}
-            }
-        }
-    },
-    "/subcategory":{
-        "post":{
-            "tags":["subcategory"],
-            "summary":"Creer une sous categorie",
-            "consumes":["application/json"],
-            "produces":["application/json"],
-            "security":[{ "Bearer":[] }],
-            "parameters":[
-                {
-                    "name":"body",
-                    "in":"body",
-                    "required": true,
-                    "schema":{
-                        "type":"object",
-                        "properties":{
-                            "name":{"type":"string"},
-                            "featured":{"type":"boolean"},
-                            "category":{"type":"string"}, "image":{"type":"string"}
-                        }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mises a jour apportees"
+                    },
+                    "400": {
+                        "description": "Champs manquants ou types incorrects"
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
                     }
                 }
-            ],
-            "responses":{
-                "201":{"description":"sous categorie cree"},
-                "400":{"description":"champs manquants ou types incorrects"},
-                "404":{"description":"categorie specifiee non trouvee"},
-                "409":{"description":"une sous categorie porte deja ce nom dans la categorie specifiee"},
-                "500":{"description":"Une erreur est survenue...."}
             }
         },
-        "get":{
-            "tags":["subcategory"], "summary":"Liste des sous categories", "consumes":["application/json"], "produces":["application/json"],
-            "responses":{
-                "200":{"description":"Liste des sous categories retournee"},
-                "500":{"description":"Une erreur est survenue........"}
-            }
-        },
-        "put":{
-            "tags":["subcategory"], "summary":"Modifier une sous categorie", "consumes":["application/json"], "produces":["application/json"],
-            "security":[{ "Bearer":[] }],
-            "parameters":[
-                {
-                    "name":"body",
-                    "in":"body",
-                    "required": true,
-                    "schema":{
-                        "type":"object",
-                        "properties":{
-                            "id":{"type":"string"}, "name":{"type":"string"}, "featured":{"type":"boolean"}, "image":{"type":"string"}
-                        }
+        "/users": {
+            "get": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Recevoir la liste des utilisateurs enregistres",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste retournee"
+                    },
+                    "401": {
+                        "description": "Utilisateur non authentifie"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
                     }
                 }
-            ], "responses":{
-                "200":{"description":"sous categorie modifiee"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"une erreur est survenue...."}
             }
         },
-        "delete":{
-            "tags":["subcategory"], "summary":"Supprimer une sous categorie", "consumes":["application/json"], "produces":["application/json"],
-            "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
-                "type":"object", "properties":{
-                    "id":{"type":"string"}
+        "/order": {
+            "post": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Creer une commande",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "amount": {
+                                    "type": "number"
+                                },
+                                "cart": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string"
+                                            },
+                                            "quantity": {
+                                                "type": "number"
+                                            }
+                                        }
+                                    }
+                                },
+                                "promocodes": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "commande cree, lien de paiement retourne"
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
+                    }
                 }
-            } }],
-            "responses":{
-                "200":{"description":"sous categorie supprimee"},
-                "500":{"description":"une erreur est survenue......"}
-            }
-        }
-    },
-    "/item":{
-        "post":{
-            "tags":["item"], "summary":"Creer un item", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[] }],
-            "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
-                "type":"object", "properties":{
-                    "name":{"type":"string"}, "featured":{"type":"boolean"}, "sub_category":{"type":"string"}, "image":{"type":"string"}, "schema":{"type":"string"}
+            },
+            "get": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Recevoir la liste de mes commandes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste retournee"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
                 }
-            } }], "responses":{
-            "201":{"description":"Item cree"}, "400":{"description":"Mauvaise requete, champs manquants ou types incorrects"}, 
-            "404":{"description":"sous categorie non trouvee"}, "409":{"description":"un item porte deja le meme nom dans la sous categorie specifiee"}, "500":{"description":"erreur serveur..."}
             }
         },
-        "get":{
-            "tags":["item"], "summary":"Recevoir la liste des items", "consumes":["application/json"], "produces":["application/json"], 
-            "responses":{ "200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur..."} }
-        },
-        "put":{
-            "tags":["item"], "summary":"Modifier un item", "consumes":["application/json"], "produces":["application/json"], "security": [{ "Bearer":[] }],
-            "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
-                "type":"object", "properties":{
-                    "name":{"type":"string"}, "featured":{"type":"boolean"}, "id":{"type":"string"}, "image":{"type":"string"}
+        "/order/all": {
+            "get": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Recevoir la liste de toutes les commandes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste retournee"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
                 }
-            }}], "responses":{
-            "200":{"description":"modifications appliquees"}, "400":{"description":"champs manquants ou types incorrects"}, "404":{"description":"item non trouve"},
-            "409":{"description":"un item porte deja le meme nom dans la sous categorie"}, "500":{"description":"erreur serveur"}
             }
         },
-        "delete":{
-            "tags":["item"], "summary":"Supprimer un item", "consumes":["application/json"], "produces":["application/json"], "security": [{ "Bearer":[] }],
-            "parameters":[{ "name":"body", "in":"body", "required": true, "schema":{
-                "type":"object",
-                "properties":{ "id":{"type":"string"} }
-            }}], "responses":{
-            "200":{"description":"Item supprime"}, "404":{"description":"item non trouve"}, "500":{"description":"erreur server..."}
-            }
-        }
-    },
-    "/product":{
-        "post":{
-            "tags":["product"], "summary":"Creer un produit", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
-                "type":"object",
-                "properties":{
-                    "name":{"type":"string"}, "item":{"type":"string"}, "price":{"type":"number"}, "featured":{"type":"boolean"},
-                    "in_stock":{"type":"number"}, "is_in_discount":{"type":"boolean"}, "discount_price":{"type":"number"}, "pay_at_delivery":{"type":"boolean"},
-                    "fields":{"type":"string"}, "images":{"type":"array", "items":{"type":"string"}}
+        "/pay": {
+            "post": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Recevoir un lien de paiement",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "order": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lien retourne"
+                    },
+                    "400": {
+                        "description": "champs manquants ou types incorrects"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
                 }
-            }}], "responses":{
-            "201":{"description":"Produit cree"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}
             }
         },
-        "get":{
-            "tags":["product"], "summary":"Liste des produits", "produces":["application/json"],
-            "responses":{ "200":{"description":"Liste retourne"}, "500":{"description":"erreur serveur "} }
-        },
-        "put":{
-            "tags":["product"], "summary":"Modifier un produit", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[] }],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
-                "type":"object",
-                "properties":{
-                    "id":{"type":"string"}, "name":{"type":"string"}, "price":{"type":"number"}, "featured":{"type":"boolean"},
-                    "in_stock":{"type":"number"}, "is_in_discount":{"type":"boolean"}, "discount_price":{"type":"number"}, "pay_at_delivery":{"type":"boolean"},
-                    "fields":{"type":"string"}, "images":{"type":"array", "items":{ "type":"string" }}
+        "/category": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "Creer une categorie",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Category data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Nom de la categorie"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "categorie cree"
+                    },
+                    "400": {
+                        "description": "Mauvaise requete, types incorrects ou champs manquants"
+                    },
+                    "409": {
+                        "description": "Une categorie porte deja le nom "
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue. Reessayer ou contacter les devs"
+                    }
                 }
-            }}], "responses":{
-            "200":{"description":"modifications effectuees"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}
-            }
-        },
-        "delete":{
-            "tags":["product"], "summary":"Supprimer un produit", "consumes":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
-                "type":"object",
-                "properties":{
-                    "id":{"type":"string"}
+            },
+            "get": {
+                "tags": [
+                    "category"
+                ],
+                "summary": "Liste des categories",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Donnees retournees"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue. Reessayer ou contacter les devs"
+                    }
                 }
-            }}], "responses":{ "200":{"description":"Produit supprime"}, "500":{"description":"erreur serveur"} }
-        }
-    },
-    "/promocode":{
-        "post":{
-            "tags":["promocode"], "summary":"Creer un code promo", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{
-                "type":"object", "properties":{ "code":{"type":"string"}, "valid":{"type":"boolean"}, "conditions":{"type":"array", "items":{"type":"string"}}, 
-                "featured":{"type":"boolean"}, "expiration_date":{"type":"string"}, "discount":{"type":"number"}}
-            }}], "responses":{"201":{"description":"code cree"}, "400":{"description":"champs manquants ou types incorrects"}, "409":{"description":"ce code existe deja"}, "500":{"description":"erreur serveur"}}
-        },
-        "get":{
-            "tags":["promocode"], "summary":"Liste des code promo", "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}}
-        },
-        "delete":{
-            "tags":["promocode"], "summary":"Supprimer code promo", "produces":["application/json"], "consumes":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{"id":{"type":"string"}}}}], "responses":{
-                "200":{"description":"code supprime"}, "500":{"description":"erreur serveur"}
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "Modifier une categorie",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "categorie mise a jour"
+                    },
+                    "400": {
+                        "description": "Mauvaise requete, types incorrects ou champ id manquant"
+                    },
+                    "404": {
+                        "description": "categorie non trouvee"
+                    },
+                    "409": {
+                        "description": "duplicat, une categorie porte deja le meme nom"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue...."
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "Supprimer une categorie",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "categorie supprimee"
+                    },
+                    "404": {
+                        "description": "categorie non trouvee"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue...."
+                    }
+                }
             }
-        }
-    },
-    "/promocode/verify":{
-        "post":{
-            "tags":["promocode"], "summary":"Verifier si l'utilisateur peut utiliser le code promo", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{"type":"object", "properties":{
-                "code":{"type":"string"}, "amount":{"type":"number"},
-            }}}], "responses":{"200":{"description":"Code valide pour cette commande"}, "400":{"description":"champs manquants ou types incorrects"}, "500":{"description":"erreur serveur"}}
-        }
-    },
-    "/hook/momo_event":{
-        "post":{
-            "tags":["hook"], "summary":"Alerter lorsqu'un utilisateur effectue un payment depuis l'application mobile", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "parameters":[{ "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
-                "order_id":{"type":"string"}, "user_id":{"type":"string"}, "amount_paid":{"type":"number"}
-            }}}], "responses":{"200":{"description":"Informations mises à jour"}, "404":{"description":"Utilisateur ou commande non trouvée"}, "400":{"description":"Propriétés manquantes ou types incorrects."}, "500":{"description":"erreur serveur. contacter les devs"}}
-        }
-    },
-    "/hook/payment_event":{
-        "post":{
-            "tags":["hook"], "summary":"Gerer les payments par cinetpay", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}]
-        }
-    },
-    "/transaction":{
-        "get":{
-            "tags":["transaction"], "summary":"Liste des transactions du user connecte", "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}, "401":{"description":"Utilisateur non connecte"}}
-        }
-    },
-    "/transaction/all":{
-        "get":{
-            "tags":["transaction"], "summary":"Liste de toutes les transactions effectuees", "produces":["application/json"], "security":[{ "Bearer":[]}],
-            "responses":{"200":{"description":"Liste retournee"}, "500":{"description":"erreur serveur"}, "401":{"description":"Utilisateur non connecte ou non admin"} }
-        }
-    },
-    "/brand":{
-        "post":{
-            "tags":["brand"], "summary":"Creer une nouvelle marque", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}], "parameters":[{
-                "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
-                    "name":{ "type":"string" }, "featured":{ "type":"boolean"}, "image":{ "type":"string"}
-                } }
-            }]
         },
-        "get":{
-            "tags":["brand"], "summary":"Liste des marques", "produces":["application/json"], "responses":{ "200":{"description":"Liste retournee"}, "500":{"description":"Erreur serveur"}}
+        "/slider": {
+            "post": {
+                "summary": "Creer un slider",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "slider"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "big_text": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Slider cree"
+                    },
+                    "400": {
+                        "description": "Mauvaise requete: champs manquants ou types invalides"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue......."
+                    }
+                }
+            },
+            "get": {
+                "summary": "Recevoir la liste des sliders",
+                "tags": [
+                    "slider"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des sliders renvoyee"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue....."
+                    }
+                }
+            },
+            "put": {
+                "summary": "Modifier un slider",
+                "tags": [
+                    "slider"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "big_text": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                },
+                                "featured": {
+                                    "type": "string"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "slider modifie avec succes"
+                    },
+                    "400": {
+                        "description": "id manquant ou types incorrects"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue....."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "slider"
+                ],
+                "summary": "Supprimer un slider",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": "true",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "slider supprime avec succes"
+                    },
+                    "400": {
+                        "description": "id manquant ou de type incorrect"
+                    },
+                    "500": {
+                        "description": "une erreur est survenue........"
+                    }
+                }
+            }
         },
-        "put":{
-            "tags":["brand"], "summary":"Modifier une marque", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}],  "parameters":[{
-                "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
-                    "featured":{ "type":"boolean"}, "image":{"type":"string"}
-                } }
-            }]
+        "/subcategory": {
+            "post": {
+                "tags": [
+                    "subcategory"
+                ],
+                "summary": "Creer une sous categorie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "category": {
+                                    "type": "string"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "sous categorie cree"
+                    },
+                    "400": {
+                        "description": "champs manquants ou types incorrects"
+                    },
+                    "404": {
+                        "description": "categorie specifiee non trouvee"
+                    },
+                    "409": {
+                        "description": "une sous categorie porte deja ce nom dans la categorie specifiee"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue...."
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "subcategory"
+                ],
+                "summary": "Liste des sous categories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des sous categories retournee"
+                    },
+                    "500": {
+                        "description": "Une erreur est survenue........"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "subcategory"
+                ],
+                "summary": "Modifier une sous categorie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sous categorie modifiee"
+                    },
+                    "400": {
+                        "description": "champs manquants ou types incorrects"
+                    },
+                    "500": {
+                        "description": "une erreur est survenue...."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "subcategory"
+                ],
+                "summary": "Supprimer une sous categorie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sous categorie supprimee"
+                    },
+                    "500": {
+                        "description": "une erreur est survenue......"
+                    }
+                }
+            }
         },
-        "delete":{
-            "tags":["brand"], "summary":"Creer une nouvelle marque", "consumes":["application/json"], "produces":["application/json"], "security":[{ "Bearer":[]}]  "parameters":[{
-                "name":"body", "in":"body", "required":true, "schema":{ "type":"object", "properties":{
-                    "id":{ "type":"string"}
-                } }
-            }]
+        "/item": {
+            "post": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Creer un item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "sub_category": {
+                                    "type": "string"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Item cree"
+                    },
+                    "400": {
+                        "description": "Mauvaise requete, champs manquants ou types incorrects"
+                    },
+                    "404": {
+                        "description": "sous categorie non trouvee"
+                    },
+                    "409": {
+                        "description": "un item porte deja le meme nom dans la sous categorie specifiee"
+                    },
+                    "500": {
+                        "description": "erreur serveur..."
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Recevoir la liste des items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste retournee"
+                    },
+                    "500": {
+                        "description": "erreur serveur..."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Modifier un item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "id": {
+                                    "type": "string"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "modifications appliquees"
+                    },
+                    "400": {
+                        "description": "champs manquants ou types incorrects"
+                    },
+                    "404": {
+                        "description": "item non trouve"
+                    },
+                    "409": {
+                        "description": "un item porte deja le meme nom dans la sous categorie"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Supprimer un item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item supprime"
+                    },
+                    "404": {
+                        "description": "item non trouve"
+                    },
+                    "500": {
+                        "description": "erreur server..."
+                    }
+                }
+            }
+        },
+        "/product": {
+            "post": {
+                "tags": [
+                    "product"
+                ],
+                "summary": "Creer un produit",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "item": {
+                                    "type": "string"
+                                },
+                                "price": {
+                                    "type": "number"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "in_stock": {
+                                    "type": "number"
+                                },
+                                "is_in_discount": {
+                                    "type": "boolean"
+                                },
+                                "discount_price": {
+                                    "type": "number"
+                                },
+                                "pay_at_delivery": {
+                                    "type": "boolean"
+                                },
+                                "fields": {
+                                    "type": "string"
+                                },
+                                "images": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Produit cree"
+                    },
+                    "400": {
+                        "description": "champs manquants ou types incorrects"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "product"
+                ],
+                "summary": "Liste des produits",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste retourne"
+                    },
+                    "500": {
+                        "description": "erreur serveur "
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "product"
+                ],
+                "summary": "Modifier un produit",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "price": {
+                                    "type": "number"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "in_stock": {
+                                    "type": "number"
+                                },
+                                "is_in_discount": {
+                                    "type": "boolean"
+                                },
+                                "discount_price": {
+                                    "type": "number"
+                                },
+                                "pay_at_delivery": {
+                                    "type": "boolean"
+                                },
+                                "fields": {
+                                    "type": "string"
+                                },
+                                "images": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "modifications effectuees"
+                    },
+                    "400": {
+                        "description": "champs manquants ou types incorrects"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "product"
+                ],
+                "summary": "Supprimer un produit",
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Produit supprime"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
+                }
+            }
+        },
+        "/promocode": {
+            "post": {
+                "tags": [
+                    "promocode"
+                ],
+                "summary": "Creer un code promo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "string"
+                                },
+                                "valid": {
+                                    "type": "boolean"
+                                },
+                                "conditions": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "expiration_date": {
+                                    "type": "string"
+                                },
+                                "discount": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "code cree"
+                    },
+                    "400": {
+                        "description": "champs manquants ou types incorrects"
+                    },
+                    "409": {
+                        "description": "ce code existe deja"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "promocode"
+                ],
+                "summary": "Liste des code promo",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste retournee"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "promocode"
+                ],
+                "summary": "Supprimer code promo",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "code supprime"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
+                }
+            }
+        },
+        "/promocode/verify": {
+            "post": {
+                "tags": [
+                    "promocode"
+                ],
+                "summary": "Verifier si l'utilisateur peut utiliser le code promo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "string"
+                                },
+                                "amount": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Code valide pour cette commande"
+                    },
+                    "400": {
+                        "description": "champs manquants ou types incorrects"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    }
+                }
+            }
+        },
+        "/hook/momo_event": {
+            "post": {
+                "tags": [
+                    "hook"
+                ],
+                "summary": "Alerter lorsqu'un utilisateur effectue un payment depuis l'application mobile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "order_id": {
+                                    "type": "string"
+                                },
+                                "user_id": {
+                                    "type": "string"
+                                },
+                                "amount_paid": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Informations mises à jour"
+                    },
+                    "404": {
+                        "description": "Utilisateur ou commande non trouvée"
+                    },
+                    "400": {
+                        "description": "Propriétés manquantes ou types incorrects."
+                    },
+                    "500": {
+                        "description": "erreur serveur. contacter les devs"
+                    }
+                }
+            }
+        },
+        "/hook/payment_event": {
+            "post": {
+                "tags": [
+                    "hook"
+                ],
+                "summary": "Gerer les payments par cinetpay",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/transaction": {
+            "get": {
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Liste des transactions du user connecte",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste retournee"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    },
+                    "401": {
+                        "description": "Utilisateur non connecte"
+                    }
+                }
+            }
+        },
+        "/transaction/all": {
+            "get": {
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Liste de toutes les transactions effectuees",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste retournee"
+                    },
+                    "500": {
+                        "description": "erreur serveur"
+                    },
+                    "401": {
+                        "description": "Utilisateur non connecte ou non admin"
+                    }
+                }
+            }
+        },
+        "/brand": {
+            "post": {
+                "tags": [
+                    "brand"
+                ],
+                "summary": "Creer une nouvelle marque",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "get": {
+                "tags": [
+                    "brand"
+                ],
+                "summary": "Liste des marques",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste retournee"
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "brand"
+                ],
+                "summary": "Modifier une marque",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "featured": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "brand"
+                ],
+                "summary": "Creer une nouvelle marque",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
         }
     }
-  }
 }
