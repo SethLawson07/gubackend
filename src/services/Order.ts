@@ -10,7 +10,7 @@ export async function create(req: Request, res: Response) {
             cart: z.array(z.object({
                 id: z.string(),
                 quantity: z.number().int().positive()
-            }).required()),
+            })).nonempty(),
             promocodes: z.array(z.string()),
         })
         const validation_result = schema.safeParse(req.body)
