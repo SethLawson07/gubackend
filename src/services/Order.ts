@@ -49,7 +49,7 @@ export async function create(req: Request, res: Response) {
         })
         const response = await generate_payment_link(data.amount, current_user.id, order.id)
         console.log(response)
-        return res.status(200).send({ data: response, message: "Order created" })
+        return res.status(200).send({ data: response, order: order.id })
     } catch (err) {
         console.log(`Error while creating order ${err}`)
         return res.status(500).send()
