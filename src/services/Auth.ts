@@ -9,7 +9,8 @@ export async function register(req: Request, res: Response){
            email: z.string().email(),
            phone: z.string(),
            password: z.string(),
-           profile_picture: z.string()
+           profile_picture: z.string(),
+           role:z.string()
        }) 
        const validation_result = user_schema.safeParse(req.body)
        if(!validation_result.success){

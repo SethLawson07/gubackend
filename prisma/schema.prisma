@@ -19,6 +19,7 @@ model User {
     is_admin        Boolean
     finance_pro_id  String?
     is_verified     Boolean?
+    role String  //customer,agent,delivery_man,command_handler
 }
 
 model Category {
