@@ -2,21 +2,38 @@ import { Request, Response } from "express"
 import { prisma } from "../server"
 import { sign_token, hash_pwd, password_is_valid } from "../utils"
 import { z } from "zod"
+import { fromZodError } from 'zod-validation-error';
 
 export async function register(req: Request, res: Response) {
     try {
         const user_schema = z.object({
-            user_name: z.string(),
-            email: z.string().email(),
-            phone: z.string(),
-            password: z.string(),
-            profile_picture: z.string(),
+            user_name: z.string({
+                required_error: "Veillez renseigner le nom",
+                invalid_type_error: "le nom est une chaîne de caractères",
+            }),
+            email: z.string({
+                required_error: "Veillez renseigner l'email",
+                invalid_type_error: "l'email est une chaîne de caractères"
+            }).email("l'adresse email est invalide"),
+            phone: z.string({
+                required_error: "Veillez renseigner le num de téléphone",
+                invalid_type_error: "le num de téléphone est une chaîne de caractères"
+            }),
+            password: z.string({ 
+                required_error: "Veillez renseigner le mot de passe",
+                invalid_type_error: "le mot de passe est une chaîne de caractères",
+            }),
+            profile_picture: z.string(
+                { 
+                    required_error: "Veillez renseigner le photo de profil",
+                    invalid_type_error: "la photo de profil est une chaîne de caractères",
+                }
+            ),
         })
-        console.log(req.body);
-        
+
         const validation_result = user_schema.safeParse(req.body)
         if (!validation_result.success) {
-            return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
+            return res.status(400).send({ status:400,message: 'erreur de validation ',error: fromZodError(validation_result.error,{prefix:"erreur"}) })
         }
         let user_data = { ...validation_result.data, is_admin: false, role: 'customer' }
         const hashed_password = hash_pwd(user_data.password)
@@ -27,15 +44,15 @@ export async function register(req: Request, res: Response) {
                 email: user_data.email
             }
         })
-        if (potential_duplicate) return res.status(409).send({ message: "cet email est deja en cours d'utilisation" })
+        if (potential_duplicate) return res.status(409).send({  status: 409, error: "cet email est deja en cours d'utilisation", message: " email invalide" })
         await prisma.user.create({
             data: user_data
         })
         const token = sign_token(user_data.email, false)
-        return res.status(201).send({ token })
+        return res.status(201).send({ status: 201, error: '', message: 'compte créé avec success', data: { token } })
     } catch (err) {
         console.error(`Error while registering ${err}`)
-        return res.status(500).send()
+        return res.status(500).send({ status: 500, error: '', message: "erreur s'est produite", data: {} })
     }
 }
 
@@ -67,7 +84,7 @@ export async function change_password(req: Request, res: Response) {
         return res.status(200).send()
     } catch (err) {
         console.log(`Error while changing user password ${err}`);
-        return res.status(500).send()
+        return res.status(500).send({ status: 500, error: '', message: "erreur s'est produite", data: {} })
     }
 }
 
@@ -98,18 +115,24 @@ export async function set_financepro_id(req: Request, res: Response) {
         return res.status(200).send()
     } catch (err) {
         console.error(`Error while setting user Financepro id ${err}`);
-        return res.status(500).send()
+        return res.status(500).send({ status: 500, error: '', message: "erreur s'est produite", data: {} })
     }
 }
 
 export async function login(req: Request, res: Response) {
     try {
         const login_schema = z.object({
-            email: z.string().email(),
-            password: z.string(),
+            email: z.string({
+                required_error: "Veillez renseigner l'email  ",
+                invalid_type_error: "l'email est une chaîne de caractères"
+            }).email("l'adresse email est invalide"),
+            password: z.string({ 
+                required_error: "Veillez renseigner le mot de passe",
+                invalid_type_error: "le mot de passe est une chaîne de caractères",
+            }),
         })
         const validation_result = login_schema.safeParse(req.body)
-        if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
+        if (!validation_result.success) return res.status(400).send({ status: 400,message: 'erreur de validation ', error: fromZodError(validation_result.error,{prefix:"erreur"}).message, data: {} })
         const login_data = validation_result.data
         const targetted_user = await prisma.user.findUnique({
             where: {
@@ -117,12 +140,12 @@ export async function login(req: Request, res: Response) {
             }
         })
         if (!targetted_user) return res.status(404).send({ message: "Aucun utilisateur trouve pour cette adresse email" })
-        if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ message: "mot de passe incorrect" })
+        if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ status: 400, message: "Mot de passe incorrect", data: {} })
         const token = sign_token(login_data.email, targetted_user.is_admin)
-        return res.status(200).send({ token })
+        return res.status(200).send({ status: 400, message: "connecté avec succès", data: { token } })
     } catch (err) {
         console.error(`Error while loging in ${err}`)
-        return res.status(500).send()
+        return res.status(500).send({ status: 500, error: '', message: "une erreur s'est produite", data: {} })
     }
 }
 
@@ -147,7 +170,7 @@ export async function create_admin(req: Request, res: Response) {
         return res.status(201).send({ message: "Nouveau compte admin cree" })
     } catch (err) {
         console.error(`Error while creating admin ${err}`)
-        return res.status(500).send()
+        return res.status(500).send({ status: 500, error: '', message: "erreur s'est produite", data: {} })
     }
 }
 
@@ -168,7 +191,7 @@ export async function get_orders(req: Request, res: Response) {
         return res.status(200).send({ data })
     } catch (err) {
         console.error(`Error while getting list of user orders ${err}`)
-        return res.status(500).send()
+        return res.status(500).send({ status: 500, error: '', message: "erreur s'est produite", data: {} })
     }
 }
 
@@ -178,6 +201,6 @@ export async function get_all_users(_req: Request, res: Response) {
         return res.status(200).send({ data })
     } catch (err) {
         console.log(`Error while getting list of all users ${err}`)
-        return res.status(500).send()
+        return res.status(500).send({ status: 500, error: '', message: "erreur s'est produite", data: {} })
     }
 }
