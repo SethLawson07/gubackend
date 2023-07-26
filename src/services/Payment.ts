@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../server";
 import { z } from "zod";
 import { generate_payment_link } from "../utils";
+import { User } from "@prisma/client";
 
 export async function pay(req: Request, res: Response) {
     try {
@@ -11,10 +12,10 @@ export async function pay(req: Request, res: Response) {
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send()
         const { data } = validation_result
-        const { user } = req.body.user as { user: string }
+        const { user } = req.body.user as { user: User }
         const current_user = await prisma.user.findUnique({
             where:{
-                email: user
+                email: user.email as string
             }
         })
         if(!current_user) return res.status(401).send({ message:"Utilisateur non trouve, veuillez vous reconnecter"})

@@ -13,14 +13,14 @@ datasource db {
 model User {
     id              String   @id @default(auto()) @map("_id") @db.ObjectId()
     user_name       String
-    email           String   @unique
+    email           String?  @unique
     password        String
-    phone           String
+    phone           String   @unique
     profile_picture String
     is_admin        Boolean
     finance_pro_id  String?
     is_verified     Boolean?
-    role String  //customer,agent,delivery_man,command_handler
+    role            String //customer,agent,delivery_man,command_handler,admin
 }
 
 model Category {

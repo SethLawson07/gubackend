@@ -4,10 +4,10 @@ import { verify_token } from ".";
 export function Auth(req: Request, res: Response, next: NextFunction){
     try {
         const bearer = req.headers.authorization ?? ""        
-        console.log(bearer)
         if(bearer==="") return res.status(401).send({ message:"Utilisateur non authentifié" })
         const token_verification_result = verify_token(bearer)
         if(token_verification_result==="") return res.status(401).send({ message: "token invalide ou expiré" })
+        
         req.body.user = token_verification_result
         next()
     } catch (err) {
@@ -18,6 +18,8 @@ export function Auth(req: Request, res: Response, next: NextFunction){
 
 export function UserIsAdmin(req: Request, res: Response, next: NextFunction){
     try {
+        console.log(req.body.user);
+        
         const is_admin = req.body.user.is_admin ?? false
         if(!is_admin) return res.status(401).send({ message:"Seul un compte admin peut acceder a cette route" })
         next()

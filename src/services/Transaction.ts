@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../server";
+import { User } from "@prisma/client";
 
 export async function get_all(_req: Request, res: Response){
     try {
@@ -13,9 +14,9 @@ export async function get_all(_req: Request, res: Response){
 
 export async function get(req: Request, res: Response){
     try {
-        const { user } = req.body.user as { user: string}
+        const { user } = req.body.user as { user: User}
         const current_user = await prisma.user.findUnique({ where:{
-            email: user
+            email: user.email as string
         }})
         if(!current_user) return res.status(401).send()
         const data = await prisma.transaction.findMany({

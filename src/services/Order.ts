@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
 import { create_promocode_usage, generate_payment_link } from "../utils"
+import { User } from "@prisma/client";
 
 export async function create(req: Request, res: Response) {
     try {
@@ -16,10 +17,10 @@ export async function create(req: Request, res: Response) {
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
         const { data } = validation_result
-        const { user } = req.body.user as { user: string }
+        const { user } = req.body.user as { user: User }
         const current_user = await prisma.user.findUnique({
             where: {
-                email: user
+                email: user.email as string
             }
         })
         if (!current_user) return res.status(401).send()
@@ -33,7 +34,7 @@ export async function create(req: Request, res: Response) {
                     status: "PENDING"
                 }
             })
-            await create_promocode_usage(data.promocodes, user)
+            await create_promocode_usage(data.promocodes, user.email as string)
             return res.status(200).send()
         }
         const order = await prisma.order.create({
@@ -68,10 +69,10 @@ export async function get_all(_req: Request, res: Response) {
 
 export async function get_user_orders(req: Request, res: Response) {
     try {
-        const { user } = req.body.user as { user: string }
+        const { user } = req.body.user as { user: User }
         const targetted_user = await prisma.user.findUnique({
             where: {
-                email: user
+                email: user.email as string
             }
         })
         if (!targetted_user) return res.status(401).send()
@@ -95,10 +96,10 @@ export async function cancel_order(req: Request, res: Response) {
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send()
         const { id } = validation_result.data
-        const { user } = req.body.user as { user: string }
+        const { user } = req.body.user as { user: User }
         const current_user = await prisma.user.findUnique({
             where: {
-                email: user
+                email: user.email as string
             }
         })
         if (!current_user) return res.status(401).send()

@@ -3,6 +3,7 @@ import * as jwt from "jsonwebtoken"
 import { prisma } from "../server"
 import * as crypto from "crypto"
 import axios from "axios"
+import { User } from "@prisma/client"
 
 const JWT_TOKEN = "goodnessunitsupertoken"
 const salt_rounds = 10
@@ -16,15 +17,24 @@ export function password_is_valid( plain_text_password:string, db_hash:string ){
     return bcrypt.compareSync(plain_text_password, db_hash)
 }
 
-export function sign_token( user: string, is_admin: boolean ){
-   const token = jwt.sign({ user, is_admin }, JWT_TOKEN, { expiresIn:"31d" }) 
+type user_data = {
+    is_admin: boolean;
+    role: string;
+    user_name: string;
+    email?: string|null;
+    phone: string;
+    profile_picture: string;
+}
+
+export function sign_token( user:user_data  ){
+   const token = jwt.sign({ user }, JWT_TOKEN, { expiresIn:"31d" }) 
    return token
 }
 
 export function verify_token(token: string){
     try {
-        const { user, is_admin } = jwt.verify(token, JWT_TOKEN) as { user: string, is_admin: boolean }  
-        return { user, is_admin }
+        const { user } = jwt.verify(token, JWT_TOKEN) as { user: User } 
+        return { user, is_admin:user.is_admin }
     } catch (err) {
         console.error(`Error while verifying token ${err}`)
         return ""
