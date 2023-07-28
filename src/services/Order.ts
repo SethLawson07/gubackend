@@ -13,6 +13,13 @@ export async function create(req: Request, res: Response) {
                 quantity: z.number().int().positive()
             })).nonempty(),
             promocodes: z.array(z.string()),
+            delivery_type: z.string(),
+            delivery_address: z.object({
+                name:z.string(),
+                email:z.string().email(),
+                phone:z.string(),
+                map_address:z.string()
+            })
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
@@ -45,7 +52,10 @@ export async function create(req: Request, res: Response) {
                 paid: false,
                 status: "PENDING",
                 cart: data.cart,
-                amount: data.amount
+                amount: data.amount,
+                delivery_type:data.delivery_type,
+                delivery_address:data.delivery_address
+
             }
         })
         const response = await generate_payment_link(data.amount, current_user.id, order.id)
@@ -53,7 +63,7 @@ export async function create(req: Request, res: Response) {
         return res.status(200).send({ data: response, order: order.id })
     } catch (err) {
         console.log(`Error while creating order ${err}`)
-        return res.status(500).send()
+        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
     }
 }
 

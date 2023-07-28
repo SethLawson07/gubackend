@@ -68,6 +68,7 @@ model Product {
     brand           String   @db.ObjectId()
     brand_data      Brand    @relation(fields: [brand], references: [id])
     item_data       Item     @relation(fields: [item], references: [id])
+    color           String
 }
 
 model PromoCode {
@@ -88,15 +89,24 @@ model Slider {
     featured Boolean
 }
 
+type Delivery_address {
+    name        String
+    email       String
+    phone       String
+    map_address String
+}
+
 model Order {
-    id         String   @id @default(auto()) @map("_id") @db.ObjectId
-    user       String
-    amount     Float
-    remainder  Float
-    paid       Boolean
-    cart       Json
-    promocodes String[]
-    status     String
+    id               String           @id @default(auto()) @map("_id") @db.ObjectId
+    user             String
+    amount           Float
+    remainder        Float
+    paid             Boolean
+    cart             Json
+    promocodes       String[]
+    status           String
+    delivery_type    String
+    delivery_address Delivery_address
 }
 
 model Transaction {
@@ -118,4 +128,12 @@ model Brand {
     image    String
     featured Boolean
     Product  Product[]
+}
+
+model Services {
+    id            String @id @default(auto()) @map("_id") @db.ObjectId
+    name          String
+    description   String
+    picture       String
+    seller_number String
 }
