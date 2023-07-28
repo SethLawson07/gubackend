@@ -27,18 +27,16 @@ const app = express()
 
 export const prisma = new PrismaClient()
 
-app.use(cors({
-    origin: '*'
-}))
+app.use(cors())
 app.use(express.json())
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-    const content_type = req.get("content-type") ?? ""
-    if (content_type.startsWith("application/json")) {
+app.use((req: Request, res: Response, next: NextFunction)=>{
+    const content_type = req.get("content-type")??""
+    if(content_type.startsWith("application/json")){
         express.json()(req, res, next)
-    } else if (content_type.startsWith("application/x-www-form-urlencoded")) {
-        express.urlencoded({ extended: true })(req, res, next)
-    } else {
+    }else if(content_type.startsWith("application/x-www-form-urlencoded")) {
+        express.urlencoded({ extended: true})(req, res, next)
+    }else{
         next()
     }
 })
