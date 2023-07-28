@@ -8,28 +8,11 @@ import { User } from "@prisma/client";
 export async function register(req: Request, res: Response) {
     try {
         const user_schema = z.object({
-            user_name: z.string({
-                required_error: "Veillez renseigner le nom",
-                invalid_type_error: "le nom est une chaîne de caractères",
-            }),
-            email: z.string({
-                required_error: "Veillez renseigner l'email",
-                invalid_type_error: "l'email est une chaîne de caractères"
-            }).email("l'adresse email est invalide"),
-            phone: z.string({
-                required_error: "Veillez renseigner le num de téléphone",
-                invalid_type_error: "le num de téléphone est une chaîne de caractères"
-            }),
-            password: z.string({
-                required_error: "Veillez renseigner le mot de passe",
-                invalid_type_error: "le mot de passe est une chaîne de caractères",
-            }),
-            profile_picture: z.string(
-                {
-                    required_error: "Veillez renseigner le photo de profil",
-                    invalid_type_error: "la photo de profil est une chaîne de caractères",
-                }
-            ),
+            user_name: z.string().min(5, "Veuillez indiquez un nom complet").nonempty("Veuillez renseigner votre nom complet"),
+            email: z.string().email("L'adresse email est invalide"),
+            phone: z.string().min(8, "Numéro de téléphone invalide").max(8, "Numéro de téléphone invalide").startsWith('9' || '7', "Numéro de téléphone invalide").nonempty("Veuillez renseigner un numéro de téléphone"),
+            password: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
+            profile_picture: z.string(),
         })
 
         let user_schema_partial = user_schema.partial({
@@ -37,7 +20,8 @@ export async function register(req: Request, res: Response) {
         })
         const validation_result = user_schema_partial.safeParse(req.body)
         if (!validation_result.success) {
-            return res.status(400).send({ status: 400, message: fromZodError(validation_result.error, { prefix: "erreur" }).message, error: true })
+            console.log(fromZodError(validation_result.error));
+            return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
         }
         let user_data = { ...validation_result.data, is_admin: false, role: 'customer' }
         const hashed_password = hash_pwd(user_data.password)
@@ -46,27 +30,22 @@ export async function register(req: Request, res: Response) {
         const potential_duplicate = await prisma.user.findMany({
             where: {
                 OR: [
-                    {
-                        email: user_data.email,
-                    },
-                    {
-                        phone: user_data.phone
-                    }
+                    { email: user_data.email },
+                    { phone: user_data.phone }
                 ]
-
             }
-        });
-           
-        if (potential_duplicate.length) return res.status(409).send({  status: 409, error: true , message: "cet email ou ce num de téléphone est deja en cours d'utilisation" })
+        })
+
+        if (potential_duplicate.length) return res.status(409).send({ status: 409, error: true, message: "Un autre utilisateur possède les mêmes informations" })
         await prisma.user.create({
             data: user_data
         })
 
         const token = sign_token(user_data)
-        return res.status(201).send({ status: 201, error: false, message: 'compte créé avec success', data: { token } })
+        return res.status(201).send({ status: 201, error: false, message: 'Votre compte a été créé', data: { token } })
     } catch (err) {
         console.error(`Error while registering ${err}`)
-        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
     }
 }
 
