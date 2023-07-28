@@ -15,12 +15,13 @@ export async function create(req: Request, res: Response) {
             promocodes: z.array(z.string()),
             delivery_type: z.string(),
             delivery_address: z.object({
-                name:z.string(),
-                email:z.string().email(),
-                phone:z.string(),
-                map_address:z.string()
+                name: z.string(),
+                email: z.string().email(),
+                phone: z.string(),
+                map_address: z.string()
             })
         })
+
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
         const { data } = validation_result
@@ -53,8 +54,8 @@ export async function create(req: Request, res: Response) {
                 status: "PENDING",
                 cart: data.cart,
                 amount: data.amount,
-                delivery_type:data.delivery_type,
-                delivery_address:data.delivery_address
+                delivery_type: data.delivery_type,
+                delivery_address: data.delivery_address
 
             }
         })
