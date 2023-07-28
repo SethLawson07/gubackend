@@ -68,7 +68,7 @@ model Product {
     brand           String   @db.ObjectId()
     brand_data      Brand    @relation(fields: [brand], references: [id])
     item_data       Item     @relation(fields: [item], references: [id])
-    color           String
+    // color           String
 }
 
 model PromoCode {
