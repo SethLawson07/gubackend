@@ -55,8 +55,8 @@ export async function register(req: Request, res: Response) {
                 ]
                 
             }
-        })     
-        
+        });
+           
         if (potential_duplicate.length) return res.status(409).send({  status: 409, error: true , message: "cet email ou ce num de téléphone est deja en cours d'utilisation" })
         await prisma.user.create({
             data: user_data
