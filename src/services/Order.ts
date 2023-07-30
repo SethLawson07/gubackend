@@ -26,13 +26,22 @@ export async function create(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
         const { data } = validation_result
         const { user } = req.body.user as { user: User }
-        const current_user = await prisma.user.findUnique({
+        const current_user = await prisma.user.findMany({
             where: {
-                email: user.email as string
+                OR: [
+                    { email: user.email, },
+                    { phone: user.phone }
+                ]
             }
         })
+        // const current_user = await prisma.user.findUnique({
+        //     where: {
+        //         email: user.email as string
+        //     }
+        // })
         if (!current_user) return res.status(401).send()
-        if (current_user.is_verified) {
+        if (current_user) {
+            const userData = current_user[0];
             const order = await prisma.order.create({
                 // data: {
                 //     user: current_user.id,
@@ -42,7 +51,7 @@ export async function create(req: Request, res: Response) {
                 //     status: "PENDING"
                 // }
                 data: {
-                    user: current_user.id,
+                    user: userData.id,
                     remainder: data.amount,
                     promocodes: data.promocodes,
                     paid: false,
