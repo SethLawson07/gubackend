@@ -115,35 +115,23 @@ export async function set_financepro_id(req: Request, res: Response) {
 export async function login(req: Request, res: Response) {
     try {
         const login_schema = z.object({
-            email_or_phone: z.string({
-                required_error: "Veillez renseigner l'email ou le num de téléphone ",
-                invalid_type_error: "l'email ou le num de téléphone est une chaîne de caractères"
-            }),
-            password: z.string({
-                required_error: "Veillez renseigner le mot de passe",
-                invalid_type_error: "le mot de passe est une chaîne de caractères",
-            }),
+            email_or_phone: z.string(),
+            password: z.string(),
         })
         const validation_result = login_schema.safeParse(req.body)
-        if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error, { prefix: "erreur" }).message, data: {} })
+        if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message, data: {} })
         const login_data = validation_result.data
         const targetted_users = await prisma.user.findMany({
             where: {
                 OR: [
-                    {
-                        email: login_data.email_or_phone,
-                    },
-                    {
-                        phone: login_data.email_or_phone
-                    }
+                    { email: login_data.email_or_phone, },
+                    { phone: login_data.email_or_phone }
                 ]
-
             }
         })
         if (!targetted_users.length || targetted_users.length > 1) return res.status(404).send({ status: 404, error: true, message: "Aucun utilisateur trouve pour cette adresse email" })
         let targetted_user = targetted_users[0]
-
-
+ 
         if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ status: 400, error: true, message: "Mot de passe incorrect", data: {} })
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user
         const token = sign_token({ ...user_data })

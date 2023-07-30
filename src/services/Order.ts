@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
 import { create_promocode_usage, generate_payment_link } from "../utils"
-import { User } from "@prisma/client";
+import { User, Order } from "@prisma/client";
 
 export async function create(req: Request, res: Response) {
     try {
@@ -33,35 +33,46 @@ export async function create(req: Request, res: Response) {
         })
         if (!current_user) return res.status(401).send()
         if (current_user.is_verified) {
-            await prisma.order.create({
+            const order = await prisma.order.create({
+                // data: {
+                //     user: current_user.id,
+                //     ...data,
+                //     remainder: data.amount,
+                //     paid: false,
+                //     status: "PENDING"
+                // }
                 data: {
                     user: current_user.id,
-                    ...data,
                     remainder: data.amount,
+                    promocodes: data.promocodes,
                     paid: false,
-                    status: "PENDING"
+                    status: "PENDING",
+                    cart: data.cart,
+                    amount: data.amount,
+                    delivery_type: data.delivery_type,
+                    delivery_address: data.delivery_address
+
                 }
             })
+            const response = await generate_payment_link(data.amount, current_user.id, order.id)
             await create_promocode_usage(data.promocodes, user.email as string)
-            return res.status(200).send()
+            // return res.status(200).send()
+            return res.status(200).send({ data: response, order: order.id })
         }
-        const order = await prisma.order.create({
-            data: {
-                user: current_user.id,
-                remainder: data.amount,
-                promocodes: data.promocodes,
-                paid: false,
-                status: "PENDING",
-                cart: data.cart,
-                amount: data.amount,
-                delivery_type: data.delivery_type,
-                delivery_address: data.delivery_address
+        // const order = await prisma.order.create({
+        //     data: {
+        //         user: current_user.id,
+        //         remainder: data.amount,
+        //         promocodes: data.promocodes,
+        //         paid: false,
+        //         status: "PENDING",
+        //         cart: data.cart,
+        //         amount: data.amount,
+        //         delivery_type: data.delivery_type,
+        //         delivery_address: data.delivery_address
 
-            }
-        })
-        const response = await generate_payment_link(data.amount, current_user.id, order.id)
-        console.log(response)
-        return res.status(200).send({ data: response, order: order.id })
+        //     }
+        // })
     } catch (err) {
         console.log(`Error while creating order ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
