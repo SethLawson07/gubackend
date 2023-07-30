@@ -63,7 +63,7 @@ export async function create(req: Request, res: Response) {
 
                 }
             })
-            const response = await generate_payment_link(data.amount, current_user.id, order.id)
+            const response = await generate_payment_link(data.amount, userData.id, order.id)
             await create_promocode_usage(data.promocodes, user.email as string)
             // return res.status(200).send()
             return res.status(200).send({ data: response, order: order.id })
