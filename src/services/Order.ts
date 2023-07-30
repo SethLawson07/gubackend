@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
 import { create_promocode_usage, generate_payment_link } from "../utils"
-import { User, Order } from "@prisma/client";
+import { User } from "@prisma/client";
 
 export async function create(req: Request, res: Response) {
     try {
@@ -58,6 +58,8 @@ export async function create(req: Request, res: Response) {
             await create_promocode_usage(data.promocodes, user.email as string)
             // return res.status(200).send()
             return res.status(200).send({ data: response, order: order.id })
+        } else {
+            return res.status(200).send({ error: true, message: "Utilisateur non authentifié" })
         }
         // const order = await prisma.order.create({
         //     data: {
