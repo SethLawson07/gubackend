@@ -8,36 +8,20 @@ import { User } from "@prisma/client";
 export async function register(req: Request, res: Response) {
     try {
         const user_schema = z.object({
-            user_name: z.string({
-                required_error: "Veillez renseigner le nom",
-                invalid_type_error: "le nom est une chaîne de caractères",
-            }),
-            email: z.string({
-                required_error: "Veillez renseigner l'email",
-                invalid_type_error: "l'email est une chaîne de caractères"
-            }).email("l'adresse email est invalide"),
-            phone: z.string({
-                required_error: "Veillez renseigner le num de téléphone",
-                invalid_type_error: "le num de téléphone est une chaîne de caractères"
-            }),
-            password: z.string({ 
-                required_error: "Veillez renseigner le mot de passe",
-                invalid_type_error: "le mot de passe est une chaîne de caractères",
-            }),
-            profile_picture: z.string(
-                { 
-                    required_error: "Veillez renseigner le photo de profil",
-                    invalid_type_error: "la photo de profil est une chaîne de caractères",
-                }
-            ),
+            user_name: z.string().min(5, "Veuillez indiquez un nom complet").nonempty("Veuillez renseigner votre nom complet"),
+            email: z.string().email("L'adresse email est invalide"),
+            phone: z.string().min(8, "Numéro de téléphone invalide").max(8, "Numéro de téléphone invalide").startsWith('9' || '7', "Numéro de téléphone invalide").nonempty("Veuillez renseigner un numéro de téléphone"),
+            password: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
+            profile_picture: z.string(),
         })
 
-         let user_schema_partial = user_schema.partial({
-            email:true
-        }) 
+        let user_schema_partial = user_schema.partial({
+            email: true
+        })
         const validation_result = user_schema_partial.safeParse(req.body)
         if (!validation_result.success) {
-            return res.status(400).send({ status:400,message: fromZodError(validation_result.error,{prefix:"erreur"}).message ,error: true})
+            console.log(fromZodError(validation_result.error));
+            return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
         }
         let user_data = { ...validation_result.data, is_admin: false, role: 'customer' }
         const hashed_password = hash_pwd(user_data.password)
@@ -45,28 +29,23 @@ export async function register(req: Request, res: Response) {
         user_data.profile_picture = user_data.profile_picture ?? ""
         const potential_duplicate = await prisma.user.findMany({
             where: {
-                OR:[
-                    {
-                        email: user_data.email,
-                    },
-                    {
-                        phone: user_data.phone
-                    }
+                OR: [
+                    { email: user_data.email },
+                    { phone: user_data.phone }
                 ]
-                
             }
-        });
-           
-        if (potential_duplicate.length) return res.status(409).send({  status: 409, error: true , message: "cet email ou ce num de téléphone est deja en cours d'utilisation" })
+        })
+
+        if (potential_duplicate.length) return res.status(409).send({ status: 409, error: true, message: "Un autre utilisateur possède les mêmes informations" })
         await prisma.user.create({
             data: user_data
         })
-        
+
         const token = sign_token(user_data)
-        return res.status(201).send({ status: 201, error: false, message: 'compte créé avec success', data: { token } })
+        return res.status(201).send({ status: 201, error: false, message: 'Votre compte a été créé', data: { token } })
     } catch (err) {
         console.error(`Error while registering ${err}`)
-        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
     }
 }
 
@@ -77,16 +56,16 @@ export async function change_password(req: Request, res: Response) {
             new: z.string()
         })
         const validation_result = schema.safeParse(req.body)
-        if (!validation_result.success) return res.status(400).send({ status: 400, error: true , message: fromZodError(validation_result.error,{prefix:"erreur"}).message  })
+        if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error, { prefix: "erreur" }).message })
         const { data } = validation_result
-        const {user:current_user }= req.body.user as {user:User}
+        const { user: current_user } = req.body.user as { user: User }
         const targetted_user = await prisma.user.findUnique({
             where: {
                 email: current_user.email as string
             }
         })
-        if (!targetted_user) return res.status(404).send({status: 404, error: true , message: "Utilisateur non trouve" })
-        if (!password_is_valid(data.old, targetted_user.password)) return res.status(400).send({ status: 404, error: false , message: "Mot de passe invalide" })
+        if (!targetted_user) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouve" })
+        if (!password_is_valid(data.old, targetted_user.password)) return res.status(400).send({ status: 404, error: false, message: "Mot de passe invalide" })
         await prisma.user.update({
             where: {
                 email: targetted_user.email as string
@@ -109,14 +88,14 @@ export async function set_financepro_id(req: Request, res: Response) {
             user_mail: z.string()
         })
         const validation_result = schema.safeParse(req.body)
-        if (!validation_result.success) return res.status(400).send({ status: 400, error: true ,message: JSON.parse(validation_result.error.message) })
+        if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: JSON.parse(validation_result.error.message) })
         const { id, user_mail } = validation_result.data
         const targetted_user = await prisma.user.findUnique({
             where: {
                 email: user_mail
             }
         })
-        if (!targetted_user) return res.status(400).send({status: 400, error: true , message: "Utilisateur non  trouve" })
+        if (!targetted_user) return res.status(400).send({ status: 400, error: true, message: "Utilisateur non  trouve" })
         await prisma.user.update({
             where: {
                 id: targetted_user.id
@@ -126,7 +105,7 @@ export async function set_financepro_id(req: Request, res: Response) {
                 finance_pro_id: id
             }
         })
-        return res.status(200).send({status: 200, error: false , message:"sucess"})
+        return res.status(200).send({ status: 200, error: false, message: "sucess" })
     } catch (err) {
         console.error(`Error while setting user Financepro id ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
@@ -140,38 +119,38 @@ export async function login(req: Request, res: Response) {
                 required_error: "Veillez renseigner l'email ou le num de téléphone ",
                 invalid_type_error: "l'email ou le num de téléphone est une chaîne de caractères"
             }),
-            password: z.string({ 
+            password: z.string({
                 required_error: "Veillez renseigner le mot de passe",
                 invalid_type_error: "le mot de passe est une chaîne de caractères",
             }),
         })
         const validation_result = login_schema.safeParse(req.body)
-        if (!validation_result.success) return res.status(400).send({ status: 400,error: true, message: fromZodError(validation_result.error,{prefix:"erreur"}).message, data: {} })
+        if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error, { prefix: "erreur" }).message, data: {} })
         const login_data = validation_result.data
         const targetted_users = await prisma.user.findMany({
             where: {
-                OR:[
+                OR: [
                     {
-                        email: login_data.email_or_phone ,
+                        email: login_data.email_or_phone,
                     },
                     {
-                        phone: login_data.email_or_phone 
+                        phone: login_data.email_or_phone
                     }
                 ]
-                
+
             }
-        })  
-        if (!targetted_users.length || targetted_users.length>1) return res.status(404).send({status: 404, error: true , message: "Aucun utilisateur trouve pour cette adresse email" })
+        })
+        if (!targetted_users.length || targetted_users.length > 1) return res.status(404).send({ status: 404, error: true, message: "Aucun utilisateur trouve pour cette adresse email" })
         let targetted_user = targetted_users[0]
-        
-        
-        if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ status: 400, error:true, message: "Mot de passe incorrect", data: {} })
-        let {password, finance_pro_id ,is_verified ,...user_data} =  targetted_user
-        const token = sign_token( {...user_data})
-        return res.status(200).send({ status: 200, error:false, message: "connecté avec succès", data: { token , user_name:targetted_user.user_name ,email: targetted_user.email } })
+
+
+        if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ status: 400, error: true, message: "Mot de passe incorrect", data: {} })
+        let { password, finance_pro_id, is_verified, ...user_data } = targetted_user
+        const token = sign_token({ ...user_data })
+        return res.status(200).send({ status: 200, error: false, message: "connecté avec succès", data: { token, user_name: targetted_user.user_name, email: targetted_user.email } })
     } catch (err) {
         console.error(`Error while loging in ${err}`)
-        return res.status(500).send({ status: 500, error:true, message: "une erreur s'est produite", data: {} })
+        return res.status(500).send({ status: 500, error: true, message: "une erreur s'est produite", data: {} })
     }
 }
 
@@ -182,24 +161,24 @@ export async function create_admin(req: Request, res: Response) {
                 required_error: "Veillez renseigner l'email",
                 invalid_type_error: "l'email est une chaîne de caractères"
             }).email("l'adresse email est invalide"),
-            password: z.string({ 
+            password: z.string({
                 required_error: "Veillez renseigner le mot de passe",
                 invalid_type_error: "le mot de passe est une chaîne de caractères",
             })
         })
         const validation_result = data_schema.safeParse(req.body)
-        if (!validation_result.success) return res.status(400).send({ status:400,error:true, message: fromZodError(validation_result.error,{prefix:"erreur"}).message  })
-        const admin_data = { ...validation_result.data, password: hash_pwd(validation_result.data.password),user_name:"",role:'admin',profile_picture: "", is_admin: true, phone: "" }
+        if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error, { prefix: "erreur" }).message })
+        const admin_data = { ...validation_result.data, password: hash_pwd(validation_result.data.password), user_name: "", role: 'admin', profile_picture: "", is_admin: true, phone: "" }
         const potential_duplicate = await prisma.user.findUnique({
             where: {
                 email: admin_data.email
             }
         })
-        if (potential_duplicate) return res.status(409).send({status: 409, error: true , message: "Email deja en cours d'utilisation" })
+        if (potential_duplicate) return res.status(409).send({ status: 409, error: true, message: "Email deja en cours d'utilisation" })
         await prisma.user.create({
             data: admin_data
         })
-        return res.status(201).send({status: 201, error: false , message: "Nouveau compte admin crée" })
+        return res.status(201).send({ status: 201, error: false, message: "Nouveau compte admin crée" })
     } catch (err) {
         console.error(`Error while creating admin ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
@@ -211,28 +190,28 @@ export async function get_orders(req: Request, res: Response) {
         const { user } = req.body.user as { user: User }
         const current_user = await prisma.user.findUnique({
             where: {
-                email:user.email as string
+                email: user.email as string
             }
         })
-        if (!current_user) return res.status(401).send({ status: 401, error:true,message:'pas autorisé' })
+        if (!current_user) return res.status(401).send({ status: 401, error: true, message: 'pas autorisé' })
         const data = await prisma.order.findMany({
             where: {
                 user: current_user.id
             }
         })
-        return res.status(200).send({status:200,error:false, data:{orders:data} })
+        return res.status(200).send({ status: 200, error: false, data: { orders: data } })
     } catch (err) {
         console.error(`Error while getting list of user orders ${err}`)
-        return res.status(500).send({ status:500,error: true, message: "erreur s'est produite", data: {} })
+        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
     }
 }
 
 export async function get_all_users(_req: Request, res: Response) {
     try {
         const data = await prisma.user.findMany()
-        return res.status(200).send({status: 200,error: false, data:{users:data} })
+        return res.status(200).send({ status: 200, error: false, data: { users: data } })
     } catch (err) {
         console.log(`Error while getting list of all users ${err}`)
-        return res.status(500).send({ status: 500, error:true, message: "erreur s'est produite", data: {} })
+        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
     }
 }
