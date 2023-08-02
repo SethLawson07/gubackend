@@ -13,6 +13,7 @@ export async function register(req: Request, res: Response) {
             phone: z.string().min(8, "Numéro de téléphone invalide").max(8, "Numéro de téléphone invalide").startsWith('9' || '7', "Numéro de téléphone invalide").nonempty("Veuillez renseigner un numéro de téléphone"),
             password: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
             profile_picture: z.string(),
+            role: z.string().default('customer')
         })
 
         let user_schema_partial = user_schema.partial({
@@ -23,7 +24,7 @@ export async function register(req: Request, res: Response) {
             console.log(fromZodError(validation_result.error));
             return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
         }
-        let user_data = { ...validation_result.data, is_admin: false, role: 'customer' }
+        let user_data = { ...validation_result.data, is_admin: false }
         const hashed_password = hash_pwd(user_data.password)
         user_data.password = hashed_password
         user_data.profile_picture = user_data.profile_picture ?? ""

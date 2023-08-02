@@ -9,7 +9,7 @@ export async function create(req:Request,res:Response){
         const schema = z.object({
           name: z.string(),
           description: z.string(),
-          picture: z.string(),
+          pictures: z.array(z.string()),
           seller_number:z.string()
         })
         const validation_result = schema.safeParse(req.body)
