@@ -1,10 +1,12 @@
 import { Router } from "express"
-import { register, login, create_admin, get_orders, change_password, set_financepro_id } from "../../services/Auth"
+import { register, adduser, login, create_admin, get_orders, change_password, set_financepro_id } from "../../services/Auth"
 import { Auth, UserIsAdmin } from "../../utils/middlewares"
 
 const router = Router()
 
 router.route("/register").post( register )
+
+router.route("/adduser").post( Auth, UserIsAdmin, adduser )
 
 router.route("/login").post( login )
 
