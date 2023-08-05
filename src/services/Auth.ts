@@ -191,7 +191,7 @@ export async function login(req: Request, res: Response) {
         if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ status: 400, error: true, message: "Mot de passe incorrect", data: {} })
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user
         const token = sign_token({ ...user_data })
-        return res.status(200).send({ status: 200, error: false, message: "connecté avec succès", data: { token, user_name: targetted_user.user_name, email: targetted_user.email, role:targetted_user.role , finance_pro_id:targetted_user.finance_pro_id } })
+        return res.status(200).send({ status: 200, error: false, message: "connecté avec succès", data: { token, user_name: targetted_user.user_name, email: targetted_user.email, role:targetted_user.role , finance_pro_id:targetted_user.finance_pro_id, is_verified:targetted_user.is_verified} })
     } catch (err) {
         console.error(`Error while loging in ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "une erreur s'est produite", data: {} })
