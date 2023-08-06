@@ -4,6 +4,8 @@ import { prisma } from "../server"
 import * as crypto from "crypto"
 import axios from "axios"
 import { User } from "@prisma/client"
+import { ObjectId } from "bson";
+
 
 const JWT_TOKEN = "goodnessunitsupertoken"
 const salt_rounds = 10
@@ -79,5 +81,10 @@ export async function create_promocode_usage( promocodes: string[], user: string
            }
        })
    })
+}
+
+export function geneObjectId(){
+    const id = new ObjectId()
+    return id.toString()
 }
 
