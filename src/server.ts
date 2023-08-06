@@ -20,6 +20,8 @@ import users from "./routes/users"
 import hook from "./routes/hook"
 import transaction from "./routes/transactions"
 import brand from "./routes/brand"
+import service from "./routes/service"
+import book from "./routes/Book"
 
 const PORT = process.env.PORT || 5000
 
@@ -59,7 +61,8 @@ app.use("/users", users)
 app.use("/hook", hook)
 app.use("/transaction", transaction)
 app.use("/brand", brand)
-
+app.use("/service",service)
+app.use('/book',book)
 app.get("/health", (_req: Request, res: Response) => {
     return res.status(200).send()
 })
