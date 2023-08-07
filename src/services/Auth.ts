@@ -173,7 +173,7 @@ export async function login(req: Request, res: Response) {
                 ]
             }
         })
-        if (!targetted_users.length || targetted_users.length > 1 || !password_is_valid(login_data.password, targetted_users[0].password)) return res.status(404).send({ status: 404, error: true, message: "Identifiants incorrects" })
+        if (!targetted_users.length || targetted_users.length > 1 || !password_is_valid(login_data.password, targetted_users[0].password)) return res.status(404).send({ status: 404, error: true, message: "Identifiants incorrects", data: {} })
         let targetted_user = targetted_users[0]
 
 
