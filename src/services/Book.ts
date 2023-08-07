@@ -51,14 +51,14 @@ export async function activeBook(req: Request, res: Response) {
         if (!validation_result.success) {
             return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
         }
-        let {book_id} = validation_result.data
+        let { book_id } = validation_result.data
 
         let data = await prisma.book.update({
-            where:{
-                id:book_id
+            where: {
+                id: book_id
             },
-            data:{
-                status:"opened"
+            data: {
+                status: "opened"
             }
         })
 
@@ -74,21 +74,108 @@ export async function activeBook(req: Request, res: Response) {
     }
 }
 
-export async function activeSheet(req: Request, res: Response){
+export async function activeSheet(req: Request, res: Response) {
     try {
         let active_data_schema = z.object({
-            openedAt:z.string().regex(new RegExp(/^\d{4}-\d{2}-\d{2}$/), 'la date doit etre dans le format 1987-12-24 '),
-            book_id:z.string(),
-            sheet_id:z.string(),
-            bet:z.number().min(300)
+            openedAt: z.string().regex(new RegExp(/^\d{4}-\d{2}-\d{2}$/), 'la date doit etre dans le format 1987-12-24 '),
+            book_id: z.string(),
+            sheet_id: z.string(),
+            bet: z.number().min(300),
+            sheet: z.object({
+                id: z.string(),
+                createdAt: z.string(),
+                openedAt: z.optional(z.date()).nullable(),
+                index: z.number(),
+                cases: z.array(z.object({
+                    id:z.string(),
+                    index: z.number(),
+                    contributionStatus: z.string()
+                })),
+                bet: z.number().min(300),
+                status: z.string()
+            })
         })
         let validation_result = active_data_schema.safeParse(req.body)
         if (!validation_result.success) {
             return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
         }
-
-        return   res.status(200).send({ status: 200, error: false, message: "pas encore activer", data: {} })
+        let { openedAt, book_id, sheet_id, bet ,sheet} = validation_result.data
+        sheet.openedAt = new Date(openedAt)
+        sheet.status = "opened"
+        sheet.bet = bet        
         
+        
+        await prisma.book.update({
+            where: { id: book_id },
+            data: {
+                sheets: {
+                     deleteMany: {
+                        where: {
+                            id: {
+                                in:[sheet_id]
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        const updated = await prisma.book.update({
+            where: { id: book_id },
+            data: {
+                sheets: {
+                    push: sheet
+
+                }
+            }
+        })
+        updated.sheets.sort((a,b)=> a.index - b.index)
+        return res.status(200).send({ status: 200, error: false, message: "activer avec sucess", data: {
+            book:updated||{}
+        } })
+
+    } catch (err) {
+        console.error(`Error while registering ${err}`)
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
+export async function allBook(req: Request, res: Response){
+    try {
+        const books = await prisma.book.findMany()
+        books.map((book)=>{
+          return  book.sheets.sort((a,b)=> a.index - b.index)
+        })
+        return res.status(200).send({ status: 200, error: false, message: "pas encore activer", data: {
+            books
+        } })
+    } catch (err) {
+        console.error(`Error while registering ${err}`)
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
+export async function bookById(req: Request, res: Response){
+    try {
+        const data_schema = z.object({
+            book_id:z.string()
+        })
+        let validation_result = data_schema.safeParse(req.body)
+        if (!validation_result.success) {
+            return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
+        }
+        let {book_id} = validation_result.data
+        const books = await prisma.book.findMany({
+            where:{
+                id:book_id
+            }
+        })
+        books.map((book)=>{
+          return  book.sheets.sort((a,b)=> a.index - b.index)
+        })
+        return res.status(200).send({ status: 200, error: false, message: "sucess", data: {
+            books
+        } })
     } catch (err) {
         console.error(`Error while registering ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
