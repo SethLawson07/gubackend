@@ -27,7 +27,7 @@ model User {
     user_contributions           Contribution[] @relation(name: "user_contributions")
     admin_contributions_validate Contribution[] @relation(name: "admin_contributions_validate")
     agent_contributions_validate Contribution[] @relation(name: "agent_contributions_validate")
-    books Book[] @relation(name: "user book")
+    books                        Book[]         @relation(name: "user book")
 }
 
 model Category {
@@ -153,7 +153,7 @@ type Case {
 }
 
 type Sheet {
-    id        String   @map("_id") @db.ObjectId
+    id        String    @map("_id") @db.ObjectId
     createdAt DateTime
     openedAt  DateTime?
     index     Int // valeurs possibles [1-12]
@@ -164,9 +164,9 @@ type Sheet {
 
 model Book {
     id            String         @id @default(auto()) @map("_id") @db.ObjectId
-    customer         User        @relation(name: "user book", fields: [customerId], references: [id])
-    customerId       String      @db.ObjectId
-    bookNumber     String 
+    customer      User           @relation(name: "user book", fields: [customerId], references: [id])
+    customerId    String         @db.ObjectId
+    bookNumber    String
     createdAt     DateTime
     sheets        Sheet[]
     status        String // "notopened" "opened" "closed"
