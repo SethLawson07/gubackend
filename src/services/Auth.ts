@@ -22,7 +22,7 @@ export async function register(req: Request, res: Response) {
         if (!validation_result.success) {
             return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
         }
-        let user_data = { ...validation_result.data, is_admin: false, role:'customer'}
+        let user_data = { ...validation_result.data, is_admin: false, role: 'customer' }
         const hashed_password = hash_pwd(user_data.password)
         user_data.password = hashed_password
         user_data.profile_picture = user_data.profile_picture ?? ""
@@ -146,7 +146,7 @@ export async function set_financepro_id(req: Request, res: Response) {
             },
             data: {
                 is_verified: true,
-                agentId:agentId
+                agentId: agentId
             }
         })
         return res.status(200).send({ status: 200, error: false, message: "sucess" })
@@ -191,7 +191,7 @@ export async function login(req: Request, res: Response) {
         if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ status: 400, error: true, message: "Mot de passe incorrect", data: {} })
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user
         const token = sign_token({ ...user_data })
-        return res.status(200).send({ status: 200, error: false, message: "connecté avec succès", data: { token, user_name: targetted_user.user_name, email: targetted_user.email, role:targetted_user.role , finance_pro_id:targetted_user.finance_pro_id, is_verified:targetted_user.is_verified} })
+        return res.status(200).send({ status: 200, error: false, message: "connecté avec succès", data: { token, user_name: targetted_user.user_name, email: targetted_user.email, role: targetted_user.role, finance_pro_id: targetted_user.finance_pro_id, is_verified: targetted_user.is_verified } })
     } catch (err) {
         console.error(`Error while loging in ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "une erreur s'est produite", data: {} })
