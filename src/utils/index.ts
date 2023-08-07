@@ -88,3 +88,12 @@ export function geneObjectId(){
     return id.toString()
 }
 
+export function randomString(len:number) {
+    let p = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return [...Array(len)].reduce(a=>a+p[~~(Math.random()*p.length)],'');
+}
+
+export function randomNumber(len:number){
+    let p = "0123456789";
+    return [...Array(len)].reduce(a=>a+p[~~(Math.random()*p.length)],'');
+}

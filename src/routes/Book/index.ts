@@ -1,9 +1,9 @@
 import { Router } from "express"
-import { addBook } from "../../services/Book"
-import { Auth, UserIsAdmin } from "../../utils/middlewares"
+import { addBook,activeBook} from "../../services/Book"
+import { Auth, UserIsAdmin,UserIsCustomer } from "../../utils/middlewares"
 
 const router = Router()
 router.route("/").post(Auth, UserIsAdmin, addBook)
-/* router.route("/").get() */
+router.route("/activate").put(Auth,UserIsCustomer,activeBook)
 
 export default router
