@@ -147,6 +147,7 @@ export async function set_financepro_id(req: Request, res: Response) {
             data: {
                 is_verified: true,
                 agentId: agentId
+                agentId: agentId
             }
         })
         return res.status(200).send({ status: 200, error: false, message: "sucess" })
