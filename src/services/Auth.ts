@@ -147,7 +147,6 @@ export async function set_financepro_id(req: Request, res: Response) {
             data: {
                 is_verified: true,
                 agentId: agentId
-                agentId: agentId
             }
         })
         return res.status(200).send({ status: 200, error: false, message: "sucess" })
@@ -182,10 +181,10 @@ export async function login(req: Request, res: Response) {
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
         // let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
         const token = sign_token({ ...user_data })
-        return res.status(200).send({ status: 200, error: false, message: "connecté avec succès", data: { ...user_data, token, } })
+        return res.status(200).send({ status: 200, error: false, message: "Connecté avec succès", data: { ...user_data, token, } })
     } catch (err) {
         console.error(`Error while loging in ${err}`)
-        return res.status(500).send({ status: 500, error: true, message: "une erreur s'est produite", data: {} })
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
     }
 }
 
