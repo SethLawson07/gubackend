@@ -66,9 +66,9 @@ export async function create(req: Request, res: Response) {
             const response = await generate_payment_link(data.amount, userData.id, order.id)
             await create_promocode_usage(data.promocodes, user.email as string)
             // return res.status(200).send()
-            return res.status(200).send({ data: response, order: order.id, error: false })
+            return res.status(201).send({ data: response, order: order.id, error: false, status: 201 })
         } else {
-            return res.status(200).send({ error: true, message: "Utilisateur non authentifié" })
+            return res.status(400).send({ error: true, message: "Utilisateur non authentifié" })
         }
         // const order = await prisma.order.create({
         //     data: {
@@ -114,7 +114,7 @@ export async function get_user_orders(req: Request, res: Response) {
                 user: targetted_user.id
             }
         })
-        return res.status(200).send({ data })
+        return res.status(200).send({ data: data, error: false, message: "", status: 200 })
     } catch (err) {
         console.error(`Error while getting user orders ${err}`)
         return res.status(500).send()
