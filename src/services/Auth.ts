@@ -173,7 +173,7 @@ export async function login(req: Request, res: Response) {
                 ]
             }
         })
-        if (!targetted_users.length || targetted_users.length > 1 || !password_is_valid(login_data.password, targetted_users[0].password)) return res.status(404).send({ status: 404, error: true, message: "Aucun utilisateur trouve pour cette adresse email" })
+        if (!targetted_users.length || targetted_users.length > 1 || !password_is_valid(login_data.password, targetted_users[0].password)) return res.status(404).send({ status: 404, error: true, message: "Identifiants incorrects" })
         let targetted_user = targetted_users[0]
 
         // if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ status: 400, error: true, message: "Mot de passe incorrect", data: {} })
