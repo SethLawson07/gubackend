@@ -107,7 +107,7 @@ export async function get_user_orders(req: Request, res: Response) {
         const targetted_user = await prisma.user.findMany({
             where: {
                 OR: [
-                    { email: user.email, },
+                    { email: user.email },
                     { phone: user.phone }
                 ]
             }
@@ -119,12 +119,14 @@ export async function get_user_orders(req: Request, res: Response) {
         //     }
         // })
         if (!targetted_user.length || targetted_user.length > 1) return res.status(401).send()
+
+        console.log(targetted_user);
         const data = await prisma.order.findMany({
             where: {
                 user: targetted_user[0].id
             }
         })
-        return res.status(200).send({ data: data, error: false, message: "", status: 200 })
+        return res.status(200).send({ data: data, error: false, message: "", status: 200, user: targetted_user[0].id })
     } catch (err) {
         console.error(`Error while getting user orders ${err}`)
         return res.status(500).send()
