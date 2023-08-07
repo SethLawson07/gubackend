@@ -24,7 +24,7 @@ export async function create(req: Request, res: Response) {
 
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
-        const { data } = validation_result
+        const { data } = validation_result;
         const { user } = req.body.user as { user: User }
         const current_user = await prisma.user.findMany({
             where: {
@@ -42,6 +42,7 @@ export async function create(req: Request, res: Response) {
         if (!current_user) return res.status(401).send()
         if (current_user) {
             const userData = current_user[0];
+            // const d_status = data.delivery_type == "livraison" ? "PENDING"
             const order = await prisma.order.create({
                 // data: {
                 //     user: current_user.id,
@@ -60,7 +61,6 @@ export async function create(req: Request, res: Response) {
                     amount: data.amount,
                     delivery_type: data.delivery_type,
                     delivery_address: data.delivery_address
-
                 }
             })
             const response = await generate_payment_link(data.amount, userData.id, order.id)
@@ -102,16 +102,26 @@ export async function get_all(_req: Request, res: Response) {
 
 export async function get_user_orders(req: Request, res: Response) {
     try {
-        const { user } = req.body.user as { user: User }
-        const targetted_user = await prisma.user.findUnique({
+        const { user } = req.body.user as { user: User };
+
+        const targetted_user = await prisma.user.findMany({
             where: {
-                email: user.email as string
+                OR: [
+                    { email: user.email, },
+                    { phone: user.phone }
+                ]
             }
-        })
-        if (!targetted_user) return res.status(401).send()
+        });
+
+        // const targetted_user = await prisma.user.findUnique({
+        //     where: {
+        //         email: user.email as string
+        //     }
+        // })
+        if (!targetted_user.length || targetted_user.length > 1) return res.status(401).send()
         const data = await prisma.order.findMany({
             where: {
-                user: targetted_user.id
+                user: targetted_user[0].id
             }
         })
         return res.status(200).send({ data: data, error: false, message: "", status: 200 })
