@@ -129,11 +129,12 @@ export async function set_financepro_id(req: Request, res: Response) {
     try {
         const schema = z.object({
             agentId: z.string(),
-            user_id: z.string()
+            user_id: z.string(),
+            finance_pro_id:z.string()
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: JSON.parse(validation_result.error.message) })
-        const { agentId, user_id } = validation_result.data
+        const { agentId, user_id ,finance_pro_id} = validation_result.data
         const targetted_user = await prisma.user.findUnique({
             where: {
                 id: user_id
@@ -146,7 +147,8 @@ export async function set_financepro_id(req: Request, res: Response) {
             },
             data: {
                 is_verified: true,
-                agentId: agentId
+                agentId,
+                finance_pro_id
             }
         })
         return res.status(200).send({ status: 200, error: false, message: "sucess" })
@@ -181,7 +183,7 @@ export async function login(req: Request, res: Response) {
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
         // let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
         const token = sign_token({ ...user_data })
-        return res.status(200).send({ status: 200, error: false, message: "connecté avec succès", data: { ...user_data, token, } })
+        return res.status(200).send({ status: 200, error: false, message: "connecté avec succès", data: { ...user_data,is_verified:is_verified||false, token, } })
     } catch (err) {
         console.error(`Error while loging in ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "une erreur s'est produite", data: {} })
