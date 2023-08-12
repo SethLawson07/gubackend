@@ -261,7 +261,7 @@ export async function get_customers(_req: Request, res: Response) {
 export async function get_agents(_req: Request, res: Response) {
     try {
         const data = await prisma.user.findMany({ where: { role: "agent" } })
-        return res.status(200).send({ status: 200, error: false, data: { customers: data } })
+        return res.status(200).send({ status: 200, error: false, data: { agents: data } })
     } catch (err) {
         console.log(`Error while getting list of agents ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
@@ -271,7 +271,7 @@ export async function get_agents(_req: Request, res: Response) {
 export async function get_deliverypersons(_req: Request, res: Response) {
     try {
         const data = await prisma.user.findMany({ where: { role: "delivery_man" } })
-        return res.status(200).send({ status: 200, error: false, data: { customers: data } })
+        return res.status(200).send({ status: 200, error: false, data: { persons: data } })
     } catch (err) {
         console.log(`Error while getting list of deliverypersons ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
