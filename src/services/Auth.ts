@@ -129,7 +129,7 @@ export async function updateuser(req: Request, res: Response) {
     }
 }
 
-export async function change_password(req: Request, res: Response) {
+export async function changePasswordFirstLogin(req: Request, res: Response) {
     try {
         const schema = z.object({
             old: z.string(),
@@ -155,7 +155,10 @@ export async function change_password(req: Request, res: Response) {
                 first_login: false,
             }
         })
-        return res.status(200).send({ status: 200, error: false, data: {} })
+        let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
+        // let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
+        const token = sign_token({ ...user_data })
+        return res.status(200).send({ status: 200, error: false, message: "Connecté avec succès", data: { ...targetted_user, token, } })
     } catch (err) {
         console.log(`Error while changing user password ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
