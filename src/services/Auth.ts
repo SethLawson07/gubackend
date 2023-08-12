@@ -133,7 +133,7 @@ export async function change_password(req: Request, res: Response) {
     try {
         const schema = z.object({
             old: z.string(),
-            new: z.string()
+            new: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe")
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error, { prefix: "erreur" }).message })
