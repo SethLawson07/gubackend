@@ -90,10 +90,10 @@ model PromoCode {
 }
 
 model Slider {
-    id       String  @id @default(auto()) @map("_id") @db.ObjectId()
+    id       String   @id @default(auto()) @map("_id") @db.ObjectId()
     big_text String
     alt_text String
-    image    String
+    images   String[]
     featured Boolean
 }
 
