@@ -141,14 +141,14 @@ export async function change_password(req: Request, res: Response) {
         const { user: current_user } = req.body.user as { user: User }
         const targetted_user = await prisma.user.findUnique({
             where: {
-                email: current_user.email as string
+                phone: current_user.phone as string
             }
         })
         if (!targetted_user) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouve" })
         if (!password_is_valid(data.old, targetted_user.password)) return res.status(400).send({ status: 404, error: false, message: "Mot de passe invalide" })
         await prisma.user.update({
             where: {
-                email: targetted_user.email as string
+                phone: targetted_user.phone as string
             },
             data: {
                 password: hash_pwd(data.new),
