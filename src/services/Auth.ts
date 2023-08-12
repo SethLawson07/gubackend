@@ -22,7 +22,7 @@ export async function register(req: Request, res: Response) {
         if (!validation_result.success) {
             return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
         }
-        let user_data = { ...validation_result.data, is_admin: false, role: 'customer' }
+        let user_data = { ...validation_result.data, is_admin: false, role: 'customer', first_login: false }
         const hashed_password = hash_pwd(user_data.password)
         user_data.password = hashed_password
         user_data.profile_picture = user_data.profile_picture ?? ""
@@ -81,12 +81,12 @@ export async function adduser(req: Request, res: Response) {
         })
 
         if (potential_duplicate.length) return res.status(409).send({ status: 409, error: true, message: "Un autre utilisateur possède les mêmes informations" })
-        await prisma.user.create({
+        const createdUser = await prisma.user.create({
             data: user_data
         })
 
         const token = sign_token(user_data)
-        return res.status(201).send({ status: 201, error: false, message: 'Utilisateur créé', data: { token } })
+        return res.status(201).send({ status: 201, error: false, message: 'Utilisateur créé', data: { token: token, id: createdUser.id } });
     } catch (err) {
         console.error(`Error while registering ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
@@ -152,10 +152,11 @@ export async function change_password(req: Request, res: Response) {
                 email: targetted_user.email as string
             },
             data: {
-                password: hash_pwd(data.new)
+                password: hash_pwd(data.new),
+                first_login: false,
             }
         })
-        return res.status(200).send({ status: 200, error: false })
+        return res.status(200).send({ status: 200, error: false, data: {} })
     } catch (err) {
         console.log(`Error while changing user password ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
@@ -176,7 +177,7 @@ export async function set_financepro_id(req: Request, res: Response) {
                 id: user_id
             }
         })
-        if (!targetted_user) return res.status(400).send({ status: 400, error: true, message: "Utilisateur non  trouve" })
+        if (!targetted_user) return res.status(400).send({ status: 400, error: true, message: "Utilisateur non  trouve", data: {} })
         await prisma.user.update({
             where: {
                 id: targetted_user.id
@@ -187,7 +188,7 @@ export async function set_financepro_id(req: Request, res: Response) {
                 agentId: agentId
             }
         })
-        return res.status(200).send({ status: 200, error: false, message: "sucess" })
+        return res.status(200).send({ status: 200, error: false, message: "sucess", data: {} })
     } catch (err) {
         console.error(`Error while setting user Financepro id ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })

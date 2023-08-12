@@ -28,6 +28,7 @@ model User {
     admin_contributions_validate Contribution[] @relation(name: "admin_contributions_validate")
     agent_contributions_validate Contribution[] @relation(name: "agent_contributions_validate")
     books                        Book[]         @relation(name: "user book")
+    first_login                  Boolean        @default(true)
 }
 
 model Category {
