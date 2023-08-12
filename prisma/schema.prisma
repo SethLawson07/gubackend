@@ -21,8 +21,8 @@ model User {
     phone                        String         @unique
     profile_picture              String
     is_admin                     Boolean
-    finance_pro_id               String?
-    is_verified                  Boolean?
+    finance_pro_id               String?        @default("")
+    is_verified                  Boolean?       @default(false)
     role                         String //customer,agent,delivery_man,command_handler,admin
     user_contributions           Contribution[] @relation(name: "user_contributions")
     admin_contributions_validate Contribution[] @relation(name: "admin_contributions_validate")

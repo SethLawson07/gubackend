@@ -86,7 +86,44 @@ export async function adduser(req: Request, res: Response) {
         })
 
         const token = sign_token(user_data)
-        return res.status(201).send({ status: 201, error: false, message: 'Votre compte a été créé', data: { token } })
+        return res.status(201).send({ status: 201, error: false, message: 'Utilisateur créé', data: { token } })
+    } catch (err) {
+        console.error(`Error while registering ${err}`)
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
+export async function updateuser(req: Request, res: Response) {
+    try {
+        const user_schema = z.object({
+            user_name: z.string().min(5, "Veuillez indiquez un nom complet").nonempty("Veuillez renseigner votre nom complet"),
+            // email: z.string().email("L'adresse email est invalide"),
+            phone: z.string(),
+            // password: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
+            profile_picture: z.string(),
+            role: z.string().default('customer')
+        })
+
+        const validation_result = user_schema.safeParse(req.body)
+        if (!validation_result.success) {
+            console.log(fromZodError(validation_result.error));
+            return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
+        }
+        let user_data = { ...validation_result.data, is_admin: false }
+        user_data.profile_picture = user_data.profile_picture ?? ""
+        await prisma.user.update({
+            data: {
+                user_name: user_data.user_name,
+                profile_picture: user_data.profile_picture,
+                role: user_data.role
+            },
+            where: {
+                phone: user_data.phone,
+            }
+        })
+
+        return res.status(201).send({ status: 201, error: false, message: 'Modification réussie', data: {} })
+
     } catch (err) {
         console.error(`Error while registering ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
@@ -146,6 +183,7 @@ export async function set_financepro_id(req: Request, res: Response) {
             },
             data: {
                 is_verified: true,
+                // finance_pro_id: "",
                 agentId: agentId
             }
         })
