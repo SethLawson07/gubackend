@@ -12,7 +12,7 @@ export async function register(req: Request, res: Response) {
             email: z.string().email("L'adresse email est invalide"),
             phone: z.string().min(8, "Numéro de téléphone invalide").max(8, "Numéro de téléphone invalide").startsWith('9' || '7', "Numéro de téléphone invalide").nonempty("Veuillez renseigner un numéro de téléphone"),
             password: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
-            profile_picture: z.string(),
+            profile_picture: z.string().optional().default("")
         })
 
         let user_schema_partial = user_schema.partial({
@@ -25,7 +25,7 @@ export async function register(req: Request, res: Response) {
         let user_data = { ...validation_result.data, is_admin: false, role: 'customer', first_login: false }
         const hashed_password = hash_pwd(user_data.password)
         user_data.password = hashed_password
-        user_data.profile_picture = user_data.profile_picture ?? ""
+        // user_data.profile_picture = user_data.profile_picture ?? ""
         const potential_duplicate = await prisma.user.findMany({
             where: {
                 OR: [
