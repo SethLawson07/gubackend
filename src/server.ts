@@ -32,13 +32,13 @@ export const prisma = new PrismaClient()
 app.use(cors())
 app.use(express.json())
 
-app.use((req: Request, res: Response, next: NextFunction)=>{
-    const content_type = req.get("content-type")??""
-    if(content_type.startsWith("application/json")){
+app.use((req: Request, res: Response, next: NextFunction) => {
+    const content_type = req.get("content-type") ?? ""
+    if (content_type.startsWith("application/json")) {
         express.json()(req, res, next)
-    }else if(content_type.startsWith("application/x-www-form-urlencoded")) {
-        express.urlencoded({ extended: true})(req, res, next)
-    }else{
+    } else if (content_type.startsWith("application/x-www-form-urlencoded")) {
+        express.urlencoded({ extended: true })(req, res, next)
+    } else {
         next()
     }
 })
@@ -61,8 +61,8 @@ app.use("/users", users)
 app.use("/hook", hook)
 app.use("/transaction", transaction)
 app.use("/brand", brand)
-app.use("/service",service)
-app.use('/book',book)
+app.use("/service", service)
+app.use('/book', book)
 app.get("/health", (_req: Request, res: Response) => {
     return res.status(200).send()
 })
