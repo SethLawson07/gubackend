@@ -11,24 +11,20 @@ datasource db {
 }
 
 model User {
-    id                           String         @id @default(auto()) @map("_id") @db.ObjectId()
-    user_name                    String
-    email                        String?        @unique
-    agentId                      String?        @db.ObjectId
-    agent                        User?          @relation("agent_customeur", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    customers                    User[]         @relation(name: "agent_customeur")
-    password                     String
-    phone                        String         @unique
-    profile_picture              String
-    is_admin                     Boolean
-    finance_pro_id               String?        @default("")
-    is_verified                  Boolean?       @default(false)
-    role                         String //customer,agent,delivery_man,command_handler,admin
-    user_contributions           Contribution[] @relation(name: "user_contributions")
-    admin_contributions_validate Contribution[] @relation(name: "admin_contributions_validate")
-    agent_contributions_validate Contribution[] @relation(name: "agent_contributions_validate")
-    books                        Book[]         @relation(name: "user book")
-    first_login                  Boolean        @default(true)
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId()
+    user_name       String
+    email           String?  @unique
+    agentId         String?  @db.ObjectId
+    agent           User?    @relation("agent_customeur", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    customers       User[]   @relation(name: "agent_customeur")
+    password        String
+    phone           String   @unique
+    profile_picture String
+    is_admin        Boolean
+    finance_pro_id  String?  @default("")
+    is_verified     Boolean? @default(false)
+    role            String //customer,agent,delivery_man,command_handler,admin
+    first_login     Boolean  @default(true)
 }
 
 model Category {
@@ -119,11 +115,10 @@ model Order {
 }
 
 model Transaction {
-    id           String        @id @default(auto()) @map("_id") @db.ObjectId
-    user         String
-    date         String
-    amount       Float
-    contribution Contribution?
+    id     String @id @default(auto()) @map("_id") @db.ObjectId
+    user   String
+    date   String
+    amount Float
 }
 
 model PromoCodeUsage {
@@ -148,51 +143,53 @@ model Services {
     seller_number String
 }
 
+model Account {
+    id            String   @id @default(auto()) @map("_id") @db.ObjectId
+    accountNumber String
+    type          String // saving, tontine
+    user          String
+    amount        Float
+    createdAt     DateTime
+}
+
 type Case {
     id                 String @map("_id") @db.ObjectId
-    index              Int // valeurs possibles [1-31]
     contributionStatus String @default("unpaid") // ["paid","unpaid","awaiting"]
+    sheet              String
 }
 
 type Sheet {
     id        String    @map("_id") @db.ObjectId
     createdAt DateTime
     openedAt  DateTime?
-    index     Int // valeurs possibles [1-12]
     cases     Case[]
-    bet       Int
+    bet       Int?
     status    String // "notopened" "opened" "closed"
+    book      String
 }
 
 model Book {
-    id            String         @id @default(auto()) @map("_id") @db.ObjectId
-    customer      User           @relation(name: "user book", fields: [customerId], references: [id])
-    customerId    String         @db.ObjectId
-    bookNumber    String
-    createdAt     DateTime
-    sheets        Sheet[]
-    status        String // "notopened" "opened" "closed"
-    contributions Contribution[]
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    customer   String
+    bookNumber String
+    createdAt  DateTime
+    status     String // "notopened" "opened" "closed"
+    sheets     Sheet[]
 }
 
 model Contribution {
-    id               String      @id @default(auto()) @map("_id") @db.ObjectId
-    customer         User        @relation(name: "user_contributions", fields: [customerId], references: [id])
-    customerId       String      @db.ObjectId
-    agent            User        @relation(name: "agent_contributions_validate", fields: [agentId], references: [id])
-    agentId          String      @db.ObjectId
-    admin            User        @relation(name: "admin_contributions_validate", fields: [agentId], references: [id])
-    adminId          String      @db.ObjectId
-    book             Book        @relation(fields: [bookId], references: [id])
-    bookId           String      @db.ObjectId
-    caseId           String      @db.ObjectId
-    sheetId          String      @db.ObjectId
-    createdAt        DateTime    @default(now())
-    paymentmethod    String // agent,tmoney,moovmoney
-    status           String      @default("unpaid") //awaiting,paid,unpaid
-    customerHasPaid  Boolean     @default(false)
-    agentHasValidate Boolean     @default(false)
-    adminHasValidate Boolean     @default(false)
-    transaction      Transaction @relation(fields: [transactionId], references: [id])
-    transactionId    String      @unique @db.ObjectId
+    id            String   @id @default(auto()) @map("_id") @db.ObjectId
+    customer      String
+    agent         String?
+    admin         String?
+    book          String
+    case          String
+    sheet         String
+    account       String
+    createdAt     DateTime
+    paymentmethod String // agent,tmoney,moovmoney
+    status        String   @default("unpaid") //paid,unpaid, aagent, aadmin
+    // customerHasPaid  Boolean? @default(false)
+    // agentHasValidate Boolean? @default(false)
+    // adminHasValidate Boolean? @default(false)
 }
