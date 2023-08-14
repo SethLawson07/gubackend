@@ -4,7 +4,7 @@ import { prisma } from "../server";
 import { store } from "../utils/store";
 
 
-export async function momo_payment_event(req: Request, res: Response){
+export async function momo_payment_event(req: Request, res: Response) {
     try {
         const schema = z.object({
             user_id: z.string(),
@@ -12,26 +12,26 @@ export async function momo_payment_event(req: Request, res: Response){
             amount_paid: z.number().int().positive()
         })
         const validation_result = schema.safeParse(req.body)
-        if(!validation_result.success) return res.status(400).send()
+        if (!validation_result.success) return res.status(400).send()
         const { data } = validation_result
         const targetted_user = await prisma.user.findFirst({
-            where:{
+            where: {
                 finance_pro_id: data.user_id
             }
         })
-        if(!targetted_user) return res.status(404).send({ message :"Utilisateur non trouvé"})
+        if (!targetted_user) return res.status(404).send({ message: "Utilisateur non trouvé" })
         const targetted_order = await prisma.order.findUnique({
-            where:{
+            where: {
                 id: data.order_id
             }
         })
-        if(!targetted_order) return res.status(404).send({ message:"Commande non trouvée"})
+        if (!targetted_order) return res.status(404).send({ message: "Commande non trouvée" })
         const new_remainder = targetted_order.remainder - data.amount_paid
         await prisma.order.update({
-            where:{
+            where: {
                 id: targetted_order.id
             },
-            data:{
+            data: {
                 amount: new_remainder
             }
         })
@@ -42,7 +42,7 @@ export async function momo_payment_event(req: Request, res: Response){
     }
 }
 
-export async function payment_event(req: Request, res: Response){
+export async function payment_event(req: Request, res: Response) {
     try {
         const order_id = req.params.id
         const schema = z.object({
@@ -54,41 +54,41 @@ export async function payment_event(req: Request, res: Response){
             cpm_trans_date: z.string()
         })
         const validation_result = schema.safeParse(req.body)
-        if(!validation_result.success){
+        if (!validation_result.success) {
             console.log(`Error while parsing response from cinet pay ${req.body}`)
             return res.status(500).send()
         }
         const { data } = validation_result
-        if(store.includes(data.cpm_trans_id)){
+        if (store.includes(data.cpm_trans_id)) {
             console.log(`Found duplicate id in store ${data.cpm_trans_id} : Aborting processing`)
             return res.status(409).send()
         }
         store.push(data.cpm_trans_id)
-        if(data.cpm_error_message==="SUCCES"){
+        if (data.cpm_error_message === "SUCCES") {
             const targetted_order = await prisma.order.findUnique({
-                where:{
+                where: {
                     id: order_id
                 }
             })
-            if(!targetted_order){
+            if (!targetted_order) {
                 console.log(`Order not found ${order_id}`)
                 return res.status(404).send()
             }
             await prisma.transaction.create({
-                data:{
+                data: {
                     user: targetted_order.user,
                     amount: targetted_order.remainder,
                     date: data.cpm_trans_date,
                 }
             })
             await prisma.order.update({
-                where:{
+                where: {
                     id: targetted_order.id
                 },
-                data:{
+                data: {
                     paid: true,
-                    status:"PAID",
-                    remainder:0
+                    status: "PAID",
+                    remainder: 0
                 }
             })
             console.log("Payment processed")
@@ -100,4 +100,50 @@ export async function payment_event(req: Request, res: Response){
         console.error(`Error while handling payment event ${err}`)
         return res.status(500).send()
     }
+}
+
+
+export async function contribution_event(req: Request, res: Response) {
+    console.log(req.body);
+    res.status(200).send(req.body);
+    // try {
+    //     const userid = req.params.id;
+    //     let result = { error: true, status: 'unpaid' };
+    //     const schema = z.object({
+    //         cpm_amount: z.string(),
+    //         cpm_trans_id: z.string(),
+    //         payment_method: z.string(),
+    //         cel_phone_num: z.string(),
+    //         cpm_error_message: z.string(),
+    //         cpm_trans_date: z.string()
+    //     })
+    //     const validation_result = schema.safeParse(req.body)
+    //     if (!validation_result.success) {
+    //         console.log(`Error while parsing response from cinet pay ${req.body}`)
+    //         return res.status(500).send()
+    //     }
+    //     const { data } = validation_result
+    //     if (store.includes(data.cpm_trans_id)) {
+    //         console.log(`Found duplicate id in store ${data.cpm_trans_id} : Aborting processing`)
+    //         return res.status(409).send()
+    //     }
+    //     store.push(data.cpm_trans_id)
+    //     if (data.cpm_error_message === "SUCCES") {
+    //         result.status = "paid";
+    //         result.error = false;
+    //         console.log("Validation completed")
+    //         await prisma.transaction.create({
+    //             data: {
+    //                 user: userid,
+    //                 amount: parseInt(data.cpm_amount),
+    //                 date: data.cpm_trans_date,
+    //             }
+    //         })
+    //     }
+    //     console.log(`A payment failed`)
+    //     return result;
+    // } catch (err) {
+    //     console.error(`Error while handling payment event ${err}`)
+    //     return res.status(500).send()
+    // }
 }
