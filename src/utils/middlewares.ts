@@ -17,9 +17,7 @@ export function Auth(req: Request, res: Response, next: NextFunction){
 }
 
 export function UserIsAdmin(req: Request, res: Response, next: NextFunction){
-    try {
-        console.log(req.body.user);
-        
+    try {        
         const is_admin = req.body.user.is_admin ?? false
         if(!is_admin) return res.status(401).send({ message:"Seul un compte admin peut acceder a cette route" })
         next()
@@ -31,7 +29,8 @@ export function UserIsAdmin(req: Request, res: Response, next: NextFunction){
 
 export function UserIsCustomer(req: Request, res: Response, next: NextFunction){
     try {
-        const is_customer = req.body.user.role === "customer" ?? false
+        let {user} = req.body.user
+        const is_customer = user.role === "customer" ?? false
         if(!is_customer) return res.status(401).send({ message:"Seul un compte client peut acceder a cette route" })
         next()
     } catch (err) {
@@ -42,7 +41,8 @@ export function UserIsCustomer(req: Request, res: Response, next: NextFunction){
 
 export function UserIsAgent(req: Request, res: Response, next: NextFunction){
     try {
-        const is_agent = req.body.user.role === "agent" ?? false
+        let {user} = req.body.user
+        const is_agent = user.role === "agent" ?? false
         if(!is_agent) return res.status(401).send({ message:"Seul un compte agent peut acceder a cette route" })
         next()
     } catch (err) {
@@ -54,7 +54,8 @@ export function UserIsAgent(req: Request, res: Response, next: NextFunction){
 
 export function UserIsDeliveryMan(req: Request, res: Response, next: NextFunction){
     try {
-        const is_delivery_man = req.body.user.role === "delivery_man" ?? false
+        let {user} = req.body.user
+        const is_delivery_man = user.role === "delivery_man" ?? false
         if(!is_delivery_man) return res.status(401).send({ message:"Seul un compte livreur peut acceder a cette route" })
         next()
     } catch (err) {
@@ -65,7 +66,8 @@ export function UserIsDeliveryMan(req: Request, res: Response, next: NextFunctio
 
 export function UserIsCommandHandler(req: Request, res: Response, next: NextFunction){
     try {
-        const is_command_handler = req.body.user.role === "command_handler" ?? false
+        let {user} = req.body.user
+        const is_command_handler = user.role === "command_handler" ?? false
         if(!is_command_handler) return res.status(401).send({ message:"Seul un compte gestionaire de commande  peut acceder a cette route" })
         next()
     } catch (err) {
