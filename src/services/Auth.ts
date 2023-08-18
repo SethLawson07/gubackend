@@ -256,7 +256,8 @@ export async function updateUserDeviceToken(req: Request, res: Response) {
         if (!targettedUser) return res.status(404).send({ error: true, message: "User not found" });
         let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: validation_result.data.device_token } });
         // return res.status(200).send();
-        return res.status(200).send({ error: false, message: "Device token modifié", data: updatedUser });
+        const token = sign_token({ ...updatedUser });
+        return res.status(200).send({ error: false, message: "Device token modifié", data: { ...updatedUser, token } });
     } catch (e) {
         console.log(e)
     }
