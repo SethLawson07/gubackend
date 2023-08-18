@@ -144,7 +144,7 @@ export async function updateUserOnFirstLogin(req: Request, res: Response) {
             where: {
                 phone: current_user.phone as string
             }
-        })
+        });
         if (!targetted_user) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouve" })
         if (!password_is_valid(data.old, targetted_user.password)) return res.status(400).send({ status: 404, error: false, message: "Mot de passe invalide" })
         await prisma.user.update({
@@ -156,14 +156,13 @@ export async function updateUserOnFirstLogin(req: Request, res: Response) {
                 first_login: false,
                 device_token: data.d_token
             }
-        })
+        });
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
-        // let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
-        const token = sign_token({ ...user_data })
+        const token = sign_token({ ...user_data });
         return res.status(200).send({ status: 200, error: false, message: "Connecté avec succès", data: { ...targetted_user, token, } })
     } catch (err) {
         console.log(`Error while changing user password ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
+        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} });
     }
 }
 
@@ -173,7 +172,7 @@ export async function set_financepro_id(req: Request, res: Response) {
             agentId: z.string(),
             user_id: z.string(),
             finance_pro_id: z.string()
-        })
+        });
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: JSON.parse(validation_result.error.message) })
         const { agentId, user_id, finance_pro_id } = validation_result.data
@@ -181,7 +180,7 @@ export async function set_financepro_id(req: Request, res: Response) {
             where: {
                 id: user_id
             }
-        })
+        });
         if (!targetted_user) return res.status(400).send({ status: 400, error: true, message: "Utilisateur non  trouve", data: {} })
         await prisma.user.update({
             where: {
@@ -192,11 +191,11 @@ export async function set_financepro_id(req: Request, res: Response) {
                 // finance_pro_id: "",
                 agentId: agentId
             }
-        })
-        return res.status(200).send({ status: 200, error: false, message: "sucess", data: {} })
+        });
+        return res.status(200).send({ status: 200, error: false, message: "sucess", data: {} });
     } catch (err) {
         console.error(`Error while setting user Financepro id ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
+        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} });
     }
 }
 
@@ -216,16 +215,15 @@ export async function login(req: Request, res: Response) {
                     { phone: login_data.email_or_phone }
                 ]
             }
-        })
+        });
         if (!targetted_users.length || targetted_users.length > 1 || !password_is_valid(login_data.password, targetted_users[0].password)) return res.status(404).send({ status: 404, error: true, message: "Identifiants incorrects", data: {} })
         let targetted_user = targetted_users[0]
 
 
         if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ status: 400, error: true, message: "Mot de passe incorrect", data: {} })
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
-        // let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
-        const token = sign_token({ ...user_data })
-        return res.status(200).send({ status: 200, error: false, message: "Connecté avec succès", data: { ...targetted_user, token, } })
+        const token = sign_token({ ...user_data });
+        return res.status(200).send({ status: 200, error: false, message: "Connecté avec succès", data: { ...targetted_user, token, } });
     } catch (err) {
         console.error(`Error while loging in ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
@@ -239,7 +237,8 @@ export async function logout(req: Request, res: Response) {
         let targettedUser = await prisma.user.findUnique({ where: { id: user.id } });
         if (!targettedUser) return res.status(404).send({ error: true, message: "User not found" });
         let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: "" } });
-        return res.status(200).send({ error: false, message: "Device token supprimé", data: updatedUser });
+        return res.status(200).send();
+        // return res.status(200).send({ error: false, message: "Device token supprimé", data: updatedUser });
     } catch (err) {
         throw err
     }
@@ -250,13 +249,14 @@ export async function updateUserDeviceToken(req: Request, res: Response) {
         const schema = z.object({
             device_token: z.string()
         })
+        const { user } = req.body.user as { user: User };
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message, data: {} })
-        const { user } = req.body.user as { user: User };
         let targettedUser = await prisma.user.findUnique({ where: { id: user.id } });
         if (!targettedUser) return res.status(404).send({ error: true, message: "User not found" });
         let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: validation_result.data.device_token } });
-        return res.status(200).send({ error: false, message: "Device token modifié", data: updatedUser });
+        return res.status(200).send();
+        // return res.status(200).send({ error: false, message: "Device token modifié", data: updatedUser });
     } catch (e) {
         console.log(e)
     }

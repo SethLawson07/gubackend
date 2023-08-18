@@ -9,6 +9,7 @@ import { json } from "express";
 import admin from "firebase-admin";
 import serviceAccount from '../token/goodpay-86d48-c5c79b945b8f.json';
 
+
 const firebaseServiceAccountParams = {
     type: serviceAccount.type,
     projectId: serviceAccount.project_id,
@@ -22,6 +23,8 @@ const firebaseServiceAccountParams = {
     clientC509CertUrl: serviceAccount.client_x509_cert_url,
     universeDomain: serviceAccount.universe_domain
 }
+
+admin.initializeApp({ credential: admin.credential.cert(firebaseServiceAccountParams) });
 const JWT_TOKEN = "goodnessunitsupertoken";
 const salt_rounds = 10;
 
@@ -202,10 +205,8 @@ export function update_case(sheets: Sheet[], sheetid: string, caseid: string, st
 
 
 export async function sendPushNotification(token: string) {
+    let result = false;
     try {
-        admin.initializeApp({
-            credential: admin.credential.cert(firebaseServiceAccountParams),
-        })
         const payload = {
             "token": token,
             "data": {},
@@ -215,10 +216,12 @@ export async function sendPushNotification(token: string) {
             },
             // "click_action": "FLUTTER_NOTIFICATION_CLICK",
         };
-        let result = await admin.messaging().send(payload);
-        console.log(result);
+        let message = await admin.messaging().send(payload);
+        if (message) { result = true }
     } catch (e) {
         console.log(e);
         console.log("Une erreur s'est produite");
+        return false;
     }
+    return result;
 }
