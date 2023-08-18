@@ -104,10 +104,18 @@ export async function payment_event(req: Request, res: Response) {
 
 
 export async function contribution_event(req: Request, res: Response) {
-    console.log(req.body);
-    res.status(200).send(req.body);
+    // console.log(req.params.data);
+    let buff = Buffer.from(req.params.data, 'base64');
+    let text = buff.toString('ascii');
+    let textTK = JSON.parse(text);
+    console.log(textTK.createdAt);
+    return res.status(200).send();
     // try {
     //     const userid = req.params.id;
+    //     const params = req.params.data;
+    //     let buff = Buffer.from(params, 'base64');
+    //     let text = buff.toString('ascii');
+    //     console.log(text);
     //     let result = { error: true, status: 'unpaid' };
     //     const schema = z.object({
     //         cpm_amount: z.string(),
@@ -134,9 +142,7 @@ export async function contribution_event(req: Request, res: Response) {
     //         console.log("Validation completed")
     //         await prisma.transaction.create({
     //             data: {
-    //                 user: userid,
-    //                 amount: parseInt(data.cpm_amount),
-    //                 date: data.cpm_trans_date,
+    //                 user: userid, amount: parseInt(data.cpm_amount), date: data.cpm_trans_date,
     //             }
     //         })
     //     }

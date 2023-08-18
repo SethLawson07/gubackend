@@ -25,6 +25,7 @@ model User {
     is_verified     Boolean? @default(false)
     role            String //customer,agent,delivery_man,command_handler,admin
     first_login     Boolean  @default(true)
+    device_token    String   @default("")
 }
 
 model Category {

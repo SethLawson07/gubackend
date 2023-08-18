@@ -129,11 +129,12 @@ export async function updateuser(req: Request, res: Response) {
     }
 }
 
-export async function changePasswordFirstLogin(req: Request, res: Response) {
+export async function updateUserOnFirstLogin(req: Request, res: Response) {
     try {
         const schema = z.object({
             old: z.string(),
-            new: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe")
+            new: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
+            d_token: z.string()
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message })
@@ -153,6 +154,7 @@ export async function changePasswordFirstLogin(req: Request, res: Response) {
             data: {
                 password: hash_pwd(data.new),
                 first_login: false,
+                device_token: data.d_token
             }
         })
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
@@ -170,11 +172,11 @@ export async function set_financepro_id(req: Request, res: Response) {
         const schema = z.object({
             agentId: z.string(),
             user_id: z.string(),
-            finance_pro_id:z.string()
+            finance_pro_id: z.string()
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: JSON.parse(validation_result.error.message) })
-        const { agentId, user_id ,finance_pro_id} = validation_result.data
+        const { agentId, user_id, finance_pro_id } = validation_result.data
         const targetted_user = await prisma.user.findUnique({
             where: {
                 id: user_id
@@ -229,6 +231,37 @@ export async function login(req: Request, res: Response) {
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
     }
 }
+
+// Déconnexion suppression de device token
+export async function logout(req: Request, res: Response) {
+    try {
+        const { user } = req.body.user as { user: User }
+        let targettedUser = await prisma.user.findUnique({ where: { id: user.id } });
+        if (!targettedUser) return res.status(404).send({ error: true, message: "User not found" });
+        let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: "" } });
+        return res.status(200).send({ error: false, message: "Device token supprimé", data: updatedUser });
+    } catch (err) {
+        throw err
+    }
+}
+
+export async function updateUserDeviceToken(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            device_token: z.string()
+        })
+        const validation_result = schema.safeParse(req.body)
+        if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message, data: {} })
+        const { user } = req.body.user as { user: User };
+        let targettedUser = await prisma.user.findUnique({ where: { id: user.id } });
+        if (!targettedUser) return res.status(404).send({ error: true, message: "User not found" });
+        let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: validation_result.data.device_token } });
+        return res.status(200).send({ error: false, message: "Device token modifié", data: updatedUser });
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 
 export async function create_admin(req: Request, res: Response) {
     try {

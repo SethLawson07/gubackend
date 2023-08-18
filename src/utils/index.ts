@@ -5,8 +5,23 @@ import * as crypto from "crypto";
 import axios from "axios";
 import { Book, Case, Sheet, User } from "@prisma/client";
 import { ObjectId } from "bson";
+import { json } from "express";
+import admin from "firebase-admin";
+import serviceAccount from '../token/goodpay-86d48-c5c79b945b8f.json';
 
-
+const firebaseServiceAccountParams = {
+    type: serviceAccount.type,
+    projectId: serviceAccount.project_id,
+    privateKeyId: serviceAccount.private_key_id,
+    privateKey: serviceAccount.private_key,
+    clientEmail: serviceAccount.client_email,
+    clientId: serviceAccount.client_id,
+    authUri: serviceAccount.auth_uri,
+    tokenUri: serviceAccount.token_uri,
+    authProviderX509CertUrl: serviceAccount.auth_provider_x509_cert_url,
+    clientC509CertUrl: serviceAccount.client_x509_cert_url,
+    universeDomain: serviceAccount.universe_domain
+}
 const JWT_TOKEN = "goodnessunitsupertoken";
 const salt_rounds = 10;
 
@@ -177,10 +192,33 @@ export function update_case(sheets: Sheet[], sheetid: string, caseid: string, st
         if (_case && _case.contributionStatus == "unpaid") {
             _case.contributionStatus = status;
             sheet.cases[_caseIndex] = _case;
-        } else { error = true, message = "Already ..." }
+        } else { error = true, message = "Already updated" }
     } else { error = true, message = "Vous ne pouvez pas cotiser pour cette feuille" }
 
     updated_sheets[sheetIndex] = sheet!;
 
     return { error, message, updated_sheets };
+}
+
+
+export async function sendPushNotification(token: string) {
+    try {
+        admin.initializeApp({
+            credential: admin.credential.cert(firebaseServiceAccountParams),
+        })
+        const payload = {
+            "token": token,
+            "data": {},
+            "notification": {
+                "title": "FCM Message",
+                "body": "This is an FCM notification message!",
+            },
+            // "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        };
+        let result = await admin.messaging().send(payload);
+        console.log(result);
+    } catch (e) {
+        console.log(e);
+        console.log("Une erreur s'est produite");
+    }
 }
