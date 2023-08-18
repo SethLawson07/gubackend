@@ -234,7 +234,6 @@ export async function login(req: Request, res: Response) {
 export async function logout(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User }
-        console.log(user.id);
         let targettedUser = await prisma.user.findUnique({ where: { id: user.id } });
         if (!targettedUser) return res.status(404).send({ error: true, message: "User not found" });
         let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: "" } });
