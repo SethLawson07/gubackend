@@ -134,7 +134,6 @@ export async function updateUserOnFirstLogin(req: Request, res: Response) {
         const schema = z.object({
             old: z.string(),
             new: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
-            d_token: z.string()
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message })
@@ -154,7 +153,6 @@ export async function updateUserOnFirstLogin(req: Request, res: Response) {
             data: {
                 password: hash_pwd(data.new),
                 first_login: false,
-                device_token: data.d_token
             }
         });
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
@@ -257,7 +255,7 @@ export async function updateUserDeviceToken(req: Request, res: Response) {
         let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: validation_result.data.device_token } });
         // return res.status(200).send();
         const token = sign_token({ ...updatedUser });
-        return res.status(200).send({ error: false, message: "Device token modifié", data: { ...updatedUser, token } });
+        return res.status(200).send({ error: false, message: "Device token modifié", data: { ...updatedUser, token: token } });
     } catch (e) {
         console.log(e)
     }
