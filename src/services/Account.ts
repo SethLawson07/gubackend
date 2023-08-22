@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
-import { close_sheets, create_sheets, update_case, update_sheets } from "../utils";
+import { close_sheets, create_sheets, sendPushNotification, update_case, update_sheets } from "../utils";
 import { User } from "@prisma/client";
 
 
@@ -72,6 +72,34 @@ export async function create_book(req: Request, res: Response) {
     }
 }
 
+export async function get_books(req: Request, res: Response) {
+    try {
+        const { user } = req.body.user as { user: User };
+        let books = await prisma.book.findMany({ where: { customer: user.id } });
+        if (!books) return res.status(404).send({ error: true, message: "Aucun livre pour cet utilisateur", data: {} });
+        return res.status(200).send({ error: false, message: "", data: books })
+    } catch (err) {
+        console.log(err);
+        console.log("Error while getting books");
+        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
+
+export async function get_book(req: Request, res: Response) {
+    try {
+        let bookid = req.params.id;
+        const { user } = req.body.user as { user: User };
+        let book = await prisma.book.findUnique({ where: { id: bookid } });
+        if (!book) return res.status(404).send({ error: true, message: "Livre non trouvé" });
+        return res.status(200).send({ error: false, message: "", data: book });
+    } catch (err) {
+        console.log(err);
+        console.log("Error while trying to get book");
+        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
 
 export async function open_sheet(req: Request, res: Response) {
     try {
@@ -101,6 +129,26 @@ export async function open_sheet(req: Request, res: Response) {
         console.log(err);
         console.log("Error while opening sheet");
         return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
+export async function get_sheet(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            b_id: z.string(),
+            s_id: z.string(),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(404).send({ error: true, message: "Données non validées", data: {} });
+        const book = await prisma.book.findUnique({ where: { id: validation.data.b_id } });
+        if (!book) return res.status(404).send({ error: true, message: "Carnet non trouvé", data: {} });
+        const sheet = book.sheets.find((e) => e.id == validation.data.s_id);
+        if (!sheet) return res.status(404).send({ error: true, message: "", data: {} });
+        return res.status(200).send({ error: false, message: '', data: sheet });
+    } catch (err) {
+        console.log(err);
+        console.log("Error while getting sheets");
+        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
     }
 }
 
@@ -151,8 +199,6 @@ export async function make_contribution(req: Request, res: Response) {
         let data = validation_result.data;
         let targeted_book = await prisma.book.findUnique({ where: { id: data.b_id } });
         if (!targeted_book) return res.status(404).send({ error: true, message: "Book not found" });
-        // let ctb_status = data.p_method == "mobile_money" ? "paid" : "aawaiting"; // Contribution status
-        // let cse_status = data.p_method == "mobile_money" ? "paid" : "awaiting"; // Case status
         let created_contrib = await prisma.contribution.create({
             data: {
                 account: data.account,
@@ -170,10 +216,12 @@ export async function make_contribution(req: Request, res: Response) {
             const target_sheet = update_case(targeted_book.sheets, data.s_id, data.c_id, "awaiting");
             if (target_sheet.error) return res.status(400).send({ error: true, message: target_sheet.message });
             await prisma.book.update({ where: { id: data.b_id, }, data: { sheets: target_sheet.updated_sheets } });
+            let targeted_agent = await prisma.user.findFirst({ where: { id: user.agentId! } });
+            if (targeted_agent) { await sendPushNotification(targeted_agent.device_token, "Demande de cotisation", `Le client ${user.user_name} vient de cotiser`) };
             return res.status(201).send({ status: 201, error: false, message: 'Feuille bloquée', data: targeted_book, });
         }
         return res.status(400).send({ error: true, message: "Une erreur s'est produite", data: {}, });
-    } catch (err) {     
+    } catch (err) {
         console.log(err);
         console.log("Error while ... action");
         return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });

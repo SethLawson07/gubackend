@@ -208,3 +208,14 @@ model Contribution {
     // agentHasValidate Boolean? @default(false)
     // adminHasValidate Boolean? @default(false)
 }
+
+model Caroussel {
+    id          String @id @default(auto()) @map("_id") @db.ObjectId
+    code        String
+    link        String
+    image       String
+    title       String
+    linkText    String
+    buttomText  String
+    description String
+}
