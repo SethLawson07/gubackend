@@ -125,7 +125,7 @@ export async function create_csl(req: Request, res: Response) {
             });
         }
         if (!created) return res.status(200).send({ error: true, message: "Slider non créé", data: {} })
-        return res.status(201).send({ error: false, message: "Slider crée", data: created });
+        return res.status(201).send({ status: 201, error: false, message: "Slider crée", data: created });
     } catch (err) {
         console.error(`Error while creating slider ${err}`)
         return res.status(500).send({ error: true, message: "", data: {} })
@@ -135,7 +135,7 @@ export async function create_csl(req: Request, res: Response) {
 // // Get all
 export async function slider_csl(req: Request, res: Response) {
     try {
-        let sliders = await prisma.caroussel.findMany({});
+        let sliders = await prisma.caroussel.findMany();
         if (!sliders) return res.status(404).send({ error: true, message: "", data: {} });
         return res.status(200).send({ error: false, message: {}, data: sliders });
     } catch (err) {
