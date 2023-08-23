@@ -3,14 +3,14 @@ import * as jwt from "jsonwebtoken";
 import { prisma } from "../server";
 import * as crypto from "crypto";
 import axios from "axios";
-import { Book, Case, Sheet, User } from "@prisma/client";
+import { Book, Case, Product, Sheet, User } from "@prisma/client";
 import { ObjectId } from "bson";
 import { json } from "express";
 import admin from "firebase-admin";
 import serviceAccount from '../token/goodpay-86d48-c5c79b945b8f.json';
 import { TokenMessage } from "firebase-admin/lib/messaging/messaging-api";
 
-
+//
 const firebaseServiceAccountParams = {
     type: serviceAccount.type,
     projectId: serviceAccount.project_id,
@@ -97,12 +97,6 @@ export async function create_promocode_usage(promocodes: string[], user: string)
 
 export function geneObjectId() { return (new ObjectId()).toString(); }
 
-// export const json_result = (status: Number, error: boolean, data: Object): Object => {
-//     return {}
-// book: 64da1da3b80904cdbb9dc14a
-// sh..: 64da1da43e80b0413c57f52c
-// }
-
 export const create_sheets = (book: Book, bet: number, date: Date): Sheet[] => {
     return Array.from({ length: 12 }, (_, index) => {
         const sheetId = geneObjectId();
@@ -130,20 +124,6 @@ export function create_cases(sheet: string): Case[] {
         return _case;
     }) as Case[];
 }
-
-// export function contribution_status(p_method: string, u_awaiting: string) {
-//     let result = "";
-//     switch (p_method) {
-//         case "mobile_money":
-//             result = "paid";
-//             break;
-//         case "agent" && u_awaiting == "":
-
-//             break;
-//         default:
-//             break;
-//     }
-// }
 
 export function update_sheets(sheets: Sheet[], sheetid: string, openedat: Date, bet: number) {
     let error: boolean = false;
@@ -221,4 +201,13 @@ export async function sendPushNotification(token: string, title: string, body: s
         return false;
     }
     return result;
+}
+
+// Find products by list id ([id...])
+export const products_byids = async (content: string[]) => {
+    const result = await prisma.product.findMany({
+        where: { id: { in: content } }
+    });
+    if (!result) return { error: true, message: "none", data: {} };
+    return { error: false, message: "ok!", data: result };
 }

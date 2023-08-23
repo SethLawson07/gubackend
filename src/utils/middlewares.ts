@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verify_token } from ".";
+import { User } from "@prisma/client";
 
 export function Auth(req: Request, res: Response, next: NextFunction) {
     try {
@@ -29,7 +30,8 @@ export function UserIsAdmin(req: Request, res: Response, next: NextFunction) {
 
 export function UserIsCustomer(req: Request, res: Response, next: NextFunction) {
     try {
-        let { user } = req.body.user
+        const { user } = req.body.user as { user: User };
+        // const is_customer = (user.role === "customer" || user.is_admin) ?? false
         const is_customer = user.role === "customer" ?? false
         if (!is_customer) return res.status(401).send({ message: "Seul un compte client peut acceder a cette route" })
         next()

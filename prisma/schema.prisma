@@ -219,3 +219,10 @@ model Caroussel {
     buttomText  String
     description String
 }
+
+model Section {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    contenttype String // product, category, promotion(promo card)
+    content     String[]
+}
