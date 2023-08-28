@@ -77,3 +77,15 @@ export function UserIsCommandHandler(req: Request, res: Response, next: NextFunc
         return res.status(500).send({ message: "Une erreur est survenue, reesayez ou contactez les devs" })
     }
 }
+
+export function UserIsAgentOrAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+        let { user } = req.body.user;
+        const is_command_handler = (req.body.user.is_admin || user.role == "agent") ?? false
+        if (!is_command_handler) return res.status(401).send({ message: "Seul un compte gestionaire de commande  peut acceder a cette route" })
+        next()
+    } catch (err) {
+        console.error(`Error while command handler checking incoming request ${err}`)
+        return res.status(500).send({ message: "Une erreur est survenue, reesayez ou contactez les devs" })
+    }
+}
