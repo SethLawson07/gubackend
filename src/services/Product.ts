@@ -18,8 +18,8 @@ export async function create(req: Request, res: Response) {
             brand: z.string(),
             description: z.string()
         })
-        const validation_result = schema.safeParse(req.body)
-        if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
+        const validation_result = schema.safeParse(req.body);
+        if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) });
         let { data } = validation_result
         if (data.is_in_discount && !data.discount_price) return res.status(400).send({ message: "discount_price est requis si le produit est en reduction" })
         data.discount_price = data.discount_price ? data.discount_price : 0
@@ -37,7 +37,7 @@ export async function create(req: Request, res: Response) {
                 id: data.item
             }
         })
-        if (!targetted_item) return res.status(404).send()
+        if (!targetted_item) return res.status(404).send({ error: true, message: "" })
         await prisma.product.create({
             data
         })
@@ -59,8 +59,8 @@ export async function get(_req: Request, res: Response) {
                         schema: true
                     }
                 },
-                brand_data:{
-                    select:{
+                brand_data: {
+                    select: {
                         id: true,
                         name: true
                     }
@@ -84,7 +84,7 @@ export async function update(req: Request, res: Response) {
             price: z.number().positive().optional(),
             pay_at_delivery: z.boolean().optional(),
             is_in_discount: z.boolean().optional(),
-            discount_price: z.number().positive().optional(),
+            discount_price: z.number().optional(),
             fields: z.string().optional(),
             images: z.array(z.string()).optional()
         })
