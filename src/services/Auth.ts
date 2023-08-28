@@ -270,7 +270,7 @@ export async function create_admin(req: Request, res: Response) {
             phone: z.string().min(8, "Numéro de téléphone invalide").max(8, "Numéro de téléphone invalide").startsWith('9' || '7', "Numéro de téléphone invalide").nonempty("Veuillez renseigner un numéro de téléphone"),
             password: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
             profile_picture: z.string(),
-        })
+        });
         const validation_result = data_schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message })
         const admin_data = { ...validation_result.data, password: hash_pwd(validation_result.data.password), role: 'admin', is_admin: true }
@@ -349,5 +349,20 @@ export async function get_deliverypersons(_req: Request, res: Response) {
     } catch (err) {
         console.log(`Error while getting list of deliverypersons ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
+    }
+}
+
+export async function get_agent_customers(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            agent: z.string()
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const data = await prisma.user.findMany({ where: { role: "customer", agentId: validation.data.agent, is_verified: true } });
+        return res.status(200).send({ status: 200, error: false, data: { customers: data } });
+    } catch (err) {
+        console.log(`Error while getting list of customers ${err}`);
+        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} });
     }
 }

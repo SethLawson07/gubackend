@@ -1,5 +1,5 @@
-import { get_agents, get_all_users, get_customers, get_deliverypersons } from "../../services/Auth"
-import { Auth, UserIsAdmin } from "../../utils/middlewares"
+import { get_agent_customers, get_agents, get_all_users, get_customers, get_deliverypersons } from "../../services/Auth"
+import { Auth, UserIsAdmin, UserIsAgent, UserIsCustomer } from "../../utils/middlewares"
 import { Router } from "express"
 
 const router = Router()
@@ -12,6 +12,6 @@ router.route("/agents").get(Auth, UserIsAdmin, get_agents);
 
 router.route("/deliverypersons").get(Auth, UserIsAdmin, get_deliverypersons);
 
-// router.route("/agentcustomers").get(Auth, UserIsAdmin, get_deliverypersons);
+router.route("/agentcustomers").get(Auth, UserIsAdmin || UserIsAgent, get_agent_customers);
 
 export default router

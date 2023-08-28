@@ -223,6 +223,7 @@ model Caroussel {
 model Section {
     id          String   @id @default(auto()) @map("_id") @db.ObjectId
     title       String
+    name        String // Name == Title
     contenttype String // product, category, promotion(promo card)
     content     String[]
 }

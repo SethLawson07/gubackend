@@ -8,7 +8,7 @@ import { ObjectId } from "bson";
 import { json } from "express";
 import admin from "firebase-admin";
 import serviceAccount from '../token/goodpay-86d48-c5c79b945b8f.json';
-import { TokenMessage } from "firebase-admin/lib/messaging/messaging-api";
+import { MessagingPayload, TokenMessage } from "firebase-admin/lib/messaging/messaging-api";
 
 //
 const firebaseServiceAccountParams = {
@@ -184,16 +184,41 @@ export function update_case(sheets: Sheet[], sheetid: string, caseid: string, st
     return { error, message, updated_sheets };
 }
 
+const notificationdata = {
+    // Add APNS (Apple) config
+    "apns": {
+        "payload": {
+            "aps": {
+                "contentAvailable": true,
+            },
+        },
+        "headers": {
+            "apns-push-type": "background",
+            "apns-priority": "5", // Must be `5` when `contentAvailable` is set to true.
+            "apns-topic": "io.flutter.plugins.firebase.messaging", // bundle identifier
+        },
+    },
+};
 
 export async function sendPushNotification(token: string, title: string, body: string) {
     let result = false;
     try {
-        const payload: TokenMessage = {
-            "token": token,
-            "notification": { "title": title, "body": body },
-            "android": { "priority": 'high' },
-        };
+        const payload: TokenMessage = { ...notificationdata, notification: { title, body }, android: { priority: 'high' }, token };
         let message = await admin.messaging().send(payload);
+        if (message) { result = true };
+    } catch (e) {
+        console.log(e);
+        console.log("Une erreur s'est produite");
+        return false;
+    }
+    return result;
+}
+
+export async function sendNotificationToTopic(topic: string, title: string, body: string) {
+    let result = false;
+    try {
+        const payload: MessagingPayload = { ...notificationdata, notification: { title, body }, data: {} };
+        let message = await admin.messaging().sendToTopic(topic, payload);
         if (message) { result = true };
     } catch (e) {
         console.log(e);
