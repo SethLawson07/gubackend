@@ -43,7 +43,7 @@ export const create_section = async (req: Request, res: Response) => {
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
-        const created_section = await prisma.section.create({ data: validation.data });
+        const created_section = await prisma.section.create({ data: {...validation.data, name: validation.data.title} });
         if (!created_section) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
         return res.status(201).send({ error: false, message: "Section créée", data: created_section });
     } catch (err) {
