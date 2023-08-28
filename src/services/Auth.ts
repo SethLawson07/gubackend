@@ -357,7 +357,7 @@ export async function get_agent_customers(req: Request, res: Response) {
         const schema = z.object({
             agent: z.string()
         });
-        const validation = schema.safeParse(req.body);
+        const validation = schema.safeParse({ agent: req.params.agent });
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
         const data = await prisma.user.findMany({ where: { role: "customer", agentId: validation.data.agent, is_verified: true } });
         return res.status(200).send({ status: 200, error: false, data: { customers: data } });

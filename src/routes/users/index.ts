@@ -12,6 +12,6 @@ router.route("/agents").get(Auth, UserIsAdmin, get_agents);
 
 router.route("/deliverypersons").get(Auth, UserIsAdmin, get_deliverypersons);
 
-router.route("/agentcustomers").get(Auth, UserIsAgentOrAdmin, get_agent_customers);
+router.route("/agentcustomers/:agent").get(Auth, UserIsAgentOrAdmin, get_agent_customers);
 
 export default router
