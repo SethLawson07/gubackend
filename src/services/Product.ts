@@ -98,13 +98,23 @@ export async function update(req: Request, res: Response) {
             } catch (_) {
                 return false
             }
-        })()
+        })();
         if (!fields_is_valid) return res.status(400).send({ message: "fields invalide. fields doit provenir d'un json valide" })
         await prisma.product.update({
             where: {
                 id: data.id
             },
-            data
+            data: {
+                name: data.name,
+                featured: data.featured,
+                in_stock: data.in_stock,
+                price: data.price,
+                pay_at_delivery: data.pay_at_delivery,
+                is_in_discount: data.is_in_discount,
+                discount_price: data.discount_price,
+                fields: data.fields,
+                images: data.images,
+            }
         })
         return res.status(200).send()
     } catch (err) {
