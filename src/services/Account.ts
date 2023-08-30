@@ -44,7 +44,7 @@ export async function create_book(req: Request, res: Response) {
             b_number: z.string(),
             createdAt: z.coerce.date(),
             customer: z.string(), // customer
-            bet: z.number().min(300, "Montant de la mise invalide")
+            bet: z.number().min(300, "Montant de la mise invalide").default(300)
         });
 
         const validation_result = schema.safeParse(req.body);

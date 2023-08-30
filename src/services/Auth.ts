@@ -169,11 +169,11 @@ export async function set_financepro_id(req: Request, res: Response) {
         const schema = z.object({
             agentId: z.string(),
             user_id: z.string(),
-            finance_pro_id: z.string()
+            // finance_pro_id: z.string()
         });
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: JSON.parse(validation_result.error.message) })
-        const { agentId, user_id, finance_pro_id } = validation_result.data
+        const { agentId, user_id } = validation_result.data
         const targetted_user = await prisma.user.findUnique({
             where: {
                 id: user_id
