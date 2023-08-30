@@ -86,7 +86,8 @@ export async function update(req: Request, res: Response) {
             is_in_discount: z.boolean().optional(),
             discount_price: z.number().optional(),
             fields: z.string().optional(),
-            images: z.array(z.string()).optional()
+            images: z.array(z.string()).optional(),
+            description: z.string(),
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
@@ -114,6 +115,7 @@ export async function update(req: Request, res: Response) {
                 discount_price: data.discount_price,
                 fields: data.fields,
                 images: data.images,
+                description: data.description,
             }
         })
         return res.status(200).send()
