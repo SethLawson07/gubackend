@@ -207,7 +207,7 @@ export async function contribute(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
         let data = validation_result.data;
         const book = await opened_book(user);
-        var result = await sheet_contribute(user, data.amount);
+        var result = await sheet_contribute(user, data.amount, "paid");
         const userAccount = await prisma.account.findFirst({ where: { user: user.id } });
         var crtCtrtion: Contribution;
         if (!result.error) {
@@ -325,6 +325,6 @@ export const contribtest = async (req: Request, res: Response) => {
     // var sheet = await opened_sheet(user);
     // var calc = data.amount / sheet.data?.bet!;
     // const emptycase = await empty_case(user);
-    var result = await sheet_contribute(user, data.amount);
+    var result = await sheet_contribute(user, data.amount, "paid");
     return res.status(200).send({ data: result });
 }

@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
 import { store } from "../utils/store";
+import { opened_book, sheet_contribute, sheet_contribute_mobile } from "../utils";
+import { Contribution } from "@prisma/client";
 
 
 export async function momo_payment_event(req: Request, res: Response) {
@@ -104,52 +106,51 @@ export async function payment_event(req: Request, res: Response) {
 
 
 export async function contribution_event(req: Request, res: Response) {
-    // console.log(req.params.data);
-    let buff = Buffer.from(req.params.data, 'base64');
-    let text = buff.toString('ascii');
-    let textTK = JSON.parse(text);
-    console.log(textTK.createdAt);
-    return res.status(200).send();
-    // try {
-    //     const userid = req.params.id;
-    //     const params = req.params.data;
-    //     let buff = Buffer.from(params, 'base64');
-    //     let text = buff.toString('ascii');
-    //     console.log(text);
-    //     let result = { error: true, status: 'unpaid' };
-    //     const schema = z.object({
-    //         cpm_amount: z.string(),
-    //         cpm_trans_id: z.string(),
-    //         payment_method: z.string(),
-    //         cel_phone_num: z.string(),
-    //         cpm_error_message: z.string(),
-    //         cpm_trans_date: z.string()
-    //     })
-    //     const validation_result = schema.safeParse(req.body)
-    //     if (!validation_result.success) {
-    //         console.log(`Error while parsing response from cinet pay ${req.body}`)
-    //         return res.status(500).send()
-    //     }
-    //     const { data } = validation_result
-    //     if (store.includes(data.cpm_trans_id)) {
-    //         console.log(`Found duplicate id in store ${data.cpm_trans_id} : Aborting processing`)
-    //         return res.status(409).send()
-    //     }
-    //     store.push(data.cpm_trans_id)
-    //     if (data.cpm_error_message === "SUCCES") {
-    //         result.status = "paid";
-    //         result.error = false;
-    //         console.log("Validation completed")
-    //         await prisma.transaction.create({
-    //             data: {
-    //                 user: userid, amount: parseInt(data.cpm_amount), date: data.cpm_trans_date,
-    //             }
-    //         })
-    //     }
-    //     console.log(`A payment failed`)
-    //     return result;
-    // } catch (err) {
-    //     console.error(`Error while handling payment event ${err}`)
-    //     return res.status(500).send()
-    // }
+    try {
+        let buffer = Buffer.from(req.params.data, 'base64');
+        let text = buffer.toString('ascii');
+        let data = JSON.parse(text);
+        const schema = z.object({
+            cpm_amount: z.string(),
+            cpm_trans_id: z.string(),
+            payment_method: z.string(),
+            cel_phone_num: z.string(),
+            cpm_error_message: z.string(),
+            cpm_trans_date: z.string()
+        });
+        const validation_result = schema.safeParse(req.body)
+        if (!validation_result.success) {
+            console.log(`Error while parsing response from cinet pay ${req.body}`)
+            return res.status(500).send()
+        }
+        // if (data.cpm_error_message === "SUCCES") {
+        //     const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
+        //     const book = await opened_book(targetedUser!);
+        //     // console.log(book);
+        //     var result = await sheet_contribute_mobile(data.customer, data.amount, "awaiting");
+        //     const userAccount = await prisma.account.findFirst({ where: { user: data.customer } });
+        //     var crtCtrtion: Contribution;
+        //     if (!result.error) {
+        //         await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
+        //         // crtCtrtion = await prisma.contribution.create({
+        //         //     data: {
+        //         //         account: userAccount?.id!,
+        //         //         createdAt: data.createdAt,
+        //         //         customer: data.customer,
+        //         //         paymentmethod: data.p_method,
+        //         //         status: "aawaiting",
+        //         //         agent: data.agent,
+        //         //     }
+        //         // });
+        //         return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
+        //     } else {
+        //         console.log("Error");
+        //         return res.status(200).send({ error: result.error, message: result.message, data: {} });
+        //     }
+        // }
+        console.log(`A payment failed`)
+    } catch (err) {
+        console.error(`Error while handling payment event ${err}`)
+        return res.status(500).send()
+    }
 }
