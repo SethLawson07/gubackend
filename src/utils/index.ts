@@ -107,7 +107,7 @@ export const create_sheets = (book: Book, bet: number, date: Date): Sheet[] => {
             bet: bet,
             book: book.id,
             status: "notopened",
-            index: index + 1,
+            index: index,
         } as Sheet;
         return sheet;
     }) as Sheet[];
@@ -119,18 +119,44 @@ export function create_cases(sheet: string): Case[] {
             id: geneObjectId(),
             contributionStatus: "unpaid",
             sheet: sheet,
-            index: index + 1,
+            index: index,
         } as Case;
         return _case;
     }) as Case[];
 }
 
-export function update_sheets(sheets: Sheet[], sheetid: string, openedat: Date, bet: number) {
+// Carnet ouver
+export async function opened_book(user: User) {
+    return await prisma.book.findFirst({ where: { customer: user.id, status: "opened" } });
+}
+
+// Feuille ouverte
+export async function opened_sheet(user: User) {
+    const book = await opened_book(user);
+    var sheetOpened = book!.sheets.find((st) => st.status === "opened");
+    if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte", data: {} }
+    return { error: false, message: "", data: sheetOpened };
+}
+
+// Feuille à ouvrir
+export async function sheet_to_open(user: User) {
+    var book = (await opened_book(user));
+    var sheetToOpen: Sheet;
+    const findLastClosedSheet = book!.sheets.find((st) => st.status === "closed");
+    if (!findLastClosedSheet) {
+        sheetToOpen = book!.sheets[0];
+    } else sheetToOpen = book!.sheets[findLastClosedSheet.index];
+    return { error: false, data: sheetToOpen };
+}
+
+// Open sheet
+export async function update_sheets(user: User, openedat: Date, bet: number) {
     let error: boolean = false;
     let message: string = "";
-    let updated_sheets: Sheet[] = sheets;
-    let sheet: Sheet | undefined = sheets.find(st => st.id === sheetid);
-    let sheetIndex = sheets.findIndex(e => e.id === sheetid);
+    const sheets = (await opened_book(user))!.sheets;
+    const sheet: Sheet = (await sheet_to_open(user)).data;
+    let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+    let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     if (sheet) {
         if (sheetIndex == 0) { sheet.status = "opened"; sheet.openedAt = new Date(openedat); sheet.bet = bet }
         else {
@@ -141,9 +167,7 @@ export function update_sheets(sheets: Sheet[], sheetid: string, openedat: Date, 
             }
         }
     } else { error = true, message = "Vous ne pouvez pas encore créer de feuille" }
-
     updated_sheets[sheetIndex] = sheet!;
-
     return { error, message, updated_sheets };
 }
 
