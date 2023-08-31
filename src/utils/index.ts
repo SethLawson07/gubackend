@@ -152,7 +152,7 @@ export async function empty_case(user: User) {
     var lastContributedCase: Case;
     var sheetOpened = book!.sheets.find((st) => st.status === "opened");
     if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte" }
-    const lctCase = sheetOpened.cases.find((cse) => cse.contributionStatus === "paid"); // lct for LastContributedCase
+    const lctCase = sheetOpened.cases.findLast(cse => cse.contributionStatus == "paid"); // lct for LastContributedCase
     if (!lctCase || lctCase == undefined) {
         lastContributedCase = sheetOpened.cases[0];
     } else lastContributedCase = sheetOpened.cases[lctCase.index];
@@ -205,10 +205,8 @@ export async function sheet_contribute(user: User, amount: number) {
     if (!utilisIsInt(nbCases)) {
         return { error: true, message: "Montant saisie invalide" };
     }
-    for (let i = emptycase.index - 1; i < nbCases; i++) {
-        sheet.cases[i] = { ...sheet.cases[i], contributionStatus: "paid" };
-    }
-    console.log(sheet);
+    var targetdIndex = emptycase.index == 0 ? emptycase.index : emptycase.index + 1;
+    for (let i = 0; i < nbCases; i++) sheet.cases[i + targetdIndex].contributionStatus = "paid";
     updated_sheets[sheetIndex] = sheet!;
     return { error, message, updated_sheets };
 }
