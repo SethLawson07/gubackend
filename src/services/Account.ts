@@ -50,7 +50,7 @@ export async function create_book(req: Request, res: Response) {
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
         let b_data = validation_result.data;
-        const bookOpenedVerification = await prisma.book.findFirst({ where: { status: "opened" } });
+        const bookOpenedVerification = await prisma.book.findFirst({ where: { status: "opened", customer: validation_result.data.customer } });
         if (bookOpenedVerification) return res.status(400).send({ error: true, message: "Vous ne pouvez pas encore créé de carnet", data: {} })
         var created_book = await prisma.book.create({
             data: {
