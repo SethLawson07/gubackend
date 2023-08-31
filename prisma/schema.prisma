@@ -197,9 +197,9 @@ model Contribution {
     customer      String
     agent         String?
     admin         String?
-    book          String
-    case          String
-    sheet         String
+    // book          String
+    // case          String
+    // sheet         String
     account       String
     createdAt     DateTime
     paymentmethod String // agent,tmoney,moovmoney

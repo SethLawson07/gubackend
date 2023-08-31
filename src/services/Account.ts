@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
-import { close_sheets, create_sheets, opened_book, opened_sheet, sendPushNotification, sheet_to_open, update_case, update_sheets } from "../utils";
-import { Sheet, User } from "@prisma/client";
+import { close_sheets, create_sheets, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, update_case, update_sheets, utilisIsInt } from "../utils";
+import { Contribution, Sheet, User } from "@prisma/client";
 
 
 export async function create_account(req: Request, res: Response) {
@@ -195,6 +195,43 @@ export async function close_sheet(req: Request, res: Response) {
     }
 }
 
+export async function contribute(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            amount: z.number(),
+            createdAt: z.coerce.date(),
+            p_method: z.string(),
+        });
+        const validation_result = schema.safeParse(req.body);
+        const { user } = req.body.user as { user: User };
+        if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
+        let data = validation_result.data;
+        const book = await opened_book(user);
+        var result = await sheet_contribute(user, data.amount);
+        const userAccount = await prisma.account.findFirst({ where: { user: user.id } });
+        var crtCtrtion: Contribution;
+        if (!result.error) {
+            await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
+            crtCtrtion = await prisma.contribution.create({
+                data: {
+                    account: userAccount?.id!,
+                    createdAt: data.createdAt,
+                    customer: user.id,
+                    paymentmethod: data.p_method,
+                    status: "aawaiting",
+                    agent: user.agentId
+                }
+            });
+            return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
+        } else {
+            return res.status(200).send({ error: result.error, message: result.message, data: {} });
+        }
+    } catch (e) {
+        console.log(e)
+        return res.status(500).send({ error: true, message: "Une erreur interne est survenue" });
+    }
+}
+
 
 export async function make_contribution(req: Request, res: Response) {
     try {
@@ -217,9 +254,9 @@ export async function make_contribution(req: Request, res: Response) {
         let created_contrib = await prisma.contribution.create({
             data: {
                 account: data.account,
-                book: data.b_id,
-                sheet: data.c_id,
-                case: data.c_id,
+                // book: data.b_id,
+                // sheet: data.c_id,
+                // case: data.c_id,
                 createdAt: data.createdAt,
                 customer: user.id,
                 paymentmethod: data.p_method,
@@ -266,8 +303,8 @@ export async function validate_contribution(req: Request, res: Response) {
 
 
 export const contribtest = async (req: Request, res: Response) => {
-    const { amount, openedAt } = req.body;
-    const { user } = req.body.user as { user: User };
+    // const { amount, openedAt } = req.body;
+    // const { user } = req.body.user as { user: User };
     // const book = await prisma.book.findFirst({ where: { customer: user.id, status: "opened" } });
     // if (!book) res.status(400).send({ error: true, message: "Une erreur est survenue", data: {} });
     // var sheetToOpen: Sheet;
@@ -276,5 +313,18 @@ export const contribtest = async (req: Request, res: Response) => {
     //     sheetToOpen = book!.sheets[0];
     // } else sheetToOpen = book!.sheets[findLastClosedSheet.index];
     // var updated_sheets = await update_sheets(user, openedAt, 500);
-    res.status(200).send({ data: await opened_sheet(user) });
+    const schema = z.object({
+        amount: z.number().min(300),
+        createdAt: z.coerce.date(),
+        p_method: z.string(),
+    });
+    const validation_result = schema.safeParse(req.body);
+    const { user } = req.body.user as { user: User };
+    if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
+    let data = validation_result.data;
+    // var sheet = await opened_sheet(user);
+    // var calc = data.amount / sheet.data?.bet!;
+    // const emptycase = await empty_case(user);
+    var result = await sheet_contribute(user, data.amount);
+    return res.status(200).send({ data: result });
 }

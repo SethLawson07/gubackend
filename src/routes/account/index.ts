@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin, UserIsCustomer } from "../../utils/middlewares";
-import { check_for_opened_sheet, close_sheet, contribtest, create_account, create_book, get_book, get_books, get_opened_book, get_sheet, make_contribution, open_sheet } from "../../services/Account";
+import { check_for_opened_sheet, close_sheet, contribtest, contribute, create_account, create_book, get_book, get_books, get_opened_book, get_sheet, make_contribution, open_sheet } from "../../services/Account";
 
 const router = Router();
 
@@ -14,7 +14,7 @@ router.route("/opensheet").post(Auth, UserIsCustomer, open_sheet);
 
 router.route("/closesheet").post(Auth, UserIsCustomer, close_sheet);
 
-router.route("/contribute").post(Auth, UserIsCustomer, make_contribution);
+router.route("/contribute").post(Auth, UserIsCustomer, contribute);
 
 router.route("/books").post(Auth, UserIsCustomer, get_books);
 

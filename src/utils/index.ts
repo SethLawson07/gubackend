@@ -95,6 +95,14 @@ export async function create_promocode_usage(promocodes: string[], user: string)
     })
 }
 
+export function utilisIsInt(n: number) {
+    return Number(n) === n && n % 1 === 0;
+}
+
+export function utilsIsFloat(n: number) {
+    return Number(n) === n && n % 1 !== 0;
+}
+
 export function geneObjectId() { return (new ObjectId()).toString(); }
 
 export const create_sheets = (book: Book, bet: number, date: Date): Sheet[] => {
@@ -134,8 +142,21 @@ export async function opened_book(user: User) {
 export async function opened_sheet(user: User) {
     const book = await opened_book(user);
     var sheetOpened = book!.sheets.find((st) => st.status === "opened");
-    if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte", data: {} }
-    return { error: false, message: "", data: sheetOpened };
+    if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte" }
+    return { error: false, message: "", data: sheetOpened as Sheet };
+}
+
+// Case remplie
+export async function empty_case(user: User) {
+    const book = await opened_book(user);
+    var lastContributedCase: Case;
+    var sheetOpened = book!.sheets.find((st) => st.status === "opened");
+    if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte" }
+    const lctCase = sheetOpened.cases.find((cse) => cse.contributionStatus === "paid"); // lct for LastContributedCase
+    if (!lctCase || lctCase == undefined) {
+        lastContributedCase = sheetOpened.cases[0];
+    } else lastContributedCase = sheetOpened.cases[lctCase.index];
+    return { error: false, data: lastContributedCase as Case }
 }
 
 // Feuille à ouvrir
@@ -167,6 +188,27 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
             }
         }
     } else { error = true, message = "Vous ne pouvez pas encore créer de feuille" }
+    updated_sheets[sheetIndex] = sheet!;
+    return { error, message, updated_sheets };
+}
+
+// Update sheet for contribution
+export async function sheet_contribute(user: User, amount: number) {
+    let error: boolean = false;
+    let message: string = "";
+    const sheets = (await opened_book(user))!.sheets;
+    const sheet: Sheet = (await sheet_to_open(user)).data;
+    let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+    let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
+    const emptycase: Case = (await empty_case(user)).data!;
+    var nbCases = amount / sheet.bet!;
+    if (!utilisIsInt(nbCases)) {
+        return { error: true, message: "Montant saisie invalide" };
+    }
+    for (let i = emptycase.index - 1; i < nbCases; i++) {
+        sheet.cases[i] = { ...sheet.cases[i], contributionStatus: "paid" };
+    }
+    console.log(sheet);
     updated_sheets[sheetIndex] = sheet!;
     return { error, message, updated_sheets };
 }
