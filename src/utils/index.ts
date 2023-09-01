@@ -176,6 +176,7 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
     let error: boolean = false;
     let message: string = "";
     const sheets = (await opened_book(user))!.sheets;
+    console.log(sheets);
     const sheet: Sheet = (await sheet_to_open(user)).data;
     let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);

@@ -138,7 +138,7 @@ export async function open_sheet(req: Request, res: Response) {
         const { user } = req.body.user as { user: User };
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
         const book = await opened_book(user);
-        const sheets = await update_sheets(user, validation_result.data.openedAt, 500);
+        const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
         await prisma.book.update({ where: { id: book!.id }, data: { sheets: sheets.updated_sheets } });
         return res.status(200).send({ error: false, message: "Feuille ouverte", data: {} });
     } catch (e) {
