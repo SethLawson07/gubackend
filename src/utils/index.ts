@@ -175,6 +175,7 @@ export async function sheet_to_open(user: User) {
 export async function update_sheets(user: User, openedat: Date, bet: number) {
     let error: boolean = false;
     let message: string = "";
+    console.log((await opened_book(user)));
     const sheets = (await opened_book(user))!.sheets;
     console.log(sheets);
     const sheet: Sheet = (await sheet_to_open(user)).data;
