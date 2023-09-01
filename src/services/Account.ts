@@ -233,52 +233,52 @@ export async function contribute(req: Request, res: Response) {
 }
 
 
-export async function make_contribution(req: Request, res: Response) {
-    try {
-        const schema = z.object({
-            b_id: z.string(),
-            s_id: z.string(),
-            c_id: z.string(),
-            account: z.string(),
-            amount: z.number(),
-            createdAt: z.coerce.date(),
-            p_method: z.string(),
-        });
+// export async function make_contribution(req: Request, res: Response) {
+//     try {
+//         const schema = z.object({
+//             b_id: z.string(),
+//             s_id: z.string(),
+//             c_id: z.string(),
+//             account: z.string(),
+//             amount: z.number(),
+//             createdAt: z.coerce.date(),
+//             p_method: z.string(),
+//         });
 
-        const validation_result = schema.safeParse(req.body);
-        const { user } = req.body.user as { user: User };
-        if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
-        let data = validation_result.data;
-        let targeted_book = await prisma.book.findUnique({ where: { id: data.b_id } });
-        if (!targeted_book) return res.status(404).send({ error: true, message: "Book not found" });
-        let created_contrib = await prisma.contribution.create({
-            data: {
-                account: data.account,
-                // book: data.b_id,
-                // sheet: data.c_id,
-                // case: data.c_id,
-                createdAt: data.createdAt,
-                customer: user.id,
-                paymentmethod: data.p_method,
-                status: "aawaiting",
-                agent: user.agentId
-            }
-        });
-        if (created_contrib) {
-            const target_sheet = update_case(targeted_book.sheets, data.s_id, data.c_id, "awaiting");
-            if (target_sheet.error) return res.status(400).send({ error: true, message: target_sheet.message });
-            await prisma.book.update({ where: { id: data.b_id, }, data: { sheets: target_sheet.updated_sheets } });
-            let targeted_agent = await prisma.user.findFirst({ where: { id: user.agentId! } });
-            if (targeted_agent) { await sendPushNotification(targeted_agent.device_token, "Demande de cotisation", `Le client ${user.user_name} vient de cotiser`) };
-            return res.status(201).send({ status: 201, error: false, message: 'Feuille bloquée', data: targeted_book, });
-        }
-        return res.status(400).send({ error: true, message: "Une erreur s'est produite", data: {}, });
-    } catch (err) {
-        console.log(err);
-        console.log("Error while ... action");
-        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
-    }
-}
+//         const validation_result = schema.safeParse(req.body);
+//         const { user } = req.body.user as { user: User };
+//         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
+//         let data = validation_result.data;
+//         let targeted_book = await prisma.book.findUnique({ where: { id: data.b_id } });
+//         if (!targeted_book) return res.status(404).send({ error: true, message: "Book not found" });
+//         let created_contrib = await prisma.contribution.create({
+//             data: {
+//                 account: data.account,
+//                 // book: data.b_id,
+//                 // sheet: data.c_id,
+//                 // case: data.c_id,
+//                 createdAt: data.createdAt,
+//                 customer: user.id,
+//                 paymentmethod: data.p_method,
+//                 status: "aawaiting",
+//                 agent: user.agentId
+//             }
+//         });
+//         if (created_contrib) {
+//             const target_sheet = update_case(targeted_book.sheets, data.s_id, data.c_id, "awaiting");
+//             if (target_sheet.error) return res.status(400).send({ error: true, message: target_sheet.message });
+//             await prisma.book.update({ where: { id: data.b_id, }, data: { sheets: target_sheet.updated_sheets } });
+//             let targeted_agent = await prisma.user.findFirst({ where: { id: user.agentId! } });
+//             if (targeted_agent) { await sendPushNotification(targeted_agent.device_token, "Demande de cotisation", `Le client ${user.user_name} vient de cotiser`) };
+//             return res.status(201).send({ status: 201, error: false, message: 'Feuille bloquée', data: targeted_book, });
+//         }
+//         return res.status(400).send({ error: true, message: "Une erreur s'est produite", data: {}, });
+//     } catch (err) {
+//         console.log(err);
+//         console.log("Error while ... action");
+//         return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
+//     }
+// }
 
 
 export async function validate_contribution(req: Request, res: Response) {
@@ -304,7 +304,7 @@ export async function validate_contribution(req: Request, res: Response) {
 
 export const contribtest = async (req: Request, res: Response) => {
     // const { amount, openedAt } = req.body;
-    // const { user } = req.body.user as { user: User };
+    const { user } = req.body.user as { user: User };
     // const book = await prisma.book.findFirst({ where: { customer: user.id, status: "opened" } });
     // if (!book) res.status(400).send({ error: true, message: "Une erreur est survenue", data: {} });
     // var sheetToOpen: Sheet;
@@ -313,18 +313,19 @@ export const contribtest = async (req: Request, res: Response) => {
     //     sheetToOpen = book!.sheets[0];
     // } else sheetToOpen = book!.sheets[findLastClosedSheet.index];
     // var updated_sheets = await update_sheets(user, openedAt, 500);
-    const schema = z.object({
-        amount: z.number().min(300),
-        createdAt: z.coerce.date(),
-        p_method: z.string(),
-    });
-    const validation_result = schema.safeParse(req.body);
-    const { user } = req.body.user as { user: User };
-    if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
-    let data = validation_result.data;
-    // var sheet = await opened_sheet(user);
-    // var calc = data.amount / sheet.data?.bet!;
-    // const emptycase = await empty_case(user);
-    var result = await sheet_contribute(user, data.amount, "paid");
-    return res.status(200).send({ data: result });
+    // const schema = z.object({
+    //     amount: z.number().min(300),
+    //     createdAt: z.coerce.date(),
+    //     p_method: z.string(),
+    // });
+    // const validation_result = schema.safeParse(req.body);
+    // const { user } = req.body.user as { user: User };
+    // if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
+    // let data = validation_result.data;
+    // // var sheet = await opened_sheet(user);
+    // // var calc = data.amount / sheet.data?.bet!;
+    // // const emptycase = await empty_case(user);
+    // var result = await sheet_contribute(user, data.amount, "paid");
+    const book = await opened_book(user);
+    return res.status(200).send({ data: user });
 }
