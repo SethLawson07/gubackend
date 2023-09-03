@@ -134,7 +134,7 @@ export async function contribution_event(req: Request, res: Response) {
                     data: {
                         account: userAccount?.id!,
                         createdAt: data.createdAt,
-                        customer: { create: targetedUser! },
+                        userId: targetedUser?.id!,
                         pmethod: data.p_method,
                         awaiting: "none",
                         status: "paid",

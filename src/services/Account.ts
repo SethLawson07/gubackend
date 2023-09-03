@@ -5,7 +5,7 @@ import { fromZodError } from 'zod-validation-error';
 import { allContributions, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
 import { Contribution, Sheet, User } from "@prisma/client";
 
-
+// Créer un compte tontine ou depot utilisateur
 export async function create_account(req: Request, res: Response) {
     try {
         // a refers to account
@@ -36,7 +36,7 @@ export async function create_account(req: Request, res: Response) {
     }
 }
 
-
+// Créer un carnet
 export async function create_book(req: Request, res: Response) {
     try {
         // b refers to book
@@ -74,6 +74,7 @@ export async function create_book(req: Request, res: Response) {
     }
 }
 
+// Liste de tous les carnets
 export async function get_books(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
@@ -87,7 +88,7 @@ export async function get_books(req: Request, res: Response) {
     }
 }
 
-
+// Trouver un carnet
 export async function get_book(req: Request, res: Response) {
     try {
         let bookid = req.params.id;
@@ -116,6 +117,7 @@ export async function get_opened_book(req: Request, res: Response) {
     }
 }
 
+// Trouver la feuille ouverte
 export async function check_for_opened_sheet(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
@@ -127,7 +129,7 @@ export async function check_for_opened_sheet(req: Request, res: Response) {
     }
 }
 
-
+// Ouvrir une feuille
 export async function open_sheet(req: Request, res: Response) {
     try {
         const schema = z.object({
@@ -147,6 +149,7 @@ export async function open_sheet(req: Request, res: Response) {
     }
 }
 
+// Trouver une feuille
 export async function get_sheet(req: Request, res: Response) {
     try {
         const schema = z.object({
@@ -168,6 +171,7 @@ export async function get_sheet(req: Request, res: Response) {
 }
 
 
+// Bloquer la feuile
 export async function close_sheet(req: Request, res: Response) {
     try {
         const schema = z.object({
@@ -195,6 +199,7 @@ export async function close_sheet(req: Request, res: Response) {
     }
 }
 
+// Cotiser
 export async function contribute(req: Request, res: Response) {
     try {
         const schema = z.object({
@@ -215,7 +220,7 @@ export async function contribute(req: Request, res: Response) {
                 data: {
                     account: userAccount?.id!,
                     createdAt: data.createdAt,
-                    customer: { create: user },
+                    userId: user.id,
                     pmethod: data.p_method,
                     status: "awaiting",
                     awaiting: "agent",
@@ -241,7 +246,7 @@ export async function contribute(req: Request, res: Response) {
     }
 }
 
-
+// Validate contribution
 export async function validate_contribution(req: Request, res: Response) {
     try {
         const contribution = req.params.id;
@@ -281,6 +286,7 @@ export async function validate_contribution(req: Request, res: Response) {
     }
 }
 
+// Liste des cotisations utilisateurs
 export async function user_contributions(req: Request, res: Response) {
     const { user } = req.body.user as { user: User };
     var contributions: Object[];
@@ -300,7 +306,7 @@ export async function user_contributions(req: Request, res: Response) {
     return res.status(200).send({ error: false, message: "Requête aboutie", data: contributions! })
 }
 
-
+// Trouver une cotisation
 export async function target_contribution(req: Request, res: Response) {
     const contribution = req.params.id;
     var targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
@@ -308,6 +314,7 @@ export async function target_contribution(req: Request, res: Response) {
     return res.status(200).send({ error: false, message: "Request end", data: { ...targeted_contribution, customer: JSON.stringify(targeted_user) } });
 }
 
+// Test for all
 export const contribtest = async (req: Request, res: Response) => {
     // const { amount, openedAt } = req.body;
     const { user } = req.body.user as { user: User };

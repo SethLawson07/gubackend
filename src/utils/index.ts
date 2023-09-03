@@ -9,6 +9,7 @@ import { json } from "express";
 import admin from "firebase-admin";
 import serviceAccount from '../token/goodpay-86d48-c5c79b945b8f.json';
 import { MessagingPayload, TokenMessage } from "firebase-admin/lib/messaging/messaging-api";
+import dayjs from "dayjs";
 
 //
 const firebaseServiceAccountParams = {
@@ -309,37 +310,27 @@ export function update_case(sheets: Sheet[], sheetid: string, caseid: string, st
     return { error, message, updated_sheets };
 }
 
+// Timestamp from string || Date
+export function todate(date: Date) {
+    const djsdate = dayjs(date).format("MM/DD/YYYY");
+    const tdate = new Date(djsdate);
+    const dtime = tdate.getTime();
+    return dtime;
+}
+
 // Customer contributions
 export async function customerContributions(user: User): Promise<Contribution[]> {
-    return await prisma.contribution.findMany({ where: { customer: user } });
+    return prisma.contribution.findMany({ where: { customer: user }, include: { customer: true } });
 }
 
 // Agent contributions
 export async function userAgentContributions(user: User) {
-    // let contributions: Contribution[] = [];
-    // let ctbts = await prisma.contribution.findMany({ where: { agent: user.id } });
-    // if (ctbts) {
-    //     for (const cbt of ctbts) {
-    //         let customer = await prisma.user.findUnique({ where: { id: cbt.userId } });
-    //         contributions.push({ ...cbt, customer: JSON.stringify(customer!) });
-    //     }
-    // }
-    // return contributions!;
-    return await prisma.contribution.findMany({ where: { agent: user.id } });
+    return await prisma.contribution.findMany({ where: { agent: user.id }, include: { customer: true } });
 }
 
 // all
 export async function allContributions(): Promise<Contribution[]> {
-    // let contributions: Contribution[] = [];
-    // let ctbts = await prisma.contribution.findMany();
-    // if (ctbts) {
-    //     for (const cbt of ctbts) {
-    //         let customer = await prisma.user.findUnique({ where: { id: cbt.customer } });
-    //         contributions.push({ ...cbt, customer: JSON.stringify(customer!) });
-    //     }
-    // }
-    // return contributions!;
-    return await prisma.contribution.findMany();
+    return await prisma.contribution.findMany({ include: { customer: true } });
 }
 
 const notificationdata = {
