@@ -130,10 +130,11 @@ export async function contribution_event(req: Request, res: Response) {
             const userAccount = await prisma.account.findFirst({ where: { user: data.customer } });
             var crtCtrtion: Contribution; // CreatedContribution
             if (!result.error) {
+                console.log(result);
                 crtCtrtion = await prisma.contribution.create({
                     data: {
                         account: userAccount?.id!,
-                        createdAt: data.createdAt,
+                        createdAt: data.createdAt.toString(),
                         userId: targetedUser?.id!,
                         pmethod: data.p_method,
                         awaiting: "none",
@@ -143,6 +144,7 @@ export async function contribution_event(req: Request, res: Response) {
                         agent: data.agent,
                     }
                 });
+                console.log(crtCtrtion);
                 if (crtCtrtion) {
                     const targeted_acount = await prisma.account.findFirst({ where: { user: data.customer } });
                     await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: targeted_acount?.amount! + data.amount } });
