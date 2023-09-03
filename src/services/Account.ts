@@ -301,6 +301,13 @@ export async function user_contributions(req: Request, res: Response) {
 }
 
 
+export async function target_contribution(req: Request, res: Response) {
+    const contribution = req.params.id;
+    var targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
+    var targeted_user = await prisma.user.findUnique({ where: { id: targeted_contribution!.customer } });
+    return res.status(200).send({ error: false, message: "Request end", data: { user: targeted_user, contribution: targeted_contribution! } });
+}
+
 export const contribtest = async (req: Request, res: Response) => {
     // const { amount, openedAt } = req.body;
     const { user } = req.body.user as { user: User };
