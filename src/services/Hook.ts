@@ -4,6 +4,7 @@ import { prisma } from "../server";
 import { store } from "../utils/store";
 import { opened_book, sheet_contribute, sheet_contribute_mobile } from "../utils";
 import { Contribution } from "@prisma/client";
+import dayjs from "dayjs";
 
 
 export async function momo_payment_event(req: Request, res: Response) {
@@ -134,7 +135,7 @@ export async function contribution_event(req: Request, res: Response) {
                 crtCtrtion = await prisma.contribution.create({
                     data: {
                         account: userAccount?.id!,
-                        createdAt: data.createdAt.toString(),
+                        createdAt: new Date(dayjs(data.createdAt).format("MM/DD/YYYY")),
                         userId: targetedUser?.id!,
                         pmethod: data.p_method,
                         awaiting: "none",
@@ -144,7 +145,7 @@ export async function contribution_event(req: Request, res: Response) {
                         agent: data.agent,
                     }
                 });
-                console.log(crtCtrtion);
+                console.log(data.amount);
                 if (crtCtrtion) {
                     const targeted_acount = await prisma.account.findFirst({ where: { user: data.customer } });
                     await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: targeted_acount?.amount! + data.amount } });
