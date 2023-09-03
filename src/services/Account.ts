@@ -250,7 +250,7 @@ export async function validate_contribution(req: Request, res: Response) {
         if (targeted_contribution) {
             const customer = await prisma.user.findUnique({ where: { id: targeted_contribution.customer! } });
             const status = user.role == "admin" ? "paid" : "awaiting";
-            const book = await opened_book(user);
+            const book = await opened_book(customer!);
             var result = await sheet_validate(customer!, targeted_contribution.cases, status);
             var validated: Contribution;
             if (!result.error) {
