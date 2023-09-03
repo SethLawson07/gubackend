@@ -123,7 +123,7 @@ export async function contribution_event(req: Request, res: Response) {
             console.log(`Error while parsing response from cinet pay ${req.body}`)
             return res.status(500).send()
         }
-        if (data.cpm_error_message === "SUCCES") {
+        if (!(data.cpm_error_message === "SUCCES")) {
             const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
             const book = await opened_book(targetedUser!);
             var result = await sheet_contribute(data.customer, data.amount, data.p_method);
