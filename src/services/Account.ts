@@ -283,7 +283,7 @@ export async function validate_contribution(req: Request, res: Response) {
 
 export async function user_contributions(req: Request, res: Response) {
     const { user } = req.body.user as { user: User };
-    var contributions: Contribution[];
+    var contributions: Object[];
     switch (user.role) {
         case "customer":
             contributions = await customerContributions(user);

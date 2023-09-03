@@ -315,8 +315,16 @@ export async function customerContributions(user: User): Promise<Contribution[]>
 }
 
 // Agent contributions
-export async function userAgentContributions(user: User): Promise<Contribution[]> {
-    return await prisma.contribution.findMany({ where: { agent: user.id } });
+export async function userAgentContributions(user: User) {
+    let contributions: Contribution[] = [];
+    let ctbts = await prisma.contribution.findMany({ where: { agent: user.id } });
+    if (ctbts) {
+        for (const cbt of ctbts) {
+            let customer = await prisma.user.findUnique({ where: { id: cbt.customer } });
+            contributions.push({ ...cbt, customer: JSON.stringify(customer!) });
+        }
+    }
+    return contributions!;
 }
 
 // all
