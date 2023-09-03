@@ -305,7 +305,7 @@ export async function target_contribution(req: Request, res: Response) {
     const contribution = req.params.id;
     var targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
     var targeted_user = await prisma.user.findUnique({ where: { id: targeted_contribution!.customer } });
-    return res.status(200).send({ error: false, message: "Request end", data: { user: targeted_user, contribution: targeted_contribution! } });
+    return res.status(200).send({ error: false, message: "Request end", data: { ...targeted_contribution, customer: JSON.stringify(targeted_user) } });
 }
 
 export const contribtest = async (req: Request, res: Response) => {
