@@ -123,31 +123,39 @@ export async function contribution_event(req: Request, res: Response) {
             console.log(`Error while parsing response from cinet pay ${req.body}`)
             return res.status(500).send()
         }
-        // if (data.cpm_error_message === "SUCCES") {
-        //     const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
-        //     const book = await opened_book(targetedUser!);
-        //     // console.log(book);
-        //     var result = await sheet_contribute_mobile(data.customer, data.amount, "awaiting");
-        //     const userAccount = await prisma.account.findFirst({ where: { user: data.customer } });
-        //     var crtCtrtion: Contribution;
-        //     if (!result.error) {
-        //         await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
-        //         // crtCtrtion = await prisma.contribution.create({
-        //         //     data: {
-        //         //         account: userAccount?.id!,
-        //         //         createdAt: data.createdAt,
-        //         //         customer: data.customer,
-        //         //         paymentmethod: data.p_method,
-        //         //         status: "aawaiting",
-        //         //         agent: data.agent,
-        //         //     }
-        //         // });
-        //         return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
-        //     } else {
-        //         console.log("Error");
-        //         return res.status(200).send({ error: result.error, message: result.message, data: {} });
-        //     }
-        // }
+        if (data.cpm_error_message === "SUCCES") {
+            const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
+            const book = await opened_book(targetedUser!);
+            var result = await sheet_contribute(data.customer, data.amount, data.p_method);
+            const userAccount = await prisma.account.findFirst({ where: { user: data.customer } });
+            var crtCtrtion: Contribution; // CreatedContribution
+            if (!result.error) {
+                crtCtrtion = await prisma.contribution.create({
+                    data: {
+                        account: userAccount?.id!,
+                        createdAt: data.createdAt,
+                        customer: data.customer,
+                        pmethod: data.p_method,
+                        awaiting: "none",
+                        status: "paid",
+                        amount: data.amount,
+                        cases: result.cases!,
+                        agent: data.agent,
+                    }
+                });
+                if (crtCtrtion) {
+                    const targeted_acount = await prisma.account.findFirst({ where: { user: data.customer } });
+                    await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: targeted_acount?.amount! + data.amount } });
+                    await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
+                    return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
+                } else {
+                    return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
+                }
+            } else {
+                console.log("Error");
+                return res.status(200).send({ error: result.error, message: result.message, data: {} });
+            }
+        }
         console.log(`A payment failed`)
     } catch (err) {
         console.error(`Error while handling payment event ${err}`)

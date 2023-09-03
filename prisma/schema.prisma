@@ -183,30 +183,18 @@ model Book {
     closeReason String?
 }
 
-// model Validation {
-//     id           String @id @default(auto()) @map("_id") @db.ObjectId
-//     contribution String
-//     customer     String
-//     case         String
-//     book         String
-//     sheet        String
-// }
-
 model Contribution {
-    id            String   @id @default(auto()) @map("_id") @db.ObjectId
-    customer      String
-    agent         String?
-    admin         String?
-    // book          String
-    // case          String
-    // sheet         String
-    account       String
-    createdAt     DateTime
-    paymentmethod String // agent,tmoney,moovmoney
-    status        String   @default("unpaid") //paid,unpaid, aawaiting, aawaiting
-    // customerHasPaid  Boolean? @default(false)
-    // agentHasValidate Boolean? @default(false)
-    // adminHasValidate Boolean? @default(false)
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    customer  String
+    cases     Int[]
+    amount    Float
+    agent     String?
+    admin     String?
+    account   String
+    createdAt DateTime
+    pmethod   String // (payment method)  agent,tmoney,moovmoney
+    awaiting  String // agent, admin, none
+    status    String   @default("unpaid") //paid, unpaid, awaiting
 }
 
 model Caroussel {

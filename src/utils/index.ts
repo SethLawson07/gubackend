@@ -196,8 +196,9 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
 }
 
 // Update sheet for contribution (Method: agent)
-export async function sheet_contribute(user: User, amount: number, status: string) {
-    console.log("Loading");
+export async function sheet_contribute(userid: string, amount: number, pmethod: string) {
+    const user = (await prisma.user.findUnique({ where: { id: userid } }))!;
+    const status = pmethod === "agent" ? "awaiting" : "paid";
     let error: boolean = false;
     let message: string = "";
     const sheets = (await opened_book(user))!.sheets;
@@ -207,12 +208,48 @@ export async function sheet_contribute(user: User, amount: number, status: strin
     const emptycase: Case = (await empty_case(user)).data!;
     var nbCases = amount / sheet.bet!;
     if (!utilisIsInt(nbCases)) return { error: true, message: "Montant saisie invalide" };
-    var targetdIndex = emptycase.index == 0 ? emptycase.index : emptycase.index + 1;
-    // for (let i = 0; i < nbCases; i++) sheet.cases[i + targetdIndex].contributionStatus = status;
-    for (let i = 0; i < nbCases; i++) sheet.cases[i + emptycase.index].contributionStatus = status;
+    if (emptycase.index === 30) return { error: "true", message: "Votre carnet est remplie" };
+    if (emptycase.index + nbCases > 30) return { error: "true", message: `Il ne reste plus que ${30 - emptycase.index}` };
+    let cases = [];
+    for (let i = 0; i < nbCases; i++) {
+        sheet.cases[i + emptycase.index].contributionStatus = status;
+        cases.push((emptycase.index + i));
+    };
+    updated_sheets[sheetIndex] = sheet!;
+    return { error, message, updated_sheets, cases };
+}
+
+// Update sheet for contribution (Method: agent)
+export async function sheet_validate(user: User, cases: number[], status: string) {
+    let error: boolean = false;
+    let message: string = "";
+    const sheets = (await opened_book(user))!.sheets;
+    const sheet: Sheet = (await sheet_to_open(user)).data;
+    let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+    let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
+    for (let i = 0; i < cases.length; i++) sheet.cases[cases[i]].contributionStatus = status;
     updated_sheets[sheetIndex] = sheet!;
     return { error, message, updated_sheets };
 }
+
+// // Update sheet for contribution (Method: agent)
+// export async function sheet_contribute(user: User, amount: number, status: string) {
+//     const targeted_user = await prisma.user.findUnique({ where: { id: user } });
+//     let error: boolean = false;
+//     let message: string = "";
+//     const sheets = (await opened_book(user))!.sheets;
+//     const sheet: Sheet = (await sheet_to_open(user)).data;
+//     let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+//     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
+//     const emptycase: Case = (await empty_case(user)).data!;
+//     var nbCases = amount / sheet.bet!;
+//     if (!utilisIsInt(nbCases)) return { error: true, message: "Montant saisie invalide" };
+//     var targetdIndex = emptycase.index == 0 ? emptycase.index : emptycase.index + 1;
+//     // for (let i = 0; i < nbCases; i++) sheet.cases[i + targetdIndex].contributionStatus = status;
+//     for (let i = 0; i < nbCases; i++) sheet.cases[i + emptycase.index].contributionStatus = status;
+//     updated_sheets[sheetIndex] = sheet!;
+//     return { error, message, updated_sheets };
+// }
 
 // Method: Mobile money
 // Update sheet for contribution (Agent)
