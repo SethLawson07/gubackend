@@ -14,7 +14,7 @@ router.route("/opensheet").post(Auth, UserIsCustomer, open_sheet);
 
 router.route("/contribute").post(Auth, UserIsCustomer, contribute);
 
-router.route("/contribution/validate:id").post(Auth, UserIsAgentOrAdmin, validate_contribution);
+router.route("/validate/:id").post(Auth, UserIsAgentOrAdmin, validate_contribution);
 
 router.route("/contribution").get(Auth, UserIsAgentCustomerOrAdmin, user_contributions);
 
