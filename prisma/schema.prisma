@@ -11,21 +11,22 @@ datasource db {
 }
 
 model User {
-    id              String   @id @default(auto()) @map("_id") @db.ObjectId()
+    id              String         @id @default(auto()) @map("_id") @db.ObjectId()
     user_name       String
-    email           String?  @unique
-    agentId         String?  @db.ObjectId
-    agent           User?    @relation("agent_customeur", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    customers       User[]   @relation(name: "agent_customeur")
+    email           String?        @unique
+    agentId         String?        @db.ObjectId
+    agent           User?          @relation("agent_customeur", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    customers       User[]         @relation(name: "agent_customeur")
     password        String
-    phone           String   @unique
+    phone           String         @unique
     profile_picture String
     is_admin        Boolean
-    finance_pro_id  String?  @default("")
-    is_verified     Boolean? @default(false)
+    finance_pro_id  String?        @default("")
+    is_verified     Boolean?       @default(false)
     role            String //customer,agent,delivery_man,command_handler,admin
-    first_login     Boolean  @default(true)
-    device_token    String   @default("")
+    first_login     Boolean        @default(true)
+    device_token    String         @default("")
+    Contribution    Contribution[]
 }
 
 model Category {
@@ -185,7 +186,7 @@ model Book {
 
 model Contribution {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    customer  String
+    customer  User     @relation(fields: [userId], references: [id])
     cases     Int[]
     amount    Float    @default(0.0)
     agent     String?
@@ -195,6 +196,7 @@ model Contribution {
     pmethod   String   @default("") // (payment method)  agent,tmoney,moovmoney
     awaiting  String   @default("") // agent, admin, none
     status    String   @default("unpaid") //paid, unpaid, awaiting
+    userId    String   @db.ObjectId()
 }
 
 model Notification {

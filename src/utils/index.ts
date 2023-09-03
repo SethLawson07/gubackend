@@ -311,33 +311,35 @@ export function update_case(sheets: Sheet[], sheetid: string, caseid: string, st
 
 // Customer contributions
 export async function customerContributions(user: User): Promise<Contribution[]> {
-    return await prisma.contribution.findMany({ where: { customer: user.id } });
+    return await prisma.contribution.findMany({ where: { customer: user } });
 }
 
 // Agent contributions
 export async function userAgentContributions(user: User) {
-    let contributions: Contribution[] = [];
-    let ctbts = await prisma.contribution.findMany({ where: { agent: user.id } });
-    if (ctbts) {
-        for (const cbt of ctbts) {
-            let customer = await prisma.user.findUnique({ where: { id: cbt.customer } });
-            contributions.push({ ...cbt, customer: JSON.stringify(customer!) });
-        }
-    }
-    return contributions!;
+    // let contributions: Contribution[] = [];
+    // let ctbts = await prisma.contribution.findMany({ where: { agent: user.id } });
+    // if (ctbts) {
+    //     for (const cbt of ctbts) {
+    //         let customer = await prisma.user.findUnique({ where: { id: cbt.userId } });
+    //         contributions.push({ ...cbt, customer: JSON.stringify(customer!) });
+    //     }
+    // }
+    // return contributions!;
+    return await prisma.contribution.findMany({ where: { agent: user.id } });
 }
 
 // all
 export async function allContributions(): Promise<Contribution[]> {
-    let contributions: Contribution[] = [];
-    let ctbts = await prisma.contribution.findMany();
-    if (ctbts) {
-        for (const cbt of ctbts) {
-            let customer = await prisma.user.findUnique({ where: { id: cbt.customer } });
-            contributions.push({ ...cbt, customer: JSON.stringify(customer!) });
-        }
-    }
-    return contributions!;
+    // let contributions: Contribution[] = [];
+    // let ctbts = await prisma.contribution.findMany();
+    // if (ctbts) {
+    //     for (const cbt of ctbts) {
+    //         let customer = await prisma.user.findUnique({ where: { id: cbt.customer } });
+    //         contributions.push({ ...cbt, customer: JSON.stringify(customer!) });
+    //     }
+    // }
+    // return contributions!;
+    return await prisma.contribution.findMany();
 }
 
 const notificationdata = {

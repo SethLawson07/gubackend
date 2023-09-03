@@ -215,14 +215,14 @@ export async function contribute(req: Request, res: Response) {
                 data: {
                     account: userAccount?.id!,
                     createdAt: data.createdAt,
-                    customer: user.id,
+                    customer: { create: user },
                     pmethod: data.p_method,
                     status: "awaiting",
                     awaiting: "agent",
                     amount: data.amount,
                     cases: result.cases!,
                     agent: user.agentId
-                }
+                },
             });
             if (crtCtrtion) {
                 const userAgent = await prisma.user.findUnique({ where: { id: user.agentId! } });
@@ -248,7 +248,7 @@ export async function validate_contribution(req: Request, res: Response) {
         const { user } = req.body.user as { user: User };
         var targeted_contribution = await prisma.contribution.findFirst({ where: { id: contribution } });
         if (targeted_contribution) {
-            const customer = await prisma.user.findUnique({ where: { id: targeted_contribution.customer! } });
+            const customer = await prisma.user.findUnique({ where: { id: targeted_contribution.userId! } });
             const status = user.role == "admin" ? "paid" : "awaiting";
             const book = await opened_book(customer!);
             var result = await sheet_validate(customer!, targeted_contribution.cases, status);
@@ -304,7 +304,7 @@ export async function user_contributions(req: Request, res: Response) {
 export async function target_contribution(req: Request, res: Response) {
     const contribution = req.params.id;
     var targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
-    var targeted_user = await prisma.user.findUnique({ where: { id: targeted_contribution!.customer } });
+    var targeted_user = await prisma.user.findUnique({ where: { id: targeted_contribution!.userId } });
     return res.status(200).send({ error: false, message: "Request end", data: { ...targeted_contribution, customer: JSON.stringify(targeted_user) } });
 }
 
