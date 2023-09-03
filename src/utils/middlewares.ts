@@ -89,3 +89,39 @@ export function UserIsAgentOrAdmin(req: Request, res: Response, next: NextFuncti
         return res.status(500).send({ message: "Une erreur est survenue, reesayez ou contactez les devs" })
     }
 }
+
+export function UserIsAgentOrCustomer(req: Request, res: Response, next: NextFunction) {
+    try {
+        let { user } = req.body.user;
+        const is_command_handler = (user.role == "agent" || user.role == "customer") ?? false
+        if (!is_command_handler) return res.status(401).send({ message: "Seul un compte Agent ou Client  peut acceder a cette route" })
+        next()
+    } catch (err) {
+        console.error(`Error while command handler checking incoming request ${err}`)
+        return res.status(500).send({ message: "Une erreur est survenue, reesayez ou contactez les devs" })
+    }
+}
+
+export function UserIsCustomerOrAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+        let { user } = req.body.user;
+        const is_command_handler = (req.body.user.is_admin || user.role == "customer") ?? false
+        if (!is_command_handler) return res.status(401).send({ message: "Seul un compte admin ou client peut acceder a cette route" })
+        next()
+    } catch (err) {
+        console.error(`Error while command handler checking incoming request ${err}`)
+        return res.status(500).send({ message: "Une erreur est survenue, reesayez ou contactez les devs" })
+    }
+}
+
+export function UserIsAgentCustomerOrAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+        let { user } = req.body.user;
+        const is_command_handler = (req.body.user.is_admin || user.role == "agent" || user.role == "customer") ?? false
+        if (!is_command_handler) return res.status(401).send({ message: "Seul un admin, client, agent  peut acceder a cette route" })
+        next()
+    } catch (err) {
+        console.error(`Error while command handler checking incoming request ${err}`)
+        return res.status(500).send({ message: "Une erreur est survenue, reesayez ou contactez les devs" })
+    }
+}

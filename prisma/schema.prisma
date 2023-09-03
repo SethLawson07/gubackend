@@ -187,14 +187,22 @@ model Contribution {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
     customer  String
     cases     Int[]
-    amount    Float
+    amount    Float    @default(0.0)
     agent     String?
     admin     String?
     account   String
     createdAt DateTime
-    pmethod   String // (payment method)  agent,tmoney,moovmoney
-    awaiting  String // agent, admin, none
+    pmethod   String   @default("") // (payment method)  agent,tmoney,moovmoney
+    awaiting  String   @default("") // agent, admin, none
     status    String   @default("unpaid") //paid, unpaid, awaiting
+}
+
+model Notification {
+    id      String @id @default(auto()) @map("_id") @db.ObjectId
+    user    String
+    title   String
+    message String
+    status  String @default("unseen") // seen, unseen
 }
 
 model Caroussel {

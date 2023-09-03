@@ -3,7 +3,7 @@ import * as jwt from "jsonwebtoken";
 import { prisma } from "../server";
 import * as crypto from "crypto";
 import axios from "axios";
-import { Book, Case, Product, Sheet, User } from "@prisma/client";
+import { Book, Case, Contribution, Product, Sheet, User } from "@prisma/client";
 import { ObjectId } from "bson";
 import { json } from "express";
 import admin from "firebase-admin";
@@ -307,6 +307,21 @@ export function update_case(sheets: Sheet[], sheetid: string, caseid: string, st
     updated_sheets[sheetIndex] = sheet!;
 
     return { error, message, updated_sheets };
+}
+
+// Customer contributions
+export async function customerContributions(user: User): Promise<Contribution[]> {
+    return await prisma.contribution.findMany({ where: { customer: user.id } });
+}
+
+// Agent contributions
+export async function userAgentContributions(user: User): Promise<Contribution[]> {
+    return await prisma.contribution.findMany({ where: { agent: user.id } });
+}
+
+// all
+export async function allContributions(): Promise<Contribution[]> {
+    return await prisma.contribution.findMany();
 }
 
 const notificationdata = {

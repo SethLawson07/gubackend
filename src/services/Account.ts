@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
-import { close_sheets, create_sheets, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, utilisIsInt } from "../utils";
+import { allContributions, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
 import { Contribution, Sheet, User } from "@prisma/client";
 
 
@@ -225,7 +225,9 @@ export async function contribute(req: Request, res: Response) {
                 }
             });
             if (crtCtrtion) {
+                const userAgent = await prisma.user.findUnique({ where: { id: user.agentId! } });
                 await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
+                userAgent?.device_token! != "" ? await sendPushNotification(userAgent?.device_token!, "Cotisation", `${user.user_name} vient de cotiser la somme de ${data.amount} FCFA pour son compte tontine`) : {};
                 return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
             } else {
                 return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: crtCtrtion! });
@@ -246,6 +248,7 @@ export async function validate_contribution(req: Request, res: Response) {
         const { user } = req.body.user as { user: User };
         var targeted_contribution = await prisma.contribution.findFirst({ where: { id: contribution } });
         if (targeted_contribution) {
+            const customer = await prisma.user.findUnique({ where: { id: targeted_contribution.customer! } });
             const status = user.role == "admin" ? "paid" : "awaiting";
             const book = await opened_book(user);
             var result = await sheet_validate(user, targeted_contribution.cases, status);
@@ -259,22 +262,42 @@ export async function validate_contribution(req: Request, res: Response) {
                     }
                 });
                 if (validated) {
-                    const targeted_acount = await prisma.account.findFirst({ where: { user: targeted_contribution.customer } });
+                    const targeted_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
                     await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: targeted_acount?.amount! + targeted_contribution.amount } });
                     await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
+                    if (user.role == "admin") await sendPushNotification(customer?.device_token!, "Cotisation", `Votre cotisation en attente vient d'être validé`);
                     return res.status(200).send({ error: false, message: "Cotisation éffectée", data: validated! });
                 } else {
                     return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
                 }
             }
         } else {
-
+            return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
         }
     } catch (err) {
         console.log(err);
         console.log("Error while ... action");
         return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
     }
+}
+
+export async function user_contributions(req: Request, res: Response) {
+    const { user } = req.body.user as { user: User };
+    var contributions: Contribution[];
+    switch (user.role) {
+        case "customer":
+            contributions = await customerContributions(user);
+            break;
+        case "agent":
+            contributions = await userAgentContributions(user);
+            break;
+        case "admin":
+            contributions = await allContributions();
+            break;
+        default:
+            break;
+    }
+    return res.status(200).send({ error: false, message: "Requête aboutie", data: contributions! })
 }
 
 
