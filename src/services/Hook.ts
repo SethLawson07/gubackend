@@ -119,19 +119,24 @@ export async function contribution_event(req: Request, res: Response) {
             cpm_error_message: z.string(),
             cpm_trans_date: z.string()
         });
-        const validation_result = schema.safeParse(req.body)
+        const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) {
             console.log(`Error while parsing response from cinet pay ${req.body}`)
             return res.status(500).send()
         }
-        if (!(data.cpm_error_message === "SUCCES")) {
+        if (store.includes(validation_result.data.cpm_trans_id)) {
+            console.log(`Found duplicate id in store ${validation_result.data.cpm_trans_id} : Aborting processing`)
+            return res.status(409).send({ error: true, message: "", data: {} });
+        }
+        store.push(validation_result.data.cpm_trans_id);
+        if (validation_result.data.cpm_error_message === "SUCCES") {
             const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
             const book = await opened_book(targetedUser!);
             var result = await sheet_contribute(data.customer, data.amount, data.p_method);
             const userAccount = await prisma.account.findFirst({ where: { user: data.customer } });
             var crtCtrtion: Contribution; // CreatedContribution
             if (!result.error) {
-                console.log(result);
+                console.log(data.amount);
                 crtCtrtion = await prisma.contribution.create({
                     data: {
                         account: userAccount?.id!,
@@ -145,7 +150,6 @@ export async function contribution_event(req: Request, res: Response) {
                         agent: data.agent,
                     }
                 });
-                console.log(data.amount);
                 if (crtCtrtion) {
                     const targeted_acount = await prisma.account.findFirst({ where: { user: data.customer } });
                     await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: targeted_acount?.amount! + data.amount } });

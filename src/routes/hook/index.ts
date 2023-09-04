@@ -8,7 +8,6 @@ router.route("/momo_event").post(momo_payment_event)
 router.route("/payment_event/:id").post(payment_event)
 
 router.route("/contrib_event/:data").post(contribution_event);
-// router.route("/contrib_event").post(contribution_event);
 
 
 export default router
