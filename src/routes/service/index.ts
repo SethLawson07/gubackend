@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { create, create_service_category, get, service_categories } from "../../services/Service"
+import { create, create_service_category, delete_category_service, get, service_categories, update_category_service } from "../../services/Service"
 import { Auth, UserIsAdmin } from "../../utils/middlewares"
 
 const router = Router();
@@ -13,6 +13,10 @@ router.route("").get(get);
 router.route("/category").get(service_categories);
 // Create category service
 router.route("/category").post(Auth, UserIsAdmin, create_service_category);
+// Modifier une catégorie de service
+router.route("/category").put(Auth, UserIsAdmin, update_category_service);
+// Supprimer une catégorie de service
+router.route("/category").delete(Auth, UserIsAdmin, delete_category_service);
 
 
 export default router;

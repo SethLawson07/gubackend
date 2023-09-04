@@ -66,3 +66,70 @@ export async function service_categories(req: Request, res: Response) {
     console.error(`${error}`);
   }
 }
+
+
+// Mise à jour de la catégorie de service
+export async function update_category_service(req: Request, res: Response) {
+  try {
+    const category_schema = z.object({
+      id: z.string(),
+      name: z.string().optional(),
+      featured: z.boolean().optional(),
+      image: z.string().optional()
+    });
+    const validation_result = category_schema.safeParse(req.body);
+    if (!validation_result.success) return res.status(400).send({ error: true, message: JSON.parse(validation_result.error.message), data: {} });
+    const { data } = validation_result;
+    const targetted_category = await prisma.serviceCategory.findUnique({
+      where: {
+        id: data.id
+      }
+    });
+    if (!targetted_category) return res.status(404).send({ error: true, message: "Aucune catégorie de ce type trouvée", data: {} })
+    await prisma.serviceCategory.update({
+      where: {
+        id: data.id
+      },
+      data: {
+        name: data.name,
+        featured: data.featured,
+        image: data.image
+      }
+    });
+    return res.status(200).send({ status: 200, error: false, data: {}, message: {} });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === "P2002") return res.status(409).send({ error: true, data: {} });
+    }
+    console.error(err);
+    return res.status(500).send({ error: true, status: 500, message: "", data: {} });
+  }
+}
+
+
+//TODO: Delete categories
+export async function delete_category_service(req: Request, res: Response) {
+  try {
+    const schema = z.object({
+      id: z.string()
+    });
+    const validation_result = schema.safeParse(req.body);
+    if (!validation_result.success) return res.status(400).send({ message: "id manquant ou de type incorrect" });
+    const { id } = validation_result.data;
+    const targetted_category = await prisma.serviceCategory.findUnique({
+      where: { id },
+    });
+    if (!targetted_category) return res.status(404).send({ error: true, message: "", data: {} });
+
+    //Delete category
+    await prisma.category.delete({
+      where: {
+        id
+      }
+    });
+    return res.status(200).send({ status: 200, error: false, message: "Catégorie supprimée", data: {} });
+  } catch (err) {
+    console.error(`Error while deleting categories`);
+    return res.status(500).send({ error: true, message: "Une erreur est survenue" });
+  }
+}
