@@ -61,7 +61,7 @@ export async function create_service_category(req: Request, res: Response) {
 export async function service_categories(req: Request, res: Response) {
   try {
     const data = await prisma.serviceCategory.findMany();
-    return res.status(200).send({ error: true, message: "R.A", data })
+    return res.status(200).send({ error: false, message: "R.A", data })
   } catch (error) {
     console.error(`${error}`);
   }
