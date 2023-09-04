@@ -37,6 +37,13 @@ model Category {
     SubCategory SubCategory[]
 }
 
+model ServiceCategory {
+    id       String  @id @default(auto()) @map("_id") @db.ObjectId()
+    name     String
+    image    String
+    featured Boolean
+}
+
 model SubCategory {
     id            String   @id @default(auto()) @map("_id") @db.ObjectId()
     name          String
@@ -137,9 +144,10 @@ model Brand {
     Product  Product[]
 }
 
-model Services {
+model Service {
     id            String   @id @default(auto()) @map("_id") @db.ObjectId
     name          String
+    category      String
     description   String
     pictures      String[]
     seller_number String
