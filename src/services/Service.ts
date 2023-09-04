@@ -122,9 +122,9 @@ export async function delete_category_service(req: Request, res: Response) {
     if (!targetted_category) return res.status(404).send({ error: true, message: "", data: {} });
 
     //Delete category
-    await prisma.category.delete({
+    await prisma.serviceCategory.delete({
       where: {
-        id
+        id: targetted_category.id
       }
     });
     return res.status(200).send({ status: 200, error: false, message: "Catégorie supprimée", data: {} });
