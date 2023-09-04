@@ -49,7 +49,7 @@ export async function create_service_category(req: Request, res: Response) {
     if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message, data: {} });
     const { data } = validation_result;
     let result = await prisma.serviceCategory.create({ data });
-    if (result) return res.status(201).send({ error: false, message: "Requête aboutie", data });
+    if (result) return res.status(201).send({ status: 201, error: false, message: "Requête aboutie", data });
     return res.status(401).send({ error: true, message: "Erreur inconnue", data: {} });
   } catch (err) {
     console.error(`Error while getting services ${err}`);
@@ -61,7 +61,7 @@ export async function create_service_category(req: Request, res: Response) {
 export async function service_categories(req: Request, res: Response) {
   try {
     const data = await prisma.serviceCategory.findMany();
-    return res.status(200).send({ error: false, message: "R.A", data })
+    return res.status(200).send({ status: 200, error: false, message: "R.A", data })
   } catch (error) {
     console.error(`${error}`);
   }
