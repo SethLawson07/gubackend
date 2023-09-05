@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { create, create_service_category, delete_category_service, get, service_categories, update_category_service } from "../../services/Service"
+import { create, create_service_category, delete_category_service, delete_service, get, service_categories, update_category_service, update_service } from "../../services/Service"
 import { Auth, UserIsAdmin } from "../../utils/middlewares"
 
 const router = Router();
@@ -8,6 +8,10 @@ const router = Router();
 router.route("").post(Auth, UserIsAdmin, create);
 // Services
 router.route("").get(get);
+// Update
+router.route("").put(Auth, UserIsAdmin, update_service);
+// Delete
+router.route("").get(Auth, UserIsAdmin, delete_service);
 
 // Category Services
 router.route("/category").get(service_categories);
