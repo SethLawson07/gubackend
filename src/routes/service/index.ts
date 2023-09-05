@@ -11,7 +11,7 @@ router.route("").get(get);
 // Update
 router.route("").put(Auth, UserIsAdmin, update_service);
 // Delete
-router.route("").get(Auth, UserIsAdmin, delete_service);
+router.route("").delete(Auth, UserIsAdmin, delete_service);
 
 // Category Services
 router.route("/category").get(service_categories);
