@@ -39,8 +39,22 @@ export async function create_account(req: Request, res: Response) {
 // Trouver un compte
 export async function get_account(req: Request, res: Response) {
     try {
-        const accountid = req.params.id;
+        const accountid = req.params.accountid;
         const account = prisma.account.findUnique({ where: { id: accountid } });
+        if (!account) return res.status(404).send({ error: true, message: "Ce compte non trouvé." });
+        return res.send({ error: false, data: account, message: "Requête aboutie" });
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+
+// Trouver un compte avec utilisateur id
+export async function get_account_withid(req: Request, res: Response) {
+    try {
+        const userid = req.params.userid;
+        const account = prisma.account.findFirst({ where: { user: userid } });
         if (!account) return res.status(404).send({ error: true, message: "Ce compte non trouvé." });
         return res.send({ error: false, data: account, message: "Requête aboutie" });
     } catch (e) {
