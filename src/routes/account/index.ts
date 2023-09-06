@@ -6,6 +6,9 @@ const router = Router();
 
 router.route("/create").post(Auth, UserIsAdmin, create_account);
 
+// Get User account
+router.route("/").get(Auth, UserIsAdmin, create_account);
+
 router.route("/addbook").post(Auth, UserIsAdmin, create_book);
 
 router.route("/sheetcheck").get(Auth, UserIsCustomer, check_for_opened_sheet);

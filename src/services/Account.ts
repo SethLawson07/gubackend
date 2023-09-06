@@ -36,6 +36,19 @@ export async function create_account(req: Request, res: Response) {
     }
 }
 
+// Trouver un compte
+export async function get_account(req: Request, res: Response) {
+    try {
+        const accountid = req.params.id;
+        const account = prisma.account.findUnique({ where: { id: accountid } });
+        if (!account) return res.status(404).send({ error: true, message: "Ce compte non trouvé." });
+        return res.send({ error: false, data: account, message: "Requête aboutie" });
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 // Créer un carnet
 export async function create_book(req: Request, res: Response) {
     try {
