@@ -7,7 +7,7 @@ const router = Router();
 router.route("/create").post(Auth, UserIsAdmin, create_account);
 
 // User account
-router.route("/:accountid").get(Auth, UserIsCustomer, get_account);
+router.route("/user/:accountid").get(Auth, UserIsCustomer, get_account);
 
 // Get User account with user id
 router.route("/:userid").get(Auth, UserIsCustomer, get_account_withid);
