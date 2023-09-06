@@ -36,33 +36,6 @@ export async function create_account(req: Request, res: Response) {
     }
 }
 
-// Trouver un compte
-export async function get_account(req: Request, res: Response) {
-    try {
-        const accountid = req.params.accountid;
-        const account = prisma.account.findUnique({ where: { id: accountid } });
-        if (!account) return res.status(404).send({ error: true, message: "Ce compte non trouvé." });
-        return res.send({ error: false, data: account, message: "Requête aboutie" });
-    } catch (e) {
-        console.log(e);
-        throw e;
-    }
-}
-
-
-// Trouver un compte avec utilisateur id
-export async function get_account_withid(req: Request, res: Response) {
-    try {
-        const userid = req.params.userid;
-        const account = prisma.account.findFirst({ where: { user: userid } });
-        if (!account) return res.status(404).send({ error: true, message: "Ce compte non trouvé." });
-        return res.send({ error: false, data: account, message: "Requête aboutie" });
-    } catch (e) {
-        console.log(e);
-        throw e;
-    }
-}
-
 // Créer un carnet
 export async function create_book(req: Request, res: Response) {
     try {
@@ -119,13 +92,8 @@ export async function get_books(req: Request, res: Response) {
 export async function get_book(req: Request, res: Response) {
     try {
         let bookid = req.params.id;
-        const schema = z.object({
-            bookid: z.string().nonempty(),
-        });
-        const validation_result = schema.safeParse(req.body);
-        if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message })
         const { user } = req.body.user as { user: User };
-        let book = await prisma.book.findFirst({ where: { id: bookid, customer: user.id } });
+        let book = await prisma.book.findUnique({ where: { id: bookid } });
         if (!book) return res.status(404).send({ error: true, message: "Livre non trouvé" });
         return res.status(200).send({ error: false, message: "", data: book });
     } catch (err) {

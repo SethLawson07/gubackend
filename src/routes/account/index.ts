@@ -1,16 +1,10 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer, UserIsCustomer } from "../../utils/middlewares";
-import { check_for_opened_sheet, close_sheet, contribtest, contribute, create_account, create_book, get_account, get_account_withid, get_book, get_books, get_opened_book, get_sheet, open_sheet, target_contribution, user_contributions, validate_contribution } from "../../services/Account";
+import { check_for_opened_sheet, close_sheet, contribtest, contribute, create_account, create_book, get_book, get_books, get_opened_book, get_sheet, open_sheet, target_contribution, user_contributions, validate_contribution } from "../../services/Account";
 
 const router = Router();
 
 router.route("/create").post(Auth, UserIsAdmin, create_account);
-
-// User account
-router.route("/user/:accountid").get(Auth, UserIsCustomer, get_account);
-
-// Get User account with user id
-router.route("/:userid").get(Auth, UserIsCustomer, get_account_withid);
 
 router.route("/addbook").post(Auth, UserIsAdmin, create_book);
 
