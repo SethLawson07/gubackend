@@ -8,6 +8,6 @@ router.route("").post(Auth, UserIsAdmin, create);
 router.route("").get(get);
 router.route("").put(Auth, UserIsAdmin, update);
 router.route("").delete(Auth, UserIsAdmin, delete_);
-router.route("/fromcat").get(products_from_category);
+router.route("/fromcat").post(products_from_category);
 
 export default router;
