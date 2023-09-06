@@ -1,6 +1,8 @@
 import { Request, Response } from "express"
 import { z } from "zod"
 import { prisma } from "../server"
+import { all_category_products } from "../utils";
+import { fromZodError } from "zod-validation-error";
 
 export async function create(req: Request, res: Response) {
     try {
@@ -143,4 +145,14 @@ export async function delete_(req: Request, res: Response) {
         console.error(`Error while deleting product ${err}`)
         return res.status(500).send()
     }
+}
+
+export async function products_from_category(req: Request, res: Response) {
+    const schema = z.object({
+        catid: z.string()
+    });
+    const validation_result = schema.safeParse(req.body);
+    if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error) });
+    let products = await all_category_products(validation_result.data.catid);
+    return res.status(200).send({ error: false, message: "Requête aboutie", length: products.length, data: products });
 }

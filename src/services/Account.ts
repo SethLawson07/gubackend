@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
-import { allContributions, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
+import { allContributions, all_category_products, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
 import { Contribution, Sheet, User } from "@prisma/client";
 
 // Créer un compte tontine ou depot utilisateur
@@ -317,7 +317,7 @@ export async function target_contribution(req: Request, res: Response) {
 // Test for all
 export const contribtest = async (req: Request, res: Response) => {
     // const { amount, openedAt } = req.body;
-    const { user } = req.body.user as { user: User };
+    // const { user } = req.body.user as { user: User };
     // const book = await prisma.book.findFirst({ where: { customer: user.id, status: "opened" } });
     // if (!book) res.status(400).send({ error: true, message: "Une erreur est survenue", data: {} });
     // var sheetToOpen: Sheet;
@@ -339,6 +339,7 @@ export const contribtest = async (req: Request, res: Response) => {
     // // var calc = data.amount / sheet.data?.bet!;
     // // const emptycase = await empty_case(user);
     // var result = await sheet_contribute(user, data.amount, "paid");
-    const book = await opened_book(user);
-    return res.status(200).send({ data: user });
+    // const book = await opened_book(user);
+    await all_category_products("");
+    return res.status(200).send({ data: {} });
 }

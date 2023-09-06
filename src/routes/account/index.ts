@@ -34,7 +34,7 @@ router.route("/book/opened").post(Auth, UserIsCustomer, get_opened_book);
 router.route("/sheet").post(Auth, UserIsCustomer, get_sheet);
 
 // alltest
-router.route("/test").post(Auth, UserIsCustomer, contribtest);
+router.route("/test").post(contribtest);
 
 
 

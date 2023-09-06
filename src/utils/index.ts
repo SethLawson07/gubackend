@@ -3,7 +3,7 @@ import * as jwt from "jsonwebtoken";
 import { prisma } from "../server";
 import * as crypto from "crypto";
 import axios from "axios";
-import { Book, Case, Contribution, Product, Sheet, User } from "@prisma/client";
+import { Book, Case, Contribution, Item, Product, Sheet, User } from "@prisma/client";
 import { ObjectId } from "bson";
 import { json } from "express";
 import admin from "firebase-admin";
@@ -165,10 +165,10 @@ export async function empty_case(user: User) {
 export async function sheet_to_open(user: User) {
     var book = (await opened_book(user));
     var sheetToOpen: Sheet;
-    const findLastClosedSheet = book!.sheets.find((st) => st.status === "closed");
+    const findLastClosedSheet = book!.sheets.findLast((st) => st.status === "closed");
     if (!findLastClosedSheet) {
         sheetToOpen = book!.sheets[0];
-    } else sheetToOpen = book!.sheets[findLastClosedSheet.index];
+    } else sheetToOpen = book!.sheets[findLastClosedSheet.index + 1];
     return { error: false, data: sheetToOpen };
 }
 
@@ -384,4 +384,47 @@ export const products_byids = async (content: string[]) => {
     });
     if (!result) return { error: true, message: "none", data: {} };
     return { error: false, message: "ok!", data: result };
+}
+
+
+export const all_category_products = async (catid: string) => {
+    let itemsResult: Item[] = [];
+    let productResult: Product[] = [];
+    let products = await prisma.product.findMany();
+    let subcategories = await prisma.subCategory.findMany();
+    subcategories = subcategories.filter((sbct) => sbct.category == catid);
+    if (catid == '') return products;
+    for (let subcat of subcategories) {
+        let items = await getItemsWithId(subcat.id);
+        if (items) itemsResult.push(...items);
+    }
+    if (itemsResult) {
+        for (let ite of itemsResult) {
+            let pdts = await getProductWithId(ite.id);
+            if (pdts) productResult.push(...pdts);
+        }
+    }
+    return productResult;
+}
+
+const getProductWithId = async (itemId: string) => {
+    let result: Product[] = [];
+    let products = await prisma.product.findMany();
+    products.forEach((product) => {
+        if (product.item === itemId) {
+            result.push(product);
+        }
+    });
+    return result;
+}
+
+const getItemsWithId = async (subcatid: string) => {
+    let result: Item[] = [];
+    let items = await prisma.item.findMany();
+    items.forEach((item) => {
+        if (item.subcategory == subcatid) {
+            result.push(item);
+        }
+    });
+    return result!;
 }
