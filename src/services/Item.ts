@@ -51,9 +51,9 @@ export async function create(req: Request, res: Response) {
 export async function get(_req: Request, res: Response) {
     try {
         const data = await prisma.item.findMany({
-            include:{
-                subcategory_data:{
-                    select:{
+            include: {
+                subcategory_data: {
+                    select: {
                         name: true,
                         id: true
                     }
@@ -73,7 +73,8 @@ export async function update(req: Request, res: Response) {
             id: z.string({ required_error: "id est un parametre requis", invalid_type_error: "id doit etre un string" }),
             name: z.string({ invalid_type_error: "name doit etre un string" }).optional(),
             featured: z.boolean({ invalid_type_error: "featured doit etre un string" }).optional(),
-            image: z.string().optional()
+            image: z.string().optional(),
+            schema: z.string().optional(),
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
@@ -84,16 +85,16 @@ export async function update(req: Request, res: Response) {
             }
         })
         if (!targetted_item) return res.status(404).send()
-        if(data.name){
+        if (data.name) {
             const potential_duplicate = await prisma.item.findFirst({
                 where: {
-                    AND:[
-                        { name: data.name},
-                        { subcategory: targetted_item.subcategory}
+                    AND: [
+                        { name: data.name },
+                        { subcategory: targetted_item.subcategory }
                     ]
                 }
             })
-            if (potential_duplicate && potential_duplicate.id!==targetted_item.id) return res.status(409).send()
+            if (potential_duplicate && potential_duplicate.id !== targetted_item.id) return res.status(409).send()
 
         }
         await prisma.item.update({
@@ -103,7 +104,8 @@ export async function update(req: Request, res: Response) {
             data: {
                 name: data.name,
                 featured: data.featured,
-                image: data.image
+                image: data.image,
+                schema: data.schema,
             }
         })
         return res.status(200).send()
