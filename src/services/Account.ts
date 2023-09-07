@@ -80,7 +80,7 @@ export async function get_books(req: Request, res: Response) {
         const { user } = req.body.user as { user: User };
         let books = await prisma.book.findMany({ where: { customer: user.id } });
         if (!books) return res.status(404).send({ error: true, message: "Aucun livre pour cet utilisateur", data: {} });
-        return res.status(200).send({ error: false, message: "", data: books })
+        return res.status(200).send({ error: false, message: "Requête aboutie", data: books })
     } catch (err) {
         console.log(err);
         console.log("Error while getting books");
@@ -94,12 +94,42 @@ export async function get_book(req: Request, res: Response) {
         let bookid = req.params.id;
         const { user } = req.body.user as { user: User };
         let book = await prisma.book.findUnique({ where: { id: bookid } });
-        if (!book) return res.status(404).send({ error: true, message: "Livre non trouvé" });
-        return res.status(200).send({ error: false, message: "", data: book });
+        if (!book) return res.status(404).send({ error: true, message: "Carnet non trouvé" });
+        return res.status(200).send({ error: false, message: "Requête aboutie", data: book });
     } catch (err) {
         console.log(err);
         console.log("Error while trying to get book");
         return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
+// Get Account
+export async function get_account(req: Request, res: Response) {
+    try {
+        const accountid = req.params.id;
+        const account = await prisma.account.findUnique({ where: { id: accountid } });
+        if (!account) return res.status(404).send({ error: true, message: "Carnet non trouvé", data: {} });
+        return res.status(200).send({ error: false, message: "Requête aboutie", data: account });
+    } catch (err) {
+        console.log(err);
+        console.log("Error while trying to get account");
+        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
+    }
+}
+
+// Get User Account
+export async function get_user_account(req: Request, res: Response) {
+    try {
+        const userid = req.params.id;
+        const targetted_user = await prisma.user.findUnique({ where: { id: userid } });
+        if (!targetted_user) return res.status(404).send({ error: true, message: "User not found", data: {} });
+        const targetted_account = await prisma.account.findFirst({ where: { user: targetted_user.id, type: "tontine" } });
+        if (!targetted_account) return res.status(404).send({ error: true, message: "Account not found", data: {} });
+        return res.status(200).send({ error: false, message: "Requête aboutie", data: targetted_account })
+    } catch (err) {
+        console.log(err);
+        console.log("Error while trying to get user account");
+        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
     }
 }
 
