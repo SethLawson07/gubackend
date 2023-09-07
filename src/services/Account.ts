@@ -301,7 +301,7 @@ export async function validate_contribution(req: Request, res: Response) {
                     await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: targeted_acount?.amount! + targeted_contribution.amount } });
                     await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
                     if (user.role == "admin" && customer?.device_token!) await sendPushNotification(customer?.device_token!, "Cotisation", `Votre cotisation en attente vient d'être validé`);
-                    return res.status(200).send({ error: false, message: "Cotisation validée", data: validated! });
+                    return res.status(200).send({ status: 200, error: false, message: "Cotisation validée", data: validated! });
                 } else {
                     return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
                 }
