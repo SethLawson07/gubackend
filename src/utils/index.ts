@@ -210,7 +210,7 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
     var nbCases = amount / sheet.bet!;
     if (!utilisIsInt(nbCases)) return { error: true, message: "Montant saisie invalide" };
     if (emptycase.index === 30) return { error: "true", message: "Votre carnet est remplie" };
-    if (emptycase.index + nbCases > 30) return { error: "true", message: `Il ne reste plus que ${30 - emptycase.index}` };
+    if (emptycase.index + nbCases > 31) return { error: "true", message: `Il ne reste plus que ${30 - emptycase.index}` };
     let cases = [];
     for (let i = 0; i < nbCases; i++) {
         sheet.cases[i + emptycase.index].contributionStatus = status;
