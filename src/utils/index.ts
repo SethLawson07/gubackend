@@ -153,13 +153,14 @@ export async function empty_case(user: User) {
     var lastContributedCase: Case;
     var sheetOpened = book!.sheets.find((st) => st.status === "opened");
     if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte" }
-    const lctCase = sheetOpened.cases.findLast(cse => cse.contributionStatus == ("paid" || "awaiting")); // lct for LastContributedCase
-    // const lctCase = sheetOpened.cases.find(cse => cse.contributionStatus == "unpaid"); // lct for LastContributedCase
-    // if (lctCase?.index == 30) return { error: true, message: "Plus de case pour cette feuille" };
+    // const lctCase = sheetOpened.cases.findLast(cse => cse.contributionStatus == ("paid" || "awaiting")); // lct for LastContributedCase
+    const lctCase = sheetOpened.cases.find(cse => cse.contributionStatus == "unpaid"); // lct for LastContributedCase || First unpaid case
     if (!lctCase || lctCase == undefined) {
-        lastContributedCase = sheetOpened.cases[0];
-    } else lastContributedCase = sheetOpened.cases[lctCase.index + 1];
-    // } else lastContributedCase = sheetOpened.cases[lctCase.index + 1];
+        if (sheetOpened.cases[30].contributionStatus == "paid" || "awaiting") {
+            sheetOpened.cases[30].index = 31; // Fake case Index (Just for bypass verification ...)
+            lastContributedCase = sheetOpened.cases[30]
+        } else lastContributedCase = sheetOpened.cases[0];
+    } else lastContributedCase = sheetOpened.cases[lctCase.index];
     return { error: false, data: lastContributedCase as Case };
 }
 
@@ -210,10 +211,9 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     const emptycase: Case = (await empty_case(user)).data!;
     var nbCases = amount / sheet.bet!;
-    console.log(emptycase);
     if (!utilisIsInt(nbCases)) return { error: true, message: "Montant saisie invalide" };
-    if (emptycase.index > 30) return { error: "true", message: "Votre carnet est remplie" };
-    if (emptycase.index + nbCases > 30) return { error: "true", message: `Il ne reste plus que ${30 - emptycase.index}` };
+    if (emptycase.index == 31) return { error: "true", message: "Votre carnet est remplie" };
+    if (emptycase.index + nbCases > 30) return { error: "true", message: `Il ne reste plus que ${31 - emptycase.index} case(s)` };
     let cases = [];
     for (let i = 0; i < nbCases; i++) {
         sheet.cases[i + emptycase.index].contributionStatus = status;
