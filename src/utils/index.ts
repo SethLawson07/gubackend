@@ -355,7 +355,7 @@ const notificationdata = {
 export async function sendPushNotification(token: string, title: string, body: string) {
     let result = false;
     try {
-        const payload: TokenMessage = { ...notificationdata, notification: { title, body }, android: { priority: 'high' }, token };
+        const payload: TokenMessage = { ...notificationdata, notification: { title, body, }, android: { priority: 'high' }, token };
         let message = await admin.messaging().send(payload);
         if (message) { result = true };
     } catch (e) {
