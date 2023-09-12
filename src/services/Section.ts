@@ -9,9 +9,13 @@ export const all_sections = async (req: Request, res: Response) => {
         const sections: Object[] = [];
         const target_all = await prisma.section.findMany();
         if (!target_all) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
-        target_all.forEach(async (section) => { sections.push({ ...section, products: (await products_byids(section.content)).data }) });
-        if (sections.length <= 0) return res.status(401).send({ error: true, message: "Nothing found", data: {} });
-        return res.status(200).send({ error: false, message: "Opération réussie", data: sections });
+        // console.log(target_all);
+        target_all.forEach(async (section) => {
+            sections.push({ ...section, products: (await products_byids(section.content)).data });
+            console.log(await products_byids(section.content));
+        });
+        // if (sections.length <= 0) return res.status(401).send({ error: true, message: "Nothing found", data: {} });
+        return res.status(200).send({ error: false, message: "Opération réussie", data: target_all });
     } catch (err) {
         console.log(err);
         console.log("Error while ...");

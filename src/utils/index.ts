@@ -386,6 +386,7 @@ export const products_byids = async (content: string[]) => {
         where: { id: { in: content } }
     });
     if (!result) return { error: true, message: "none", data: {} };
+    // console.log(result)
     return { error: false, message: "ok!", data: result };
 }
 

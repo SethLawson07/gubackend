@@ -230,7 +230,7 @@ model Section {
     id          String   @id @default(auto()) @map("_id") @db.ObjectId
     title       String
     description String // Name == Title
-    contenttype String // product, category, promotion(promo card)
+    contenttype String // product, category, promotion(promo card) // service
     featured    Boolean
     content     String[]
 }
