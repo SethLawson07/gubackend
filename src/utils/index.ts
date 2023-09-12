@@ -71,7 +71,7 @@ export async function generate_payment_link(amount: number, user: string, order_
         "currency": "XOF",
         "description": "Reglement de commande",
         "customer_id": user,
-        "notify_url": `https://api-goodness.herokuapp.com/hook/payment_event/${order_id}`,
+        "notify_url": `https://goodapp-58a63c81a10c.herokuapp.com/hook/payment_event/${order_id}`,
         "return_url": "https://google.com",
         "channels": "ALL",
         "lang": "FR"

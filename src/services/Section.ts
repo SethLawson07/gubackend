@@ -38,14 +38,16 @@ export const create_section = async (req: Request, res: Response) => {
     try {
         const schema = z.object({
             title: z.string().min(5, "Donnez un titre à votre section"),
+            description: z.string(),
             contenttype: z.string(),
             content: z.array(z.string()).max(5, "Vous n'avez que 5 choix de produits"),
+            featured: z.boolean()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
-        const created_section = await prisma.section.create({ data: {...validation.data, name: validation.data.title} });
+        const created_section = await prisma.section.create({ data: validation.data });
         if (!created_section) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
-        return res.status(201).send({ error: false, message: "Section créée", data: created_section });
+        return res.status(201).send({ status: 201, error: false, message: "Section créée", data: created_section });
     } catch (err) {
         console.log(err);
         console.log("Error while ...");
@@ -57,9 +59,11 @@ export const update_section = async (req: Request, res: Response) => {
     try {
         const schema = z.object({
             id: z.string(),
-            title: z.string(),
+            title: z.string().min(5, "Donnez un titre à votre section"),
+            description: z.string(),
             contenttype: z.string(),
-            content: z.array(z.string()),
+            content: z.array(z.string()).max(5, "Vous n'avez que 5 choix de produits"),
+            featured: z.boolean()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
