@@ -3,7 +3,7 @@ import { prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
 import { allContributions, all_category_products, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
-import { Contribution, Sheet, User } from "@prisma/client";
+import { Account, Contribution, Sheet, User } from "@prisma/client";
 
 // Créer un compte tontine ou depot utilisateur
 export async function create_account(req: Request, res: Response) {
@@ -343,6 +343,34 @@ export async function target_contribution(req: Request, res: Response) {
     var targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
     var targeted_user = await prisma.user.findUnique({ where: { id: targeted_contribution!.userId } });
     return res.status(200).send({ error: false, message: "Request end", data: { ...targeted_contribution, customer: targeted_user } });
+}
+
+// Faire un dépôt
+export const makeDeposit = async (req: Request, res: Response) => {
+    try {
+        const schema = z.object({
+            customer: z.string().nonempty(),
+            amount: z.number().nonnegative(),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, status: 400, message: "Veuillez vérifier les champs", data: {} });
+        const { user } = req.body.user as { user: User };
+        let targetted_account: Account;
+        if (user.role == "agent") {
+            const targetted_user = await prisma.user.findUnique({ where: { id: validation.data.customer } });
+            if (!targetted_user) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouvé", data: {} })
+            const findAccount = await prisma.account.findFirst({ where: { user: targetted_user.id } });
+            if (!findAccount) return res.status(404).send({ error: true, status: 404, message: "Compte non trouvé", data: {} });
+            targetted_account = findAccount;
+        } else {
+            targetted_account = (await prisma.account.findFirst({ where: { user: user.id } }))!;
+        }
+        // const transact = await prisma.dep
+    } catch (err) {
+        console.log(err);
+        console.log("Error while ... action");
+        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
+    }
 }
 
 // Test for all

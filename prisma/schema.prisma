@@ -234,3 +234,17 @@ model Section {
     featured    Boolean
     content     String[]
 }
+
+model Deposit {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    account   String
+    customer  String
+    createdAt DateTime
+    payment   String // agent,tmoney,moovmoney
+    amount    Float
+    madewith  String // User who do the transaction
+}
+
+// model Activity {
+
+// }
