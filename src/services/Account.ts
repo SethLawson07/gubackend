@@ -263,6 +263,14 @@ export async function contribute(req: Request, res: Response) {
                 const userAgent = await prisma.user.findUnique({ where: { id: user.agentId! } });
                 await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
                 userAgent?.device_token! != "" ? await sendPushNotification(userAgent?.device_token!, "Cotisation", `${user.user_name} vient de cotiser la somme de ${data.amount} FCFA pour son compte tontine`) : {};
+                await prisma.transaction.create({
+                    data: {
+                        amount: data.amount,
+                        date: (new Date(data.createdAt).toDateString()),
+                        user: user.id,
+                        detail: `Cotisation de ${data.amount} en cours de validation`
+                    }
+                });
                 return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
             } else {
                 return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: crtCtrtion! });
@@ -298,17 +306,25 @@ export async function validate_contribution(req: Request, res: Response) {
                 });
                 if (validated) {
                     const targeted_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
-                    var amount = (targeted_acount?.amount! + targeted_contribution.amount)
+                    var amount = (targeted_acount?.amount! + targeted_contribution.amount);
                     if (user.role == "admin") await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } });
                     await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
                     if (user.role == "admin" && customer?.device_token!) await sendPushNotification(customer?.device_token!, "Cotisation", `Votre cotisation en attente vient d'être validé`);
+                    await prisma.transaction.create({
+                        data: {
+                            amount: targeted_contribution.amount,
+                            date: (new Date()).toDateString(),
+                            user: user.id,
+                            detail: `Validation de cotisation de ${customer?.user_name}`
+                        }
+                    });
                     return res.status(200).send({ status: 200, error: false, message: "Cotisation validée", data: validated! });
                 } else {
                     return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
                 }
             }
         } else {
-            return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
+            return res.status(401).send({ error: true, message: "Ressources non trouvées", data: {} });
         }
     } catch (err) {
         console.log(err);
@@ -351,21 +367,50 @@ export const makeDeposit = async (req: Request, res: Response) => {
         const schema = z.object({
             customer: z.string().nonempty(),
             amount: z.number().nonnegative(),
+            createdAt: z.coerce.date(),
+            p_method: z.string(),
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ error: true, status: 400, message: "Veuillez vérifier les champs", data: {} });
         const { user } = req.body.user as { user: User };
+        let targetted_user: User;
         let targetted_account: Account;
+        console.log(user.role);
         if (user.role == "agent") {
-            const targetted_user = await prisma.user.findUnique({ where: { id: validation.data.customer } });
-            if (!targetted_user) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouvé", data: {} })
-            const findAccount = await prisma.account.findFirst({ where: { user: targetted_user.id } });
+            const findUser = await prisma.user.findUnique({ where: { id: validation.data.customer } });
+            if (!findUser) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouvé", data: {} });
+            targetted_user = findUser;
+            const findAccount = await prisma.account.findFirst({ where: { user: findUser.id } });
             if (!findAccount) return res.status(404).send({ error: true, status: 404, message: "Compte non trouvé", data: {} });
             targetted_account = findAccount;
         } else {
             targetted_account = (await prisma.account.findFirst({ where: { user: user.id } }))!;
+            targetted_user = user;
         }
-        // const transact = await prisma.dep
+        let transaction = await prisma.account.update({
+            where: { id: targetted_account.id }, data: { amount: targetted_account.amount + validation.data.amount }
+        })
+        if (!transaction) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} })
+        const deposit = await prisma.deposit.create({
+            data: {
+                account: targetted_account.id,
+                amount: validation.data.amount,
+                createdAt: validation.data.createdAt,
+                customer: targetted_user.id,
+                madeby: user.role,
+                payment: validation.data.p_method,
+            }
+        });
+        if (!deposit) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
+        await prisma.transaction.create({
+            data: {
+                amount: validation.data.amount,
+                date: (new Date(validation.data.createdAt).toDateString()),
+                user: targetted_user.id,
+                detail: `Dépôt de ${validation.data.amount} FCFA`
+            }
+        });
+        return res.status(200).send({ status: 200, error: false, message: "Dépôt éffectué avec succès", data: deposit });
     } catch (err) {
         console.log(err);
         console.log("Error while ... action");

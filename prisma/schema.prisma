@@ -124,10 +124,11 @@ model Order {
 }
 
 model Transaction {
-    id     String @id @default(auto()) @map("_id") @db.ObjectId
+    id     String  @id @default(auto()) @map("_id") @db.ObjectId
     user   String
     date   String
     amount Float
+    detail String?
 }
 
 model PromoCodeUsage {
@@ -242,7 +243,7 @@ model Deposit {
     createdAt DateTime
     payment   String // agent,tmoney,moovmoney
     amount    Float
-    madewith  String // User who do the transaction
+    madeby    String // User who do the transaction (User role)
 }
 
 // model Activity {
