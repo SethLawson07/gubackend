@@ -19,8 +19,11 @@ router.route("/opensheet").post(Auth, UserIsCustomer, open_sheet);
 // User make contribution
 router.route("/contribute").post(Auth, UserIsCustomer, contribute);
 
-// User make contribution
+// User make Deposit
 router.route("/deposit").post(Auth, UserIsAgentOrCustomer, makeDeposit);
+
+// User make Deposit with mobile money
+router.route("/deposit_event/:data").post(Auth, UserIsAgentOrCustomer, makeDeposit);
 
 // Agent or Admin validate contribution
 router.route("/validate/:id").post(Auth, UserIsAgentOrAdmin, validate_contribution);

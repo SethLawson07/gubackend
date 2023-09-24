@@ -4,6 +4,8 @@ import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
 import { allContributions, all_category_products, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
 import { Account, Contribution, Sheet, User } from "@prisma/client";
+import dayjs from "dayjs";
+import { store } from "../utils/store";
 
 // Créer un compte tontine ou depot utilisateur
 export async function create_account(req: Request, res: Response) {
@@ -415,6 +417,70 @@ export const makeDeposit = async (req: Request, res: Response) => {
         console.log(err);
         console.log("Error while ... action");
         return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
+    }
+}
+
+export async function makeMobileMoneyDeposit(req: Request, res: Response) {
+    try {
+        let buffer = Buffer.from(req.params.data, 'base64');
+        let text = buffer.toString('ascii');
+        let data = JSON.parse(text);
+        const schema = z.object({
+            cpm_amount: z.string(),
+            cpm_trans_id: z.string(),
+            payment_method: z.string(),
+            cel_phone_num: z.string(),
+            cpm_error_message: z.string(),
+            cpm_trans_date: z.string()
+        });
+        const validation_result = schema.safeParse(req.body);
+        if (!validation_result.success) {
+            console.log(`Error while parsing response from cinet pay ${req.body}`)
+            return res.status(500).send()
+        }
+        if (store.includes(validation_result.data.cpm_trans_id)) {
+            console.log(`Found duplicate id in store ${validation_result.data.cpm_trans_id} : Aborting processing`)
+            return res.status(409).send({ error: true, message: "", data: {} });
+        }
+        store.push(validation_result.data.cpm_trans_id);
+        if (validation_result.data.cpm_error_message === "SUCCES") {
+            let targetted_user: User;
+            let targetted_account: Account;
+            const findUser = await prisma.user.findUnique({ where: { id: data.customer } });
+            if (!findUser) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouvé", data: {} });
+            targetted_user = findUser;
+            const findAccount = await prisma.account.findFirst({ where: { user: findUser.id } });
+            if (!findAccount) return res.status(404).send({ error: true, status: 404, message: "Compte non trouvé", data: {} });
+            targetted_account = findAccount;
+            let transaction = await prisma.account.update({
+                where: { id: targetted_account.id }, data: { amount: targetted_account.amount + data.amount }
+            })
+            if (!transaction) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} })
+            const deposit = await prisma.deposit.create({
+                data: {
+                    account: targetted_account.id,
+                    amount: data.amount,
+                    createdAt: data.createdAt,
+                    customer: targetted_user.id,
+                    madeby: targetted_user.role,
+                    payment: data.p_method,
+                }
+            });
+            if (!deposit) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
+            await prisma.transaction.create({
+                data: {
+                    amount: data.amount,
+                    date: (new Date(data.createdAt).toDateString()),
+                    user: targetted_user.id,
+                    detail: `Dépôt de ${data.amount} FCFA`
+                }
+            });
+            return res.status(200).send({ status: 200, error: false, message: "Dépôt éffectué avec succès", data: deposit });
+        }
+        console.log(`A payment failed`)
+    } catch (err) {
+        console.error(`Error while handling payment event ${err}`)
+        return res.status(500).send()
     }
 }
 
