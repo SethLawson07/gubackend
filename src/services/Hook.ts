@@ -119,6 +119,7 @@ export async function contribution_event(req: Request, res: Response) {
             cpm_error_message: z.string(),
             cpm_trans_date: z.string()
         });
+        console.log(data.amount);
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) {
             console.log(`Error while parsing response from cinet pay ${req.body}`)

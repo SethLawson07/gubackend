@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer, UserIsCustomer, UserIsCustomerOrAdmin } from "../../utils/middlewares";
-import { check_for_opened_sheet, close_sheet, contribtest, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, open_sheet, target_contribution, user_contributions, validate_contribution } from "../../services/Account";
+import { check_for_opened_sheet, close_sheet, contribtest, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, target_contribution, user_contributions, validate_contribution } from "../../services/Account";
 
 const router = Router();
 
@@ -23,7 +23,7 @@ router.route("/contribute").post(Auth, UserIsCustomer, contribute);
 router.route("/deposit").post(Auth, UserIsAgentOrCustomer, makeDeposit);
 
 // User make Deposit with mobile money
-router.route("/deposit_event/:data").post(Auth, UserIsAgentOrCustomer, makeDeposit);
+router.route("/deposit_event/:data").post(makeMobileMoneyDeposit);
 
 // Agent or Admin validate contribution
 router.route("/validate/:id").post(Auth, UserIsAgentOrAdmin, validate_contribution);

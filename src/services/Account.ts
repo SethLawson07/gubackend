@@ -433,6 +433,7 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
             cpm_error_message: z.string(),
             cpm_trans_date: z.string()
         });
+        console.log(data);
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) {
             console.log(`Error while parsing response from cinet pay ${req.body}`)
@@ -443,7 +444,7 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
             return res.status(409).send({ error: true, message: "", data: {} });
         }
         store.push(validation_result.data.cpm_trans_id);
-        if (validation_result.data.cpm_error_message === "SUCCES") {
+        if (!(validation_result.data.cpm_error_message === "SUCCES")) {
             let targetted_user: User;
             let targetted_account: Account;
             const findUser = await prisma.user.findUnique({ where: { id: data.customer } });
@@ -460,7 +461,7 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
                 data: {
                     account: targetted_account.id,
                     amount: data.amount,
-                    createdAt: data.createdAt,
+                    createdAt: new Date(dayjs(data.createdAt).format("MM/DD/YYYY")),
                     customer: targetted_user.id,
                     madeby: targetted_user.role,
                     payment: data.p_method,
