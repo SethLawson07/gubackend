@@ -444,7 +444,7 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
             return res.status(409).send({ error: true, message: "", data: {} });
         }
         store.push(validation_result.data.cpm_trans_id);
-        if (!(validation_result.data.cpm_error_message === "SUCCES")) {
+        if (validation_result.data.cpm_error_message === "SUCCES") {
             let targetted_user: User;
             let targetted_account: Account;
             const findUser = await prisma.user.findUnique({ where: { id: data.customer } });

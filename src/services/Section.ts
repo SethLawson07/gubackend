@@ -6,16 +6,26 @@ import { products_byids } from "../utils";
 
 export const all_sections = async (req: Request, res: Response) => {
     try {
-        const sections: Object[] = [];
+        let sections: Object[] = [];
         const target_all = await prisma.section.findMany();
         if (!target_all) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
         // console.log(target_all);
-        target_all.forEach(async (section) => {
-            sections.push({ ...section, products: (await products_byids(section.content)).data });
-            console.log(await products_byids(section.content));
-        });
+        for (let i = 0; i < target_all.length; i++) {
+            const element = target_all[i];
+            const products = (await products_byids(element.content)).data;
+            sections.push({ ...element, products });
+        }
+        // for (l) {
+        //     // const products = (await products_byids(section.content)).data;
+        //     // sections.push({section, })
+        //     console.log(section);
+        // }
+        // target_all.forEach(async (section) => {
+        //     sections = ["{ ...sections, ...products }"];
+        // });
+        // console.log(sections);
         // if (sections.length <= 0) return res.status(401).send({ error: true, message: "Nothing found", data: {} });
-        return res.status(200).send({ error: false, message: "Opération réussie", data: target_all });
+        return res.status(200).send({ error: false, message: "Opération réussie", data: sections });
     } catch (err) {
         console.log(err);
         console.log("Error while ...");
