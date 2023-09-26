@@ -15,16 +15,6 @@ export const all_sections = async (req: Request, res: Response) => {
             const products = (await products_byids(element.content)).data;
             sections.push({ ...element, products });
         }
-        // for (l) {
-        //     // const products = (await products_byids(section.content)).data;
-        //     // sections.push({section, })
-        //     console.log(section);
-        // }
-        // target_all.forEach(async (section) => {
-        //     sections = ["{ ...sections, ...products }"];
-        // });
-        // console.log(sections);
-        // if (sections.length <= 0) return res.status(401).send({ error: true, message: "Nothing found", data: {} });
         return res.status(200).send({ error: false, message: "Opération réussie", data: sections });
     } catch (err) {
         console.log(err);
@@ -54,7 +44,7 @@ export const create_section = async (req: Request, res: Response) => {
             title: z.string().min(5, "Donnez un titre à votre section"),
             description: z.string(),
             contenttype: z.string(),
-            content: z.array(z.string()).max(5, "Vous n'avez que 5 choix de produits"),
+            content: z.array(z.string()).max(10, "Vous n'avez que 10 choix de produits"),
             featured: z.boolean()
         });
         const validation = schema.safeParse(req.body);
