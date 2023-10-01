@@ -179,9 +179,9 @@ export async function sheet_to_open(user: User) {
 export async function update_sheets(user: User, openedat: Date, bet: number) {
     let error: boolean = false;
     let message: string = "";
-    console.log((await opened_book(user)));
+    // console.log((await opened_book(user)));
     const sheets = (await opened_book(user))!.sheets;
-    console.log(sheets);
+    // console.log(sheets);
     const sheet: Sheet = (await sheet_to_open(user)).data;
     let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
@@ -267,7 +267,7 @@ export async function sheet_contribute_mobile(user: string, amount: number, stat
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     const emptycase: Case = (await empty_case(targeted_user!)).data!;
     var nbCases = amount / sheet.bet!;
-    console.log("Mise" + sheet.bet!)
+    // console.log("Mise" + sheet.bet!)
     if (!utilisIsInt(nbCases)) return { error: true, message: "Montant saisie invalide" };
     var targetdIndex = emptycase.index == 0 ? emptycase.index : emptycase.index + 1;
     // for (let i = 0; i < nbCases; i++) sheet.cases[i + targetdIndex].contributionStatus = status;

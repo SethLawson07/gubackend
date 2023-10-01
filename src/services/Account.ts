@@ -235,42 +235,56 @@ export async function close_sheet(req: Request, res: Response) {
 export async function contribute(req: Request, res: Response) {
     try {
         const schema = z.object({
+            customer: z.string().nonempty(),
             amount: z.number(),
             createdAt: z.coerce.date(),
             p_method: z.string(),
         });
         const validation_result = schema.safeParse(req.body);
-        const { user } = req.body.user as { user: User };
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
+        const { user } = req.body.user as { user: User };
         let data = validation_result.data;
-        const book = await opened_book(user);
-        var result = await sheet_contribute(user.id, data.amount, data.p_method);
-        const userAccount = await prisma.account.findFirst({ where: { user: user.id } });
+        let targetted_user: User;
+        let targetted_account: Account;
+        if (user.role == "agent") {
+            const customer = await prisma.user.findUnique({ where: { id: data.customer } });
+            if (!customer) return res.status(404).send({ error: true, status: 404, message: "Utilisateur non trouvé", data: {} });
+            targetted_user = customer;
+            const customerAccount = await prisma.account.findFirst({ where: { user: customer.id } });
+            if (!customerAccount) return res.status(404).send({ error: true, status: 404, message: "Compte non trouvé", data: {} });
+            targetted_account = customerAccount;
+        } else {
+            targetted_account = (await prisma.account.findFirst({ where: { user: user.id } }))!;
+            targetted_user = user;
+        }
+        const book = await opened_book(targetted_user);
+        var result = await sheet_contribute(targetted_user.id, data.amount, data.p_method);
+        // const userAccount = await prisma.account.findFirst({ where: { user: user.id } });
         var crtCtrtion: Contribution;
         if (!result.error) {
             crtCtrtion = await prisma.contribution.create({
                 data: {
-                    account: userAccount?.id!,
+                    account: targetted_account?.id!,
                     createdAt: data.createdAt,
-                    userId: user.id,
+                    userId: targetted_user.id,
                     pmethod: data.p_method,
                     status: "awaiting",
-                    awaiting: "agent",
+                    awaiting: user.role == "agent" ? "admin" : "agent",
                     amount: data.amount,
                     cases: result.cases!,
-                    agent: user.agentId
+                    agent: targetted_user.agentId
                 },
             });
             if (crtCtrtion) {
-                const userAgent = await prisma.user.findUnique({ where: { id: user.agentId! } });
+                const userAgent = await prisma.user.findUnique({ where: { id: targetted_user.agentId! } });
                 await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
-                userAgent?.device_token! != "" ? await sendPushNotification(userAgent?.device_token!, "Cotisation", `${user.user_name} vient de cotiser la somme de ${data.amount} FCFA pour son compte tontine`) : {};
+                user.role == "customer" && userAgent?.device_token! != "" ? await sendPushNotification(userAgent?.device_token!, "Cotisation", `${user.user_name} vient de cotiser la somme de ${data.amount} FCFA pour son compte tontine`) : {};
                 await prisma.transaction.create({
                     data: {
                         amount: data.amount,
                         date: (new Date(data.createdAt).toDateString()),
                         user: user.id,
-                        detail: `Cotisation de ${data.amount} en cours de validation`
+                        detail: user.role == "customer" ? `Cotisation de ${data.amount} en cours de validation` : `Cotisation de ${data.amount} pour ${targetted_user.user_name} en cours de validation`
                     }
                 });
                 return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
@@ -303,7 +317,8 @@ export async function validate_contribution(req: Request, res: Response) {
                     where: { id: contribution },
                     data: {
                         awaiting: user.role == "agent" ? "admin" : "none",
-                        status: user.role == "admin" ? "paid" : "awaiting",
+                        // status: user.role == "admin" ? "paid" : "awaiting",
+                        status: status,
                     }
                 });
                 if (validated) {
@@ -317,7 +332,7 @@ export async function validate_contribution(req: Request, res: Response) {
                             amount: targeted_contribution.amount,
                             date: (new Date()).toDateString(),
                             user: user.id,
-                            detail: `Validation de cotisation de ${customer?.user_name}`
+                            detail: `Validation de cotisation du client: ${customer?.user_name}`
                         }
                     });
                     return res.status(200).send({ status: 200, error: false, message: "Cotisation validée", data: validated! });
@@ -377,7 +392,6 @@ export const makeDeposit = async (req: Request, res: Response) => {
         const { user } = req.body.user as { user: User };
         let targetted_user: User;
         let targetted_account: Account;
-        console.log(user.role);
         if (user.role == "agent") {
             const findUser = await prisma.user.findUnique({ where: { id: validation.data.customer } });
             if (!findUser) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouvé", data: {} });
@@ -433,7 +447,6 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
             cpm_error_message: z.string(),
             cpm_trans_date: z.string()
         });
-        console.log(data);
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) {
             console.log(`Error while parsing response from cinet pay ${req.body}`)

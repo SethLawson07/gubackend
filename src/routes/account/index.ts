@@ -17,7 +17,7 @@ router.route("/sheetcheck").get(Auth, UserIsCustomer, check_for_opened_sheet);
 router.route("/opensheet").post(Auth, UserIsCustomer, open_sheet);
 
 // User make contribution
-router.route("/contribute").post(Auth, UserIsCustomer, contribute);
+router.route("/contribute").post(Auth, UserIsAgentOrCustomer, contribute);
 
 // User make Deposit
 router.route("/deposit").post(Auth, UserIsAgentOrCustomer, makeDeposit);
