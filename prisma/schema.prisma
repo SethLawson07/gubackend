@@ -118,7 +118,7 @@ model Order {
     cart             Json
     promocodes       String[]
     status           String
-    delivery_type    String
+    delivery_type    String           @default("")
     delivery_address Delivery_address
     // delivery_status  String // PENDING, RECEIVED
 }
