@@ -51,6 +51,7 @@ const verboseFormat = ':remote-addr :method :url HTTP/:http-version :status :res
 app.use(morgan(verboseFormat));
 app.use('/docs', swagger.serve, swagger.setup(swagger_doc));
 
+// routes
 app.use("/auth", auth);
 app.use("/category", category);
 app.use("/slider", slider);

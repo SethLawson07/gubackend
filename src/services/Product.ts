@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { z } from "zod"
 import { prisma } from "../server"
-import { all_category_products } from "../utils";
+import { all_category_brands, all_category_products } from "../utils";
 import { fromZodError } from "zod-validation-error";
 
 export async function create(req: Request, res: Response) {
@@ -155,4 +155,15 @@ export async function products_from_category(req: Request, res: Response) {
     if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error) });
     let products = await all_category_products(validation_result.data.catid);
     return res.status(200).send({ error: false, message: "Requête aboutie", length: products.length, data: products });
+}
+
+export async function brands_from_category(req: Request, res: Response) {
+    console.log("first")
+    const schema = z.object({
+        catid: z.string()
+    });
+    const validation_result = schema.safeParse(req.body);
+    if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error) });
+    let brands = await all_category_brands(validation_result.data.catid);
+    return res.status(200).send({ error: false, message: "Requête aboutie", length: brands.length, data: brands });
 }

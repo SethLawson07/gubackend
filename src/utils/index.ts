@@ -3,7 +3,7 @@ import * as jwt from "jsonwebtoken";
 import { prisma } from "../server";
 import * as crypto from "crypto";
 import axios from "axios";
-import { Book, Case, Contribution, Item, Product, Sheet, User } from "@prisma/client";
+import { Book, Brand, Case, Contribution, Item, Product, Sheet, User } from "@prisma/client";
 import { ObjectId } from "bson";
 import { json } from "express";
 import admin from "firebase-admin";
@@ -391,10 +391,10 @@ export const products_byids = async (content: string[]) => {
 }
 
 
-export const all_category_products = async (catid: string) => {
+export const all_category_products = async (catid: string): Promise<Product[]> => {
     let itemsResult: Item[] = [];
     let productResult: Product[] = [];
-    let products = await prisma.product.findMany();
+    let products = await prisma.product.findMany({ include: { brand_data: true } });
     let subcategories = await prisma.subCategory.findMany();
     subcategories = subcategories.filter((sbct) => sbct.category == catid);
     if (catid == '') return products;
@@ -411,9 +411,24 @@ export const all_category_products = async (catid: string) => {
     return productResult;
 }
 
+export const all_category_brands = async (catid: string) => {
+    let products = await all_category_products(catid);
+    let brands: string[] = [];
+    let brandData: Brand[] = [];
+    if (products) {
+        products.forEach(product => {
+            brands.push(product.brand);
+        });
+    }
+    if (brands) {
+        brandData = await prisma.brand.findMany({ where: { id: { in: brands } } })
+    }
+    return brandData;
+}
+
 const getProductWithId = async (itemId: string) => {
     let result: Product[] = [];
-    let products = await prisma.product.findMany();
+    let products = await prisma.product.findMany({ include: { brand_data: true } });
     products.forEach((product) => {
         if (product.item === itemId) {
             result.push(product);
