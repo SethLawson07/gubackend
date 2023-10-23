@@ -46,7 +46,7 @@ export async function create(req: Request, res: Response) {
             await create_promocode_usage(data.promocodes, user.email as string);
             return res.status(201).send({ data: response, order: order.id, error: false, status: 201 });
         } else {
-            return res.status(400).send({ error: true, message: "Utilisateur non authentifié" });
+            return res.status(400).send({ error: true, message: "Utilisateur non authentifié", data: {} });
         }
     } catch (err) {
         console.log(`Error while creating order ${err}`)
@@ -57,7 +57,7 @@ export async function create(req: Request, res: Response) {
 export async function get_all(_req: Request, res: Response) {
     try {
         const data = await prisma.order.findMany();
-        return res.status(200).send({ data });
+        return res.status(200).send({ error: false, message: "ok", data });
     } catch (err) {
         console.error(`Error while getting all orders ${err}`)
         return res.status(500).send();
