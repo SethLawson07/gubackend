@@ -117,7 +117,7 @@ model Order {
     paid             Boolean
     cart             Json
     promocodes       String[]
-    status           String
+    status           String // PENDING, VALIDATED, CANCELED, DELIVERED
     delivery_type    String           @default("")
     delivery_address Delivery_address
     // delivery_status  String // PENDING, RECEIVED
