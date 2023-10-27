@@ -11,9 +11,9 @@ router.route("/users").get(Auth, UserIsDeliveryMan, get_all);
 router.route("/cancel").put(Auth, cancel_order);
 router.route("/validate").put(Auth, UserIsAdmin, validate_order);
 router.route("/deliver").put(Auth, UserIsDeliveryMan, order_delivered);
-router.route("/delivered").put(Auth, delivered_orders);
-router.route("/pending").put(Auth, UserIsAdmin, pending_orders);
-router.route("/validated").put(Auth, validated_orders);
+router.route("/delivered").get(Auth, delivered_orders);
+router.route("/pending").get(Auth, UserIsAdmin, pending_orders);
+router.route("/validated").get(Auth, validated_orders);
 
 
 export default router
