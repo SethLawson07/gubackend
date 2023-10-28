@@ -31,7 +31,7 @@ export async function create(req: Request, res: Response) {
             // const d_status = data.delivery_type == "livraison" ? "PENDING"
             const order = await prisma.order.create({
                 data: {
-                    userId: user.id,
+                    user: user.id,
                     remainder: data.amount,
                     promocodes: data.promocodes,
                     paid: false,
@@ -72,9 +72,7 @@ export async function get_user_orders(req: Request, res: Response) {
             where: { phone: user.phone }
         });
         if (!targetted_user) return res.status(404).send({ error: true, message: "User not found", data: {} });
-        const data = await prisma.order.findMany({
-            where: { user: { id: user.id } }, include: { user: true, }
-        });
+        const data = await prisma.order.findMany({ where: { user: user.id } });
         return res.status(200).send({ data: data, error: false, message: "", status: 200, user: targetted_user[0].id })
     } catch (err) {
         console.error(`Error while getting user orders ${err}`)
@@ -91,28 +89,13 @@ export async function cancel_order(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send()
         const { id } = validation_result.data
         const { user } = req.body.user as { user: User }
-        const current_user = await prisma.user.findUnique({
-            where: {
-                email: user.email as string
-            }
-        })
+        const current_user = await prisma.user.findUnique({ where: { email: user.email as string } })
         if (!current_user) return res.status(401).send()
-        const targetted_order = await prisma.order.findUnique({
-            where: {
-                id
-            }
-        })
+        const targetted_order = await prisma.order.findUnique({ where: { id } });
         if (!targetted_order) return res.status(404).send()
-        if (targetted_order.userId !== current_user.id) return res.status(403).send()
-        await prisma.order.update({
-            where: {
-                id
-            },
-            data: {
-                status: "CANCELLED"
-            }
-        })
-        return res.status(200).send()
+        if (targetted_order.user !== current_user.id) return res.status(403).send()
+        await prisma.order.update({ where: { id }, data: { status: "CANCELLED" } });
+        return res.status(200).send({ error: false, message: "Commande annulé", data: targetted_order });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
         return res.status(500).send()
