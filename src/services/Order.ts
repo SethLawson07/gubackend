@@ -73,7 +73,7 @@ export async function get_user_orders(req: Request, res: Response) {
         });
         if (!targetted_user) return res.status(404).send({ error: true, message: "User not found", data: {} });
         const data = await prisma.order.findMany({
-            where: { userId: user.id }
+            where: { user: { id: user.id } }, include: { user: true, }
         });
         return res.status(200).send({ data: data, error: false, message: "", status: 200, user: targetted_user[0].id })
     } catch (err) {
