@@ -27,6 +27,7 @@ model User {
     first_login     Boolean        @default(true)
     device_token    String         @default("")
     Contribution    Contribution[]
+    Order           Order[]
 }
 
 model Category {
@@ -111,16 +112,18 @@ type Delivery_address {
 
 model Order {
     id               String           @id @default(auto()) @map("_id") @db.ObjectId
-    user             String
+    user             User             @relation(fields: [userId], references: [id])
     amount           Float
     remainder        Float
     paid             Boolean
     cart             Json
     promocodes       String[]
-    status           String // PENDING, VALIDATED, CANCELED, DELIVERED
+    status           String // PENDING (attente de validation), VALIDATED, CANCELED, GAINED, DELIVERED
     delivery_type    String           @default("")
     delivery_address Delivery_address
+    delivery_person  Json?
     // delivery_status  String // PENDING, RECEIVED
+    userId           String           @db.ObjectId()
 }
 
 model Transaction {
