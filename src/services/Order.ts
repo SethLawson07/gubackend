@@ -31,7 +31,7 @@ export async function create(req: Request, res: Response) {
             // const d_status = data.delivery_type == "livraison" ? "PENDING"
             const order = await prisma.order.create({
                 data: {
-                    user: { connect: { id: user.id } },
+                    userId: user.id,
                     remainder: data.amount,
                     promocodes: data.promocodes,
                     paid: false,
