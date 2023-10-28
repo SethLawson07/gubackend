@@ -321,6 +321,18 @@ export async function get_all_users(_req: Request, res: Response) {
     }
 }
 
+export async function get_customer(_req: Request, res: Response) {
+    try {
+        const userId = _req.params.userid;
+        if (!userId) return res.status(400).send({ error: true, message: "User Id is needed", data: {} });
+        const data = await prisma.user.findUnique({ where: { id: userId } })
+        return res.status(200).send({ status: 200, error: false, data });
+    } catch (err) {
+        console.log(`Error while getting list of customers ${err}`)
+        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
+    }
+}
+
 
 export async function get_customers(_req: Request, res: Response) {
     try {
