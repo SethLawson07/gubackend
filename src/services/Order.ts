@@ -188,7 +188,7 @@ export async function delivered_orders(req: Request, res: Response) {
         return res.status(200).send({ error: false, data: targetted_order, message: "ok" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
-        return res.status(500).send({ error: true, message: "Une erreur s'es produite", data: {} })
+        return res.status(500).send({ error: true, message: "Une erreur s'es produite", data: {} });
     }
 }
 
