@@ -167,7 +167,7 @@ export async function order_delivered(req: Request, res: Response) {
 // Delivered orders
 export async function delivered_orders(req: Request, res: Response) {
     try {
-        const targetted_order = await prisma.order.findMany({ where: { status: "DELIVERED" }, include: { user: true } });
+        const targetted_order = await prisma.order.findMany({ where: { status: "DELIVERED" }});
         return res.status(200).send({ error: false, data: targetted_order, message: "ok" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
@@ -178,7 +178,7 @@ export async function delivered_orders(req: Request, res: Response) {
 // Pending orders
 export async function pending_orders(req: Request, res: Response) {
     try {
-        const targetted_order = await prisma.order.findMany({ where: { status: "PENDING" }, include: { user: true } });
+        const targetted_order = await prisma.order.findMany({ where: { status: "PENDING" }})
         return res.status(200).send({ error: false, data: targetted_order, message: "ok" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
@@ -189,7 +189,7 @@ export async function pending_orders(req: Request, res: Response) {
 // validated orders
 export async function validated_orders(req: Request, res: Response) {
     try {
-        const targetted_order = await prisma.order.findMany({ where: { status: "VALIDATED" }, include: { user: true } });
+        const targetted_order = await prisma.order.findMany({ where: { status: "VALIDATED" }})
         return res.status(200).send({ error: false, data: targetted_order, message: "ok" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
