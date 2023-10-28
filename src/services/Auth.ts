@@ -299,11 +299,7 @@ export async function get_orders(req: Request, res: Response) {
             }
         })
         if (!current_user) return res.status(401).send({ status: 401, error: true, message: 'pas autorisé' })
-        const data = await prisma.order.findMany({
-            where: {
-                user: current_user.id
-            }
-        })
+        const data = await prisma.order.findMany({ where: { user: current_user } })
         return res.status(200).send({ status: 200, error: false, data: { orders: data } })
     } catch (err) {
         console.error(`Error while getting list of user orders ${err}`)

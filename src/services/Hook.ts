@@ -79,7 +79,7 @@ export async function payment_event(req: Request, res: Response) {
             }
             await prisma.transaction.create({
                 data: {
-                    user: targetted_order.user,
+                    user: targetted_order.userId,
                     amount: targetted_order.remainder,
                     date: data.cpm_trans_date,
                 }
