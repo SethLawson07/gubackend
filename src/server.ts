@@ -24,6 +24,7 @@ import service from "./routes/service";
 import account from "./routes/account";
 import notification from "./routes/notification";
 import section from "./routes/section";
+import delivery from "./routes/delivery";
 
 
 const PORT = process.env.PORT || 5000;
@@ -69,6 +70,7 @@ app.use("/service", service);
 app.use('/account', account);
 app.use('/push', notification);
 app.use('/section', section);
+app.use('/delivery', delivery);
 app.get("/health", (_req: Request, res: Response) => {
     return res.status(200).send()
 });

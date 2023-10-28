@@ -27,6 +27,8 @@ model User {
     first_login     Boolean        @default(true)
     device_token    String         @default("")
     Contribution    Contribution[]
+    Delivery        Delivery[]
+    Order           Order[]
 }
 
 model Category {
@@ -111,7 +113,7 @@ type Delivery_address {
 
 model Order {
     id               String           @id @default(auto()) @map("_id") @db.ObjectId
-    user             String
+    user             User             @relation(fields: [userId], references: [id])
     amount           Float
     remainder        Float
     paid             Boolean
@@ -120,8 +122,18 @@ model Order {
     status           String // PENDING (attente de validation), VALIDATED, CANCELED, GAINED, DELIVERED
     delivery_type    String           @default("")
     delivery_address Delivery_address
-    delivery_person  Json?
+    // delivery_person  Json?
     // delivery_status  String // PENDING, RECEIVED
+    userId           String           @db.ObjectId()
+}
+
+model Delivery {
+    id               String           @id @default(auto()) @map("_id") @db.ObjectId
+    status           String // AWAITING (Aucun livreur), GAINED(Livreur choisi), PENDING(En cours de livraison) DELIVERED(Livré)
+    delivery_address Delivery_address
+    amount           String
+    delivery_person  User?            @relation(fields: [userId], references: [id])
+    userId           String?          @db.ObjectId()
 }
 
 model Transaction {
@@ -244,9 +256,5 @@ model Deposit {
     createdAt DateTime
     payment   String // agent,tmoney,moovmoney
     amount    Float
-    madeby    String // User who do the transaction (User role)
+    madeby    String // User transaction (User role)
 }
-
-// model Activity {
-
-// }

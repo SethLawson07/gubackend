@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../server";
 import { create_promocode_usage, generate_payment_link } from "../utils"
 import { User } from "@prisma/client";
+import { createDelivery } from "./Delivery";
 
 export async function create(req: Request, res: Response) {
     try {
@@ -31,7 +32,7 @@ export async function create(req: Request, res: Response) {
             // const d_status = data.delivery_type == "livraison" ? "PENDING"
             const order = await prisma.order.create({
                 data: {
-                    user: user.id,
+                    user: { connect: { id: user.id } },
                     remainder: data.amount,
                     promocodes: data.promocodes,
                     paid: false,
@@ -72,7 +73,7 @@ export async function get_user_orders(req: Request, res: Response) {
             where: { phone: user.phone }
         });
         if (!targetted_user) return res.status(404).send({ error: true, message: "User not found", data: {} });
-        const data = await prisma.order.findMany({ where: { user: user.id } });
+        const data = await prisma.order.findMany({ where: { user: user } });
         return res.status(200).send({ data: data, error: false, message: "", status: 200, user: targetted_user[0].id })
     } catch (err) {
         console.error(`Error while getting user orders ${err}`)
@@ -93,7 +94,7 @@ export async function cancel_order(req: Request, res: Response) {
         if (!current_user) return res.status(401).send()
         const targetted_order = await prisma.order.findUnique({ where: { id } });
         if (!targetted_order) return res.status(404).send()
-        if (targetted_order.user !== current_user.id) return res.status(403).send()
+        if (targetted_order.userId !== current_user.id) return res.status(403).send()
         await prisma.order.update({ where: { id }, data: { status: "CANCELLED" } });
         return res.status(200).send({ error: false, message: "Commande annulé", data: targetted_order });
     } catch (err) {
@@ -115,6 +116,7 @@ export async function validate_order(req: Request, res: Response) {
             where: { id },
             data: { status: "VALIDATED" }
         });
+        await createDelivery(targetted_order);
         return res.status(200).send({ error: false, data: targetted_order, message: "Commande validée avec succès" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
@@ -135,7 +137,7 @@ export async function gain_order(req: Request, res: Response) {
         if (!targetted_order) return res.status(404).send({ error: true, message: "Order not found", data: {} });
         await prisma.order.update({
             where: { id },
-            data: { status: "GAINED", delivery_person: user }
+            data: { status: "GAINED" }
         });
         return res.status(200).send({ error: false, data: targetted_order, message: "Ça y est vous être choisi pour livrer la commande" });
     } catch (err) {
@@ -147,7 +149,6 @@ export async function gain_order(req: Request, res: Response) {
 // Delivered orders
 export async function gained_orders(req: Request, res: Response) {
     try {
-        const { user } = req.body.user as { user: User };
         const targetted_order = await prisma.order.findMany({ where: { status: "GAINED" } });
         return res.status(200).send({ error: false, data: targetted_order, message: "ok" });
     } catch (err) {
@@ -160,7 +161,7 @@ export async function gained_orders(req: Request, res: Response) {
 export async function user_gained_orders(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
-        const targetted_order = await prisma.order.findMany({ where: { status: "GAINED", user: user.id } });
+        const targetted_order = await prisma.order.findMany({ where: { status: "GAINED", /* user: user.id */ } });
         return res.status(200).send({ error: false, data: targetted_order, message: "ok" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
@@ -214,6 +215,17 @@ export async function pending_orders(req: Request, res: Response) {
 export async function validated_orders(req: Request, res: Response) {
     try {
         const targetted_order = await prisma.order.findMany({ where: { status: "VALIDATED" } })
+        return res.status(200).send({ error: false, data: targetted_order, message: "ok" });
+    } catch (err) {
+        console.error(`Error while cancelling order ${err}`)
+        return res.status(500).send({ error: true, message: "Une erreur s'es produite", data: {} })
+    }
+}
+
+// In delivery process
+export async function delivery_process(req: Request, res: Response) {
+    try {
+        const targetted_order = await prisma.order.findMany({ where: { status: { in: ["VALIDATED", "GAINED", "DELIVERED"] } } });
         return res.status(200).send({ error: false, data: targetted_order, message: "ok" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)

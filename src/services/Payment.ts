@@ -25,7 +25,7 @@ export async function pay(req: Request, res: Response) {
             }
         })
         if (!targetted_order) return res.status(404).send({ message: "commande non trouve" })
-        if (targetted_order.user !== current_user.id) return res.status(403).send()
+        if (targetted_order.userId !== current_user.id) return res.status(403).send()
         const payment_link_generation_result = await generate_payment_link(targetted_order.remainder, current_user.id, targetted_order.id)
         if (!payment_link_generation_result.status) return res.status(500).send()
         return res.status(200).send({ url: payment_link_generation_result.url })
