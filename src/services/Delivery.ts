@@ -12,7 +12,10 @@ export const createDelivery = async (data: any) => {
             amount: z.string(),
         });
         const validation = schema.safeParse(data);
-        if (!validation.success) return;
+        if (!validation.success) {
+            console.log(validation.error);
+            return;
+        };
         return await prisma.delivery.create({ data: validation.data })
     } catch (e) {
         console.log(e);
