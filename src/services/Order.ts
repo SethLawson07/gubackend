@@ -29,7 +29,6 @@ export async function create(req: Request, res: Response) {
         const { user } = req.body.user as { user: User };
         if (!user) return res.status(401).send();
         if (user) {
-            // const d_status = data.delivery_type == "livraison" ? "PENDING"
             const order = await prisma.order.create({
                 data: {
                     user: { connect: { id: user.id } },
@@ -44,6 +43,7 @@ export async function create(req: Request, res: Response) {
                 }
             });
             const response = await generate_payment_link(data.amount, user.id, order.id);
+            console.log(response.url);
             await create_promocode_usage(data.promocodes, user.email as string);
             return res.status(201).send({ data: response, order: order.id, error: false, status: 201 });
         } else {
@@ -57,7 +57,7 @@ export async function create(req: Request, res: Response) {
 
 export async function get_all(_req: Request, res: Response) {
     try {
-        const data = await prisma.order.findMany();
+        const data = await prisma.order.findMany({ include: { user: true } });
         return res.status(200).send({ error: false, message: "ok", data });
     } catch (err) {
         console.error(`Error while getting all orders ${err}`)

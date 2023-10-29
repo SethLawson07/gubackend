@@ -48,7 +48,7 @@ type user_data = {
 }
 
 export function sign_token(user: user_data) {
-    return jwt.sign({ user }, JWT_TOKEN, { expiresIn: "31d" });
+    return jwt.sign({ user }, JWT_TOKEN);
 }
 
 export function verify_token(token: string) {
