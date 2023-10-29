@@ -129,13 +129,16 @@ export async function receive_delivery(req: Request, res: Response) {
 // Marquer livré
 export async function deliver(req: Request, res: Response) {
     try {
-        const schema = z.object({ id: z.string() });
+        const schema = z.object({ id: z.string(), deliveredat: z.coerce.date() });
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ error: true, message: "Id requis", data: {} });
         const { id } = validation_result.data;
         const targetted_delivery = await prisma.delivery.findUnique({ where: { id } });
         if (!targetted_delivery) return res.status(404).send({ error: true, message: "Order not found", data: {} });
-        const delivery = await prisma.delivery.update({ where: { id }, data: { status: "DELIVERED" } });
+        const delivery = await prisma.delivery.update({ where: { id }, data: { status: "DELIVERED", deliveredat: validation_result.data.deliveredat } });
+        const customer: User = targetted_delivery.customer as User;
+        const { user } = req.body.user as { user: User };
+        await prisma.acitity.create({ data: { title: `Colis livré à ${customer!.user_name}`, createdat: validation_result.data.deliveredat, body: "", user: user.id } })
         return res.status(200).send({ error: false, data: delivery, message: "Ça y est vous être choisi pour livrer la commande" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
