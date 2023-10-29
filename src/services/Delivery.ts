@@ -21,7 +21,13 @@ export const createDelivery = async (data: Order, customer: User) => {
             console.log(validation.error);
             return;
         };
-        return await prisma.delivery.create({ data: { ...validation.data, status: "AWAITING", customer: customer } });
+        return await prisma.delivery.create({
+            data: {
+                ...validation.data,
+                status: "AWAITING",
+                customer: customer,
+            }
+        });
     } catch (e) {
         console.log(e);
     }
@@ -58,8 +64,8 @@ export async function delivery_by_user(req: Request, res: Response) {
         const data = await prisma.delivery.findMany({ where: { status: "GAINED", userId: user.id } });
         return res.status(200).send({ error: false, data, message: "ok" });
     } catch (err) {
-        console.error(`Error while cancelling order ${err}`)
-        return res.status(500).send({ error: true, message: "Une erreur s'es produite", data: {} })
+        console.error(`Error while cancelling order ${err}`);
+        return res.status(500).send({ error: true, message: "Une erreur s'es produite", data: {} });
     }
 }
 
@@ -103,8 +109,25 @@ export async function start_delivery(req: Request, res: Response) {
     }
 }
 
+// Recevoir le colis ()
+export async function receive_delivery(req: Request, res: Response) {
+    try {
+        const schema = z.object({ id: z.string() });
+        const validation_result = schema.safeParse(req.body);
+        if (!validation_result.success) return res.status(400).send({ error: true, message: "Id requis", data: {} });
+        const { id } = validation_result.data;
+        const targetted_delivery = await prisma.delivery.findUnique({ where: { id } });
+        if (!targetted_delivery) return res.status(404).send({ error: true, message: "Order not found", data: {} });
+        await prisma.delivery.update({ where: { id }, data: { status: "RECEIVED" } });
+        return res.status(200).send({ error: false, data: targetted_delivery, message: "Ça y est vous être choisi pour livrer la commande" });
+    } catch (err) {
+        console.error(`Error while cancelling order ${err}`)
+        return res.status(500).send({ error: true, message: "Une erreur s'es produite", data: {} })
+    }
+}
+
 // Marquer livré
-export async function delivered(req: Request, res: Response) {
+export async function deliver(req: Request, res: Response) {
     try {
         const schema = z.object({ id: z.string() });
         const validation_result = schema.safeParse(req.body);
