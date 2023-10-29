@@ -129,6 +129,7 @@ model Order {
 
 model Delivery {
     id               String           @id @default(auto()) @map("_id") @db.ObjectId
+    customer         Json
     status           String // AWAITING (Aucun livreur), GAINED(Livreur choisi), PENDING(En cours de livraison) DELIVERED(Livré)
     delivery_address Delivery_address
     amount           Float

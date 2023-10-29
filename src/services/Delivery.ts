@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
-import { User } from "@prisma/client";
+import { Order, User } from "@prisma/client";
 
 
-export const createDelivery = async (data: any) => {
+export const createDelivery = async (data: Order, customer: User) => {
     try {
         const schema = z.object({
             status: z.string().default("AWAITING"),
@@ -21,7 +21,7 @@ export const createDelivery = async (data: any) => {
             console.log(validation.error);
             return;
         };
-        return await prisma.delivery.create({ data: validation.data })
+        return await prisma.delivery.create({ data: { ...validation.data, status: "AWAITING", customer: customer } });
     } catch (e) {
         console.log(e);
     }

@@ -43,7 +43,6 @@ export async function create(req: Request, res: Response) {
                 }
             });
             const response = await generate_payment_link(data.amount, user.id, order.id);
-            console.log(response.url);
             await create_promocode_usage(data.promocodes, user.email as string);
             return res.status(201).send({ data: response, order: order.id, error: false, status: 201 });
         } else {
@@ -116,7 +115,9 @@ export async function validate_order(req: Request, res: Response) {
             where: { id },
             data: { status: "VALIDATED" }
         });
-        let delivery = await createDelivery(targetted_order);
+        const customer = await prisma.user.findUnique({ where: { id: targetted_order.userId } });
+        if (!customer) return res.status(404).send({ error: true, message: "FATAL ERROR: Customer not found", data: {} });
+        let delivery = await createDelivery(targetted_order, customer);
         console.log(delivery);
         return res.status(200).send({ error: false, data: targetted_order, message: "Commande validée avec succès" });
     } catch (err) {
