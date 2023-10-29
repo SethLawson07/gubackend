@@ -261,7 +261,7 @@ model Deposit {
     madeby    String // User transaction (User role)
 }
 
-model Acitity {
+model Activity {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
     user      String
     title     String
