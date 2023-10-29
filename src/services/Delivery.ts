@@ -61,7 +61,7 @@ export async function awaiting_deliveries(req: Request, res: Response) {
 export async function delivery_by_user(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
-        const data = await prisma.delivery.findMany({ where: { status: "GAINED", userId: user.id } });
+        const data = await prisma.delivery.findMany({ where: { status: { in: ["GAINED", "RECEIVED", "PENDING"] }, userId: user.id } });
         return res.status(200).send({ error: false, data, message: "ok" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`);
