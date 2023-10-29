@@ -8,7 +8,12 @@ export const createDelivery = async (data: any) => {
     try {
         const schema = z.object({
             status: z.string().default("AWAITING"),
-            delivery_address: z.object({}),
+            delivery_address: z.object({
+                name: z.string(),
+                email: z.string().email(),
+                phone: z.string(),
+                map_address: z.string()
+            }),
             amount: z.number().int().positive(),
         });
         const validation = schema.safeParse(data);
