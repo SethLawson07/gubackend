@@ -101,8 +101,8 @@ export async function start_delivery(req: Request, res: Response) {
         const { id } = validation_result.data;
         const targetted_delivery = await prisma.delivery.findUnique({ where: { id } });
         if (!targetted_delivery) return res.status(404).send({ error: true, message: "Order not found", data: {} });
-        await prisma.delivery.update({ where: { id }, data: { status: "PENDING" } });
-        return res.status(200).send({ error: false, data: targetted_delivery, message: "Ça y est vous être choisi pour livrer la commande" });
+        const delivery = await prisma.delivery.update({ where: { id }, data: { status: "PENDING" } });
+        return res.status(200).send({ error: false, data: delivery, message: "Ça y est vous être choisi pour livrer la commande" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
         return res.status(500).send({ error: true, message: "Une erreur s'es produite", data: {} })
@@ -118,7 +118,7 @@ export async function receive_delivery(req: Request, res: Response) {
         const { id } = validation_result.data;
         const targetted_delivery = await prisma.delivery.findUnique({ where: { id } });
         if (!targetted_delivery) return res.status(404).send({ error: true, message: "Order not found", data: {} });
-        let delivery = await prisma.delivery.update({ where: { id }, data: { status: "RECEIVED" } });
+        const delivery = await prisma.delivery.update({ where: { id }, data: { status: "RECEIVED" } });
         return res.status(200).send({ error: false, data: delivery, message: "Commande reçue" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
@@ -135,8 +135,8 @@ export async function deliver(req: Request, res: Response) {
         const { id } = validation_result.data;
         const targetted_delivery = await prisma.delivery.findUnique({ where: { id } });
         if (!targetted_delivery) return res.status(404).send({ error: true, message: "Order not found", data: {} });
-        await prisma.delivery.update({ where: { id }, data: { status: "DELIVERED" } });
-        return res.status(200).send({ error: false, data: targetted_delivery, message: "Ça y est vous être choisi pour livrer la commande" });
+        const delivery = await prisma.delivery.update({ where: { id }, data: { status: "DELIVERED" } });
+        return res.status(200).send({ error: false, data: delivery, message: "Ça y est vous être choisi pour livrer la commande" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
         return res.status(500).send({ error: true, message: "Une erreur s'es produite", data: {} })
