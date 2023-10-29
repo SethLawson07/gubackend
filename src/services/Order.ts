@@ -116,7 +116,8 @@ export async function validate_order(req: Request, res: Response) {
             where: { id },
             data: { status: "VALIDATED" }
         });
-        await createDelivery(targetted_order);
+        let delivery = await createDelivery(targetted_order);
+        console.log(delivery);
         return res.status(200).send({ error: false, data: targetted_order, message: "Commande validée avec succès" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
