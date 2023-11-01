@@ -498,6 +498,18 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
     }
 }
 
+// Get user contributions
+export const userContributions = async (req: Request, res: Response) => {
+    try {
+        const { user } = req.body.user as { user: User };
+        const contributions = await prisma.contribution.findMany({ where: { userId: user.id } });
+        return res.status(200).send({ error: false, data: contributions, message: "ok" });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({});
+    }
+}
+
 // Test for all
 export const contribtest = async (req: Request, res: Response) => {
     // const { amount, openedAt } = req.body;

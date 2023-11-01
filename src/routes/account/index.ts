@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer, UserIsCustomer, UserIsCustomerOrAdmin } from "../../utils/middlewares";
-import { check_for_opened_sheet, close_sheet, contribtest, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, target_contribution, user_contributions, validate_contribution } from "../../services/Account";
+import { check_for_opened_sheet, close_sheet, contribtest, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, target_contribution, userContributions, user_contributions, validate_contribution } from "../../services/Account";
 
 const router = Router();
 
@@ -30,6 +30,8 @@ router.route("/validate/:id").post(Auth, UserIsAgentOrAdmin, validate_contributi
 
 // Get Contributions  | admin or Agent
 router.route("/contribution").get(Auth, UserIsAgentCustomerOrAdmin, user_contributions);
+
+router.route("/user/contributions").get(Auth, userContributions);
 
 // Get a contribution | Admin or Agent  
 router.route("/contribution/:id").get(Auth, UserIsAgentOrAdmin, target_contribution);
