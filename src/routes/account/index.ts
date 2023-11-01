@@ -31,7 +31,7 @@ router.route("/validate/:id").post(Auth, UserIsAgentOrAdmin, validate_contributi
 // Get Contributions  | admin or Agent
 router.route("/contribution").get(Auth, UserIsAgentCustomerOrAdmin, user_contributions);
 
-router.route("/user/contributions").get(Auth, userContributions);
+router.route("/user/contributions/:userid").get(Auth, userContributions);
 
 // Get a contribution | Admin or Agent  
 router.route("/contribution/:id").get(Auth, UserIsAgentOrAdmin, target_contribution);
