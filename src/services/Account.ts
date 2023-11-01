@@ -502,7 +502,7 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
 export const userContributions = async (req: Request, res: Response) => {
     try {
         const userId = req.params.userid;
-        const contributions = await prisma.contribution.findMany({ where: { userId: userId } });
+        const contributions = await prisma.contribution.findMany({ where: { userId: userId }, include: { customer: true } });
         return res.status(200).send({ error: false, data: contributions, message: "ok" });
     } catch (err) {
         console.log(err);
