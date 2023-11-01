@@ -83,6 +83,7 @@ model Product {
     brand           String   @db.ObjectId()
     brand_data      Brand    @relation(fields: [brand], references: [id])
     item_data       Item     @relation(fields: [item], references: [id])
+    delivery_price  Float    @default(0.0)
     // color           String
 }
 
@@ -268,5 +269,3 @@ model Activity {
     body      String
     createdat DateTime
 }
-
-
