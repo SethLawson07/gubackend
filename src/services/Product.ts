@@ -18,7 +18,8 @@ export async function create(req: Request, res: Response) {
             fields: z.string({ invalid_type_error: "fields doit etre un string" }),
             images: z.array(z.string()),
             brand: z.string(),
-            description: z.string()
+            description: z.string(),
+            pay_goodpay: z.boolean().default(false)
         })
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) });
@@ -90,6 +91,7 @@ export async function update(req: Request, res: Response) {
             fields: z.string().optional(),
             images: z.array(z.string()).optional(),
             description: z.string(),
+            pay_goodpay: z.boolean().default(false)
         })
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ message: JSON.parse(validation_result.error.message) })
@@ -118,6 +120,7 @@ export async function update(req: Request, res: Response) {
                 fields: data.fields,
                 images: data.images,
                 description: data.description,
+                pay_goodpay: data.pay_goodpay
             }
         })
         return res.status(200).send()

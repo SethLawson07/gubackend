@@ -84,7 +84,7 @@ model Product {
     brand_data      Brand    @relation(fields: [brand], references: [id])
     item_data       Item     @relation(fields: [item], references: [id])
     delivery_price  Float    @default(0.0)
-    // color           String
+    pay_goodpay     Boolean  @default(false)
 }
 
 model PromoCode {

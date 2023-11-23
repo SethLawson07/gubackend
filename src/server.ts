@@ -71,6 +71,8 @@ app.use('/account', account);
 app.use('/push', notification);
 app.use('/section', section);
 app.use('/delivery', delivery);
+
+
 app.get("/health", (_req: Request, res: Response) => {
     return res.status(200).send()
 });
