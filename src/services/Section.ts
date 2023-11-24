@@ -6,15 +6,15 @@ import { products_byids } from "../utils";
 
 export const all_sections = async (req: Request, res: Response) => {
     try {
-        let sections: Object[] = [];
-        const target_all = await prisma.section.findMany();
-        if (!target_all) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
-        // console.log(target_all);
-        for (let i = 0; i < target_all.length; i++) {
-            const element = target_all[i];
-            const products = (await products_byids(element.content)).data;
-            sections.push({ ...element, products });
-        }
+        // let sections: Object[] = [];
+        const sections = await prisma.section.findMany({ include: { content: true } });
+        // if (!target_all) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
+        // // console.log(target_all);
+        // for (let i = 0; i < target_all.length; i++) {
+        //     const element = target_all[i];
+        //     const products = (await products_byids(element.content)).data;
+        //     sections.push({ ...element, products });
+        // }
         return res.status(200).send({ error: false, message: "Opération réussie", data: sections });
     } catch (err) {
         console.log(err);
@@ -26,14 +26,13 @@ export const all_sections = async (req: Request, res: Response) => {
 export const section_byid = async (req: Request, res: Response) => {
     try {
         const sectionId = req.params.id;
-        const target = await prisma.section.findUnique({ where: { id: sectionId } });
-        if (!target) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
-        const section = { ...target, products: (await products_byids(target.content)).data };
-        if (!section.products) return res.status(401).send({ error: true, message: "Nothing found", data: {} });
-        return res.status(200).send({ error: false, message: "Opération réussie", data: section });
+        const sections = await prisma.section.findUnique({ where: { id: sectionId } });
+        if (!sections) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
+        // const section = { ...target, products: (await products_byids(target.content)).data };
+        // if (!section.products) return res.status(401).send({ error: true, message: "Nothing found", data: {} });
+        return res.status(200).send({ error: false, message: "Opération réussie", data: sections });
     } catch (err) {
         console.log(err);
-        console.log("Error while ...");
         return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} })
     }
 }
@@ -49,7 +48,11 @@ export const create_section = async (req: Request, res: Response) => {
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
-        const created_section = await prisma.section.create({ data: validation.data });
+        const created_section = await prisma.section.create({
+            data: {
+                ...validation.data, content: { connect: validation.data.content.map(id => ({ id })) }
+            }
+        });
         if (!created_section) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
         return res.status(201).send({ status: 201, error: false, message: "Section créée", data: created_section });
     } catch (err) {
@@ -71,7 +74,11 @@ export const update_section = async (req: Request, res: Response) => {
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
-        const updated_section = await prisma.section.update({ where: { id: validation.data.id }, data: validation.data });
+        const updated_section = await prisma.section.update({
+            where: { id: validation.data.id }, data: {
+                ...validation.data, content: { connect: validation.data.content.map(id => ({ id })) }
+            }
+        });
         if (!updated_section) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
         return res.status(201).send({ error: false, message: "Section modifiée", data: updated_section });
     } catch (err) {

@@ -85,6 +85,8 @@ model Product {
     item_data       Item     @relation(fields: [item], references: [id])
     delivery_price  Float    @default(0.0)
     pay_goodpay     Boolean  @default(false)
+    Section         Section? @relation(fields: [sectionId], references: [id])
+    sectionId       String?  @db.ObjectId
 }
 
 model PromoCode {
@@ -244,12 +246,12 @@ model Caroussel {
 }
 
 model Section {
-    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
     title       String
     description String // Name == Title
     contenttype String // product, category, promotion(promo card) // service
     featured    Boolean
-    content     String[]
+    content     Product[]
 }
 
 model Deposit {
