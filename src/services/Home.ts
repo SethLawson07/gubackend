@@ -21,7 +21,7 @@ export async function clientHome2(_req: Request, res: Response) {
         const services = await prisma.service.findMany({});
         const cservices = await prisma.serviceCategory.findMany({});
         // let sections: Object[] = [];
-        const sections = await prisma.section.findMany();
+        const sections = await prisma.section.findMany({ include: { content: true } });
         // if (!target_all) return res.status(401).send({ error: true, message: "Une erreur est survenue", data: {} });
         // for (let i = 0; i < target_all.length; i++) {
         //     const element = target_all[i];
