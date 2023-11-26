@@ -144,7 +144,7 @@ export async function create_csl_srv(req: Request, res: Response) {
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ message: JSON.parse(validation.error.message) });
         const v_result = validation.data;
-        const targeted = await prisma.caroussel.findFirst({ where: { code: v_result.code } });
+        const targeted = await prisma.carousselService.findFirst({ where: { code: v_result.code } });
         let created: CarousselService;
         if (!targeted) {
             created = await prisma.carousselService.create({
