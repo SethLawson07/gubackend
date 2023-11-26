@@ -9,6 +9,7 @@ router.route("").get(get)
 router.route("").put(Auth, UserIsAdmin, update)
 router.route("").delete(Auth, UserIsAdmin, delete_);
 router.route("/create").post(Auth, UserIsAdmin, create_csl);
-router.route("/slides").get(slider_csl);
+router.route("/service").post(Auth, UserIsAdmin, create_csl);
+router.route("/service").get(slider_csl);
 
 export default router

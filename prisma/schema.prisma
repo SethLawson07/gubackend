@@ -245,6 +245,14 @@ model Caroussel {
     description String
 }
 
+
+model CarousselService {
+    id          String @id @default(auto()) @map("_id") @db.ObjectId
+    code        String
+    image       String
+    description String
+}
+
 model Section {
     id          String    @id @default(auto()) @map("_id") @db.ObjectId
     title       String

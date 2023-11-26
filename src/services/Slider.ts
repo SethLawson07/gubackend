@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { z } from "zod"
 import { prisma } from "../server"
-import { Caroussel } from "@prisma/client"
+import { Caroussel, CarousselService } from "@prisma/client"
 
 export async function create(req: Request, res: Response) {
     try {
@@ -131,6 +131,59 @@ export async function create_csl(req: Request, res: Response) {
         return res.status(500).send({ error: true, message: "", data: {} })
     }
 }
+
+
+// Créé
+export async function create_csl_srv(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            code: z.string(),
+            image: z.string(),
+            description: z.string(),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ message: JSON.parse(validation.error.message) });
+        const v_result = validation.data;
+        const targeted = await prisma.caroussel.findFirst({ where: { code: v_result.code } });
+        let created: CarousselService;
+        if (!targeted) {
+            created = await prisma.carousselService.create({
+                data: {
+                    code: v_result.code,
+                    image: v_result.image,
+                    description: v_result.description,
+                }
+            });
+        } else {
+            created = await prisma.caroussel.update({
+                where: { id: targeted.id },
+                data: {
+                    code: v_result.code,
+                    image: v_result.image,
+                    description: v_result.description,
+                }
+            });
+        }
+        if (!created) return res.status(200).send({ error: true, message: "Slider non créé", data: {} })
+        return res.status(201).send({ status: 201, error: false, message: "Slider crée", data: created });
+    } catch (err) {
+        console.error(`Error while creating slider ${err}`)
+        return res.status(500).send({ error: true, message: "", data: {} })
+    }
+}
+
+// // Get all
+export async function slider_csl_srv(req: Request, res: Response) {
+    try {
+        let sliders = await prisma.carousselService.findMany();
+        if (!sliders) return res.status(404).send({ error: true, message: "", data: {} });
+        return res.status(200).send({ error: false, message: {}, data: sliders });
+    } catch (err) {
+        console.error(`Error while getting slider ${err}`)
+        return res.status(500).send({ error: true, message: "", data: {} })
+    }
+}
+
 
 // // Get all
 export async function slider_csl(req: Request, res: Response) {
