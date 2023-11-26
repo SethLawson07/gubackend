@@ -155,7 +155,7 @@ export async function create_csl_srv(req: Request, res: Response) {
                 }
             });
         } else {
-            created = await prisma.caroussel.update({
+            created = await prisma.carousselService.update({
                 where: { id: targeted.id },
                 data: {
                     code: v_result.code,
