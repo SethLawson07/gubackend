@@ -12,7 +12,7 @@ export async function create(req: Request, res: Response) {
             cart: z.array(z.object({
                 id: z.string(),
                 quantity: z.number().int().positive(),
-                product: z.array(z.object({})),
+                product: z.object({}),
             })).nonempty(),
             promocodes: z.array(z.string()),
             delivery_type: z.string(),
