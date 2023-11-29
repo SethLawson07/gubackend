@@ -11,7 +11,8 @@ export async function create(req: Request, res: Response) {
             amount: z.number().int().positive(),
             cart: z.array(z.object({
                 id: z.string(),
-                quantity: z.number().int().positive()
+                quantity: z.number().int().positive(),
+                product: z.array(z.object({})),
             })).nonempty(),
             promocodes: z.array(z.string()),
             delivery_type: z.string(),
@@ -20,7 +21,7 @@ export async function create(req: Request, res: Response) {
                 email: z.string().email(),
                 phone: z.string(),
                 map_address: z.string()
-            })
+            }),
         });
 
         const validation_result = schema.safeParse(req.body);
@@ -67,7 +68,6 @@ export async function get_all(_req: Request, res: Response) {
 export async function get_user_orders(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
-
         const targetted_user = await prisma.user.findMany({
             where: { phone: user.phone }
         });

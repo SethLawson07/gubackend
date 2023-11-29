@@ -1,6 +1,5 @@
 import { Request, Response } from "express"
 import { prisma } from "../server"
-import { products_byids } from "../utils";
 
 export async function clientHome1(_req: Request, res: Response) {
     try {

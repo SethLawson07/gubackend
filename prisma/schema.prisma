@@ -87,6 +87,7 @@ model Product {
     pay_goodpay     Boolean  @default(false)
     Section         Section? @relation(fields: [sectionId], references: [id])
     sectionId       String?  @db.ObjectId
+    Cart            Cart[]
 }
 
 model PromoCode {
@@ -112,6 +113,13 @@ type Delivery_address {
     email       String
     phone       String
     map_address String
+}
+
+model Cart {
+    id        String  @id @default(auto()) @map("_id") @db.ObjectId
+    product   Product @relation(fields: [productId], references: [id])
+    quantity  Int
+    productId String  @db.ObjectId()
 }
 
 model Order {
@@ -244,7 +252,6 @@ model Caroussel {
     buttomText  String
     description String
 }
-
 
 model CarousselService {
     id          String @id @default(auto()) @map("_id") @db.ObjectId
