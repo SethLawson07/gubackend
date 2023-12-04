@@ -26,6 +26,7 @@ import notification from "./routes/notification";
 import section from "./routes/section";
 import delivery from "./routes/delivery";
 import home from "./routes/home";
+const Agenda = require('agenda');
 
 
 const PORT = process.env.PORT || 5000;
@@ -52,6 +53,9 @@ const verboseFormat = ':remote-addr :method :url HTTP/:http-version :status :res
 
 app.use(morgan(verboseFormat));
 app.use('/docs', swagger.serve, swagger.setup(swagger_doc));
+
+export const agenda = new Agenda();
+agenda.database(process.env.DATABASE);
 
 // routes
 app.use("/auth", auth);

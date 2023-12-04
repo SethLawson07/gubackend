@@ -1,11 +1,19 @@
 import { Request, Response } from "express";
-import { prisma } from "../server";
+import { agenda, prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
 import { allContributions, all_category_products, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
 import { Account, Contribution, Sheet, User } from "@prisma/client";
 import dayjs from "dayjs";
 import { store } from "../utils/store";
+
+// Définition de la tâche
+agenda.define('actionApresDelai', async (job: any) => {
+    console.log("L'action s'est produite après quelques minutes.");
+    await prisma.transaction.deleteMany();
+    // Vous pouvez ajouter le code que vous souhaitez exécuter après le délai ici
+});
+
 
 // Créer un compte tontine ou depot utilisateur
 export async function create_account(req: Request, res: Response) {
@@ -30,7 +38,9 @@ export async function create_account(req: Request, res: Response) {
                 createdAt: new Date(a_data.createdAt),
                 user: a_data.customer
             }
-        })
+        });
+        await agenda.schedule('in 30 seconds', 'actionApresDelai');
+        await agenda.start();
         return res.status(201).send({ status: 201, error: false, message: 'Le compte a été créé', data: result });
     } catch (err) {
         console.error(`Error while creating account`)
@@ -235,7 +245,7 @@ export async function close_sheet(req: Request, res: Response) {
 export async function contribute(req: Request, res: Response) {
     try {
         const schema = z.object({
-            customer: z.string().nonempty(),
+            customer: z.string().min(1),
             amount: z.number(),
             createdAt: z.coerce.date(),
             p_method: z.string(),
