@@ -119,7 +119,7 @@ export async function contribution_event(req: Request, res: Response) {
             cpm_error_message: z.string(),
             cpm_trans_date: z.string()
         });
-        console.log(data.amount);
+        // console.log(data.amount);
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) {
             console.log(`Error while parsing response from cinet pay ${req.body}`)
@@ -130,7 +130,7 @@ export async function contribution_event(req: Request, res: Response) {
             return res.status(409).send({ error: true, message: "", data: {} });
         }
         store.push(validation_result.data.cpm_trans_id);
-        console.log(validation_result.data.cpm_error_message);
+        // console.log(validation_result.data.cpm_error_message);
         if (validation_result.data.cpm_error_message === "SUCCES") {
             const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
             const book = await opened_book(targetedUser!);
@@ -138,7 +138,7 @@ export async function contribution_event(req: Request, res: Response) {
             const userAccount = await prisma.account.findFirst({ where: { user: data.customer } });
             var crtCtrtion: Contribution; // CreatedContribution
             if (!result.error) {
-                console.log(data.amount);
+                // console.log(data.amount);
                 crtCtrtion = await prisma.contribution.create({
                     data: {
                         account: userAccount?.id!,
@@ -161,7 +161,7 @@ export async function contribution_event(req: Request, res: Response) {
                     return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
                 }
             } else {
-                console.log(result.error);
+                console.log(result.message);
                 console.log("Error");
                 return res.status(200).send({ error: result.error, message: result.message, data: {} });
             }
