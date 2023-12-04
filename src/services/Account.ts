@@ -1,11 +1,15 @@
 import { Request, Response } from "express";
-import { agenda, prisma } from "../server";
+import { prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
 import { allContributions, all_category_products, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
 import { Account, Contribution, Sheet, User } from "@prisma/client";
 import dayjs from "dayjs";
 import { store } from "../utils/store";
+const Agenda = require('agenda');
+
+const agenda = new Agenda();
+agenda.database(process.env.DATABASE);
 
 // Définition de la tâche
 agenda.define('actionApresDelai', async (job: any) => {
