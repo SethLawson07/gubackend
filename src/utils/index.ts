@@ -173,6 +173,13 @@ export async function sheet_to_open(user: User) {
     return { error: false, data: sheetToOpen };
 }
 
+export async function sheet_to_close(user: User): Promise<Sheet | undefined> {
+    var book = (await opened_book(user));
+    // var sheetToClose: Sheet;
+    const sheetToClose = book!.sheets.find((st) => st.status === "opened");
+    return sheetToClose;
+}
+
 // Open sheet
 export async function update_sheets(user: User, openedat: Date | null, bet: number | null) {
     let error: boolean = false;

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
-import { allContributions, all_category_products, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
+import { allContributions, all_category_products, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_close, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
 import { Account, Book, Contribution, Sheet, User } from "@prisma/client";
 import dayjs from "dayjs";
 import { store } from "../utils/store";
@@ -20,9 +20,17 @@ agenda.define('closebook', async (job: any) => {
 // Définition de la tâche
 agenda.define('closesheet', async (job: any) => {
     const { user, date } = job.attrs.data as { user: User, date: any };
+    // const book = await opened_book(user);
+    // const sheets = await update_sheets(user, date, null);
+    // await prisma.book.update({ where: { id: book!.id }, data: { sheets: sheets.updated_sheets } });
     const book = await opened_book(user);
-    const sheets = await update_sheets(user, date, null);
-    await prisma.book.update({ where: { id: book!.id }, data: { sheets: sheets.updated_sheets } });
+    const sheets = book!.sheets;
+    const sheet: Sheet = (await sheet_to_close(user))!;
+    let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+    let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
+    sheet.status = "closed";
+    updated_sheets[sheetIndex] = sheet!;
+    await prisma.book.update({ where: { id: book!.id }, data: { sheets: updated_sheets } });
 });
 
 // Créer un compte tontine ou depot utilisateur
