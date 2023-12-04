@@ -224,7 +224,7 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     const emptycase: Case = (await empty_case(user)).data!;
     var nbCases = amount / sheet.bet!;
-    if (!utilisIsInt(nbCases)) return { error: true, message: "Montant saisie invalide" };
+    // if (!utilisIsInt(nbCases)) return { error: true, message: "Montant saisie invalide" };
     if (emptycase.index == 31) return { error: true, message: "Votre carnet est remplie" };
     if (emptycase.index + nbCases > 31) return { error: true, message: `Il ne reste plus que ${31 - emptycase.index} case(s)` };
     let cases = [];
