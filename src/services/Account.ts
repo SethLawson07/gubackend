@@ -20,9 +20,6 @@ agenda.define('closebook', async (job: any) => {
 // Définition de la tâche
 agenda.define('closesheet', async (job: any) => {
     const { user, date } = job.attrs.data as { user: User, date: any };
-    // const book = await opened_book(user);
-    // const sheets = await update_sheets(user, date, null);
-    // await prisma.book.update({ where: { id: book!.id }, data: { sheets: sheets.updated_sheets } });
     const book = await opened_book(user);
     const sheets = book!.sheets;
     const sheet: Sheet = (await sheet_to_close(user))!;
@@ -44,7 +41,6 @@ export async function create_account(req: Request, res: Response) {
             createdAt: z.coerce.date(),
             customer: z.string(),
         });
-
         const validation_result = account_schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
         let a_data = validation_result.data;
@@ -202,8 +198,8 @@ export async function open_sheet(req: Request, res: Response) {
         const book = await opened_book(user);
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
         await prisma.book.update({ where: { id: book!.id }, data: { sheets: sheets.updated_sheets } });
-        await agenda.schedule('in 10 seconds', 'closesheet', { user, date: validation_result.data.openedAt });
-        // await agenda.schedule('in 31 days', 'closesheet', { user, date: validation_result.data.openedAt });
+        // await agenda.schedule('in 10 seconds', 'closesheet', { user, date: validation_result.data.openedAt });
+        await agenda.schedule('in 31 days', 'closesheet', { user, date: validation_result.data.openedAt });
         await agenda.start();
         return res.status(200).send({ error: false, message: "Feuille ouverte", data: {} });
     } catch (e) {

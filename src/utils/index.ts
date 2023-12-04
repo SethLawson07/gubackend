@@ -175,13 +175,12 @@ export async function sheet_to_open(user: User) {
 
 export async function sheet_to_close(user: User): Promise<Sheet | undefined> {
     var book = (await opened_book(user));
-    // var sheetToClose: Sheet;
     const sheetToClose = book!.sheets.find((st) => st.status === "opened");
     return sheetToClose;
 }
 
 // Open sheet
-export async function update_sheets(user: User, openedat: Date | null, bet: number | null) {
+export async function update_sheets(user: User, openedat: Date, bet: number) {
     let error: boolean = false;
     let message: string = "";
     // console.log((await opened_book(user)));
@@ -198,8 +197,8 @@ export async function update_sheets(user: User, openedat: Date | null, bet: numb
                     error = true; message = "Feuille actuelle non ouverte";
                     break;
                 case "opened":
-                    // error = true; message = "Feuille actuelle non bloquée";
-                    sheet.status = "closed"; sheet.closeAt = new Date(openedat!);
+                    error = true; message = "Feuille actuelle non bloquée";
+                    // sheet.status = "closed"; sheet.closeAt = new Date(openedat!);
                     break;
                 case "closed":
                     sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
@@ -208,13 +207,6 @@ export async function update_sheets(user: User, openedat: Date | null, bet: numb
                     break;
             }
         }
-        // else {
-        //     if (sheets[sheetIndex - 1].status == "notopened") error = true; message = "Feuille actuelle non ouverte";
-        //     if (sheets[sheetIndex - 1].status == "opened") error = true; message = "Feuille actuelle non bloquée";
-        //     if (sheets[sheetIndex - 1].status === "closed") {
-        //         sheet.status = "opened"; sheet.openedAt = new Date(openedat); sheet.bet = bet;
-        //     }
-        // }
     } else { error = true, message = "Vous ne pouvez pas encore créer de feuille" }
     updated_sheets[sheetIndex] = sheet!;
     return { error, message, updated_sheets };
