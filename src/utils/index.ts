@@ -174,7 +174,7 @@ export async function sheet_to_open(user: User) {
 }
 
 // Open sheet
-export async function update_sheets(user: User, openedat: Date, bet: number) {
+export async function update_sheets(user: User, openedat: Date | null, bet: number | null) {
     let error: boolean = false;
     let message: string = "";
     // console.log((await opened_book(user)));
@@ -184,14 +184,30 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
     let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     if (sheet) {
-        if (sheetIndex == 0) { sheet.status = "opened"; sheet.openedAt = new Date(openedat); sheet.bet = bet }
+        if (sheetIndex == 0) { sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet }
         else {
-            if (sheets[sheetIndex - 1].status == "notopened") error = true; message = "Feuille actuelle non ouverte";
-            if (sheets[sheetIndex - 1].status == "opened") error = true; message = "Feuille actuelle non bloquée";
-            if (sheets[sheetIndex - 1].status === "closed") {
-                sheet.status = "opened"; sheet.openedAt = new Date(openedat); sheet.bet = bet;
+            switch (sheets[sheetIndex - 1].status) {
+                case "notopened":
+                    error = true; message = "Feuille actuelle non ouverte";
+                    break;
+                case "opened":
+                    // error = true; message = "Feuille actuelle non bloquée";
+                    sheet.status = "closed"; sheet.closeAt = new Date(openedat!);
+                    break;
+                case "closed":
+                    sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
+                    break;
+                default:
+                    break;
             }
         }
+        // else {
+        //     if (sheets[sheetIndex - 1].status == "notopened") error = true; message = "Feuille actuelle non ouverte";
+        //     if (sheets[sheetIndex - 1].status == "opened") error = true; message = "Feuille actuelle non bloquée";
+        //     if (sheets[sheetIndex - 1].status === "closed") {
+        //         sheet.status = "opened"; sheet.openedAt = new Date(openedat); sheet.bet = bet;
+        //     }
+        // }
     } else { error = true, message = "Vous ne pouvez pas encore créer de feuille" }
     updated_sheets[sheetIndex] = sheet!;
     return { error, message, updated_sheets };

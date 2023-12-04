@@ -14,20 +14,15 @@ agenda.database(process.env.DATABASE);
 // Définition de la tâche
 agenda.define('closebook', async (job: any) => {
     const { created_book } = job.attrs.data as { created_book: Book };
-    await prisma.transaction.create({
-        data: {
-            amount: 500,
-            date: (new Date(dayjs(Date.now()).format("MM/DD/YYYY"))).toString(),
-            user: created_book.id,
-            detail: "customer"
-        }
-    });
     await prisma.book.update({ where: { id: created_book.id }, data: { status: "closed" } });
 });
 
 // Définition de la tâche
 agenda.define('closesheet', async (job: any) => {
-    const { } = job.attrs.data;
+    const { user, date } = job.attrs.data as { user: User, date: any };
+    const book = await opened_book(user);
+    const sheets = await update_sheets(user, date, null);
+    await prisma.book.update({ where: { id: book!.id }, data: { sheets: sheets.updated_sheets } });
 });
 
 // Créer un compte tontine ou depot utilisateur
@@ -91,8 +86,7 @@ export async function create_book(req: Request, res: Response) {
             where: { id: created_book.id },
             data: { sheets: sheets },
         });
-        await agenda.schedule('in 10 seconds', 'closebook', { created_book });
-        // await agenda.schedule('in 1 year', 'closebook', { created_book });
+        await agenda.schedule('in 1 year', 'closebook', { created_book });
         await agenda.start();
         return res.status(201).send({ status: 201, error: false, message: 'Le carnet a été créé', data: created_book })
     } catch (err) {
@@ -200,6 +194,9 @@ export async function open_sheet(req: Request, res: Response) {
         const book = await opened_book(user);
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
         await prisma.book.update({ where: { id: book!.id }, data: { sheets: sheets.updated_sheets } });
+        await agenda.schedule('in 10 seconds', 'closesheet', { user, date: validation_result.data.openedAt });
+        // await agenda.schedule('in 31 days', 'closesheet', { user, date: validation_result.data.openedAt });
+        await agenda.start();
         return res.status(200).send({ error: false, message: "Feuille ouverte", data: {} });
     } catch (e) {
         console.log(e);
