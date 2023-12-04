@@ -130,6 +130,7 @@ export async function contribution_event(req: Request, res: Response) {
             return res.status(409).send({ error: true, message: "", data: {} });
         }
         store.push(validation_result.data.cpm_trans_id);
+        console.log(validation_result.data.cpm_error_message);
         if (validation_result.data.cpm_error_message === "SUCCES") {
             const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
             const book = await opened_book(targetedUser!);
@@ -160,6 +161,7 @@ export async function contribution_event(req: Request, res: Response) {
                     return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
                 }
             } else {
+                console.log(result.error);
                 console.log("Error");
                 return res.status(200).send({ error: result.error, message: result.message, data: {} });
             }

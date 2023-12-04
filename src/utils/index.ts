@@ -69,7 +69,7 @@ export async function generate_payment_link(amount: number, user: string, order_
         "currency": "XOF",
         "description": "Reglement de commande",
         "customer_id": user,
-        "notify_url": `https://goodapp.onrender.com/hook/payment_event/${order_id}`,
+        "notify_url": `https://goodness-1e5ee24644b9.herokuapp.com/hook/payment_event/${order_id}`,
         "return_url": "https://google.com",
         "channels": "ALL",
         "lang": "FR"
