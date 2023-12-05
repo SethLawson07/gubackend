@@ -48,10 +48,12 @@ router.route("/books").get(Auth, UserIsCustomer, get_books);
 // Get a book
 router.route("/book/:id").get(Auth, UserIsCustomer, get_book);
 
+// Close sheet
+router.route("/closesheet").post(Auth, UserIsCustomer, close_sheet);
+
 
 
 // // // // // // // // // // // // // // // // // // // // // // //
-router.route("/closesheet").post(Auth, UserIsCustomer, close_sheet);
 
 // Opened book
 router.route("/book/opened").post(Auth, UserIsCustomer, get_opened_book);
