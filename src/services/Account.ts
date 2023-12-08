@@ -233,23 +233,6 @@ export async function get_sheet(req: Request, res: Response) {
 // Bloquer la feuile
 export async function close_sheet(req: Request, res: Response) {
     try {
-        // const schema = z.object({
-        //     b_id: z.string(),
-        //     s_id: z.string(),
-        //     reason: z.string(),
-        //     closedAt: z.coerce.date(),
-        // });
-
-        // const validation_result = schema.safeParse(req.body);
-        // if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} })
-        // let data = validation_result.data;
-        // let targeted_book = await prisma.book.findUnique({ where: { id: data.b_id } });
-        // if (!targeted_book) return res.status(404).send({ error: true, message: "Book not found" });
-        // const target_sheet = close_sheets(targeted_book.sheets, data.s_id, data.closedAt, data.reason);
-        // if (target_sheet.error) return res.status(400).send({ error: true, message: target_sheet.message });
-        // targeted_book = await prisma.book.update({
-        //     where: { id: data.b_id, }, data: { sheets: target_sheet.updated_sheets }
-        // });
         const { user } = req.body.user as { user: User };
         const book = await opened_book(user);
         const sheets = book!.sheets;
@@ -259,7 +242,7 @@ export async function close_sheet(req: Request, res: Response) {
         sheet.status = "closed";
         updated_sheets[sheetIndex] = sheet!;
         const targeted_book = await prisma.book.update({ where: { id: book!.id }, data: { sheets: updated_sheets } });
-        return res.status(201).send({ status: 201, error: false, message: 'Feuille bloquée', data: targeted_book, });
+        return res.status(200).send({ status: 201, error: false, message: 'Feuille bloquée', data: targeted_book, });
     } catch (err) {
         console.log(err);
         console.log("Error while closing sheet");
