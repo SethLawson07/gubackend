@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
-import { allContributions, all_category_products, create_sheets, customerContributions, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_close, sheet_validate, update_sheets, userAgentContributions } from "../utils";
+import { allContributions, all_category_products, close_sheets, create_sheets, customerContributions, empty_case, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_close, sheet_to_open, sheet_validate, update_case, update_sheets, userAgentContributions, utilisIsInt } from "../utils";
 import { Account, Book, Contribution, Sheet, User } from "@prisma/client";
 import dayjs from "dayjs";
 import { store } from "../utils/store";
@@ -250,24 +250,6 @@ export async function close_sheet(req: Request, res: Response) {
     }
 }
 
-const closesheet = async (user: User) => {
-    try {
-        const book = await opened_book(user);
-        const sheets = book!.sheets;
-        const sheet: Sheet = (await sheet_to_close(user))!;
-        let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
-        let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
-        sheet.status = "closed";
-        updated_sheets[sheetIndex] = sheet!;
-        await prisma.book.update({ where: { id: book!.id }, data: { sheets: updated_sheets } });
-        return true;
-    } catch (err) {
-        console.log(err);
-        console.log("Error while closing sheet");
-        return false;
-    }
-}
-
 // Cotiser
 export async function contribute(req: Request, res: Response) {
     try {
@@ -329,8 +311,7 @@ export async function contribute(req: Request, res: Response) {
                 return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: crtCtrtion! });
             }
         } else {
-            if (result.isSheetFull) { closesheet(user) };
-            return res.status(200).send({ error: result.error, message: result.message, data: {}, isSheetFull: result.isSheetFull });
+            return res.status(200).send({ error: result.error, message: result.message, data: {} });
         }
     } catch (e) {
         console.log(e)
@@ -546,4 +527,34 @@ export const userContributions = async (req: Request, res: Response) => {
         console.log(err);
         return res.status(500).send({});
     }
+}
+
+// Test for all
+export const contribtest = async (req: Request, res: Response) => {
+    // const { amount, openedAt } = req.body;
+    // const { user } = req.body.user as { user: User };
+    // const book = await prisma.book.findFirst({ where: { customer: user.id, status: "opened" } });
+    // if (!book) res.status(400).send({ error: true, message: "Une erreur est survenue", data: {} });
+    // var sheetToOpen: Sheet;
+    // const findLastClosedSheet = book!.sheets.find((st) => st.status === "closed");
+    // if (!findLastClosedSheet) {
+    //     sheetToOpen = book!.sheets[0];
+    // } else sheetToOpen = book!.sheets[findLastClosedSheet.index];
+    // var updated_sheets = await update_sheets(user, openedAt, 500);
+    // const schema = z.object({
+    //     amount: z.number().min(300),
+    //     createdAt: z.coerce.date(),
+    //     p_method: z.string(),
+    // });
+    // const validation_result = schema.safeParse(req.body);
+    // const { user } = req.body.user as { user: User };
+    // if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
+    // let data = validation_result.data;
+    // // var sheet = await opened_sheet(user);
+    // // var calc = data.amount / sheet.data?.bet!;
+    // // const emptycase = await empty_case(user);
+    // var result = await sheet_contribute(user, data.amount, "paid");
+    // const book = await opened_book(user);
+    await all_category_products("");
+    return res.status(200).send({ data: {} });
 }
