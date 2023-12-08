@@ -331,7 +331,7 @@ export async function contribute(req: Request, res: Response) {
         } else {
             if (result.isSheetFull) {
                 await closesheet(user);
-                return res.status(200).send({ error: result.error, message: result.message, data: {}, isSheetFull: true });
+                return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, });
             };
             return res.status(200).send({ error: result.error, message: result.message, data: {} });
         }
