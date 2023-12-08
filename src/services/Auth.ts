@@ -53,7 +53,7 @@ export async function adduser(req: Request, res: Response) {
         const user_schema = z.object({
             user_name: z.string().min(5, "Veuillez indiquez un nom complet").nonempty("Veuillez renseigner votre nom complet"),
             email: z.string().email("L'adresse email est invalide"),
-            phone: z.string().min(8, "Numéro de téléphone invalide").max(8, "Numéro de téléphone invalide").startsWith('9' || '7', "Numéro de téléphone invalide").nonempty("Veuillez renseigner un numéro de téléphone"),
+            phone: z.string().min(8, "Numéro de téléphone invalide").max(8, "Numéro de téléphone invalide").nonempty("Veuillez renseigner un numéro de téléphone"),
             password: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
             profile_picture: z.string().optional().default(""),
             role: z.string().default('customer')
