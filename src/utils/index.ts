@@ -223,7 +223,7 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
         cases.push((emptycase.index + i));
     };
     updated_sheets[sheetIndex] = sheet!;
-    return { error, message, updated_sheets, cases };
+    return { error, message, updated_sheets, cases, sheet: sheet };
 }
 
 // Update sheet for contribution (Method: agent)

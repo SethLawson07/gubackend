@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../server";
 import { z } from "zod";
 import { fromZodError } from 'zod-validation-error';
-import { allContributions, all_category_products, create_sheets, customerContributions, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_close, sheet_validate, update_sheets, userAgentContributions } from "../utils";
+import { allContributions, all_category_products, create_sheets, customerContributions, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_close, sheet_to_open, sheet_validate, update_sheets, userAgentContributions } from "../utils";
 import { Account, Book, Contribution, Sheet, User } from "@prisma/client";
 import dayjs from "dayjs";
 import { store } from "../utils/store";
@@ -70,7 +70,6 @@ export async function create_book(req: Request, res: Response) {
             customer: z.string(), // customer
             bet: z.number().min(300, "Montant de la mise invalide").default(300)
         });
-
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
         let b_data = validation_result.data;
@@ -229,7 +228,6 @@ export async function get_sheet(req: Request, res: Response) {
     }
 }
 
-
 // Bloquer la feuile
 export async function close_sheet(req: Request, res: Response) {
     try {
@@ -239,6 +237,8 @@ export async function close_sheet(req: Request, res: Response) {
         const sheet: Sheet = (await sheet_to_close(user))!;
         let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
         let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
+        const contributions = await prisma.contribution.findMany({ where: { sheet: sheet.id, status: "awaiting" } });
+        if (contributions.length > 0) { return res.status(400).send({ error: true, message: "Des cotisations sont en cours de validation" }) };
         sheet.status = "closed";
         updated_sheets[sheetIndex] = sheet!;
         const targeted_book = await prisma.book.update({ where: { id: book!.id }, data: { sheets: updated_sheets } });
@@ -250,7 +250,8 @@ export async function close_sheet(req: Request, res: Response) {
     }
 }
 
-const closesheet = async (user: User) => {
+// Close sheet on file
+const forceclosesheet = async (user: User) => {
     try {
         const book = await opened_book(user);
         const sheets = book!.sheets;
@@ -296,7 +297,6 @@ export async function contribute(req: Request, res: Response) {
         }
         const book = await opened_book(targetted_user);
         var result = await sheet_contribute(targetted_user.id, data.amount, data.p_method);
-        // const userAccount = await prisma.account.findFirst({ where: { user: user.id } });
         var crtCtrtion: Contribution;
         if (!result.error) {
             crtCtrtion = await prisma.contribution.create({
@@ -309,7 +309,8 @@ export async function contribute(req: Request, res: Response) {
                     awaiting: user.role == "agent" ? "admin" : "agent",
                     amount: data.amount,
                     cases: result.cases!,
-                    agent: targetted_user.agentId
+                    agent: targetted_user.agentId,
+                    sheet: result.sheet!.id,
                 },
             });
             if (crtCtrtion) {
@@ -330,7 +331,7 @@ export async function contribute(req: Request, res: Response) {
             }
         } else {
             if (result.isSheetFull) {
-                await closesheet(user);
+                await forceclosesheet(user);
                 return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, });
             };
             return res.status(200).send({ error: result.error, message: result.message, data: {} });
@@ -356,11 +357,7 @@ export async function validate_contribution(req: Request, res: Response) {
             if (!result.error) {
                 validated = await prisma.contribution.update({
                     where: { id: contribution },
-                    data: {
-                        awaiting: user.role == "agent" ? "admin" : "none",
-                        // status: user.role == "admin" ? "paid" : "awaiting",
-                        status: status,
-                    }
+                    data: { awaiting: user.role == "agent" ? "admin" : "none", status: status, }
                 });
                 if (validated) {
                     const targeted_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
@@ -377,13 +374,9 @@ export async function validate_contribution(req: Request, res: Response) {
                         }
                     });
                     return res.status(200).send({ status: 200, error: false, message: "Cotisation validée", data: validated! });
-                } else {
-                    return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
-                }
+                } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} }); }
             }
-        } else {
-            return res.status(401).send({ error: true, message: "Ressources non trouvées", data: {} });
-        }
+        } else { return res.status(401).send({ error: true, message: "Ressources non trouvées", data: {} }); }
     } catch (err) {
         console.log(err);
         console.log("Error while ... action");
@@ -396,17 +389,10 @@ export async function user_contributions(req: Request, res: Response) {
     const { user } = req.body.user as { user: User };
     var contributions: Object[];
     switch (user.role) {
-        case "customer":
-            contributions = await customerContributions(user);
-            break;
-        case "agent":
-            contributions = await userAgentContributions(user);
-            break;
-        case "admin":
-            contributions = await allContributions();
-            break;
-        default:
-            break;
+        case "customer": contributions = await customerContributions(user); break;
+        case "agent": contributions = await userAgentContributions(user); break;
+        case "admin": contributions = await allContributions(); break;
+        default: break;
     }
     return res.status(200).send({ error: false, message: "Requête aboutie", data: contributions! })
 }
