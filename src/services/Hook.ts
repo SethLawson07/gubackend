@@ -152,7 +152,10 @@ export async function contribution_event(req: Request, res: Response) {
                 });
                 if (crtCtrtion) {
                     const targeted_acount = await prisma.account.findFirst({ where: { user: data.customer } });
-                    await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: (targeted_acount?.amount! + data.amount) } });
+                    var amount = (targeted_acount?.amount! + data.amount);
+                    if (result.cases!.includes(0)) await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: (amount - result.sheet?.bet!) } });
+                    else { await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } }); }
+                    await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } });
                     await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
                     return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
                 } else {

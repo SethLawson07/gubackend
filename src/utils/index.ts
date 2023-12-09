@@ -223,7 +223,7 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
         cases.push((emptycase.index + i));
     };
     updated_sheets[sheetIndex] = sheet!;
-    return { error, message, updated_sheets, cases, sheet: sheet };
+    return { error, message, updated_sheets, cases, sheet };
 }
 
 // Update sheet for contribution (Method: agent)
@@ -236,7 +236,7 @@ export async function sheet_validate(user: User, cases: number[], status: string
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     for (let i = 0; i < cases.length; i++) sheet.cases[cases[i]].contributionStatus = status;
     updated_sheets[sheetIndex] = sheet!;
-    return { error, message, updated_sheets };
+    return { error, message, updated_sheets, cases, sheet };
 }
 
 // // Update sheet for contribution (Method: agent)
@@ -322,7 +322,7 @@ export function todate(date: Date) {
 
 // Customer contributions
 export async function customerContributions(user: User): Promise<Contribution[]> {
-    return prisma.contribution.findMany({ where: { customer: user }, include: { customer: true } });
+    return prisma.contribution.findMany({ where: { userId: user.id }, include: { customer: true } });
 }
 
 // Agent contributions
