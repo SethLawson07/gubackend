@@ -258,10 +258,12 @@ const forceclosesheet = async (user: User) => {
         const sheet: Sheet = (await sheet_to_close(user))!;
         let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
         let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
+        // const contributions = await prisma.contribution.findMany({ where: { sheet: sheet.id, status: "awaiting" } });
+        // if (contributions.length > 0) return { error: true, message: "Vous ne pouvez pas cotiser" };
         sheet.status = "closed";
         updated_sheets[sheetIndex] = sheet!;
         await prisma.book.update({ where: { id: book!.id }, data: { sheets: updated_sheets } });
-        return true;
+        return { error: false, message: "ok", data: {} };
     } catch (err) {
         console.log(err);
         console.log("Error while closing sheet");
