@@ -183,9 +183,7 @@ export async function sheet_to_close(user: User): Promise<Sheet | undefined> {
 export async function update_sheets(user: User, openedat: Date, bet: number) {
     let error: boolean = false;
     let message: string = "";
-    // console.log((await opened_book(user)));
     const sheets = (await opened_book(user))!.sheets;
-    // console.log(sheets);
     const sheet: Sheet = (await sheet_to_open(user)).data;
     let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
@@ -193,18 +191,10 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
         if (sheetIndex == 0) { sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet }
         else {
             switch (sheets[sheetIndex - 1].status) {
-                case "notopened":
-                    error = true; message = "Feuille actuelle non ouverte";
-                    break;
-                case "opened":
-                    error = true; message = "Feuille actuelle non bloquée";
-                    // sheet.status = "closed"; sheet.closeAt = new Date(openedat!);
-                    break;
-                case "closed":
-                    sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
-                    break;
-                default:
-                    break;
+                case "notopened": error = true; message = "Feuille actuelle non ouverte"; break;
+                case "opened": error = true; message = "Feuille actuelle non bloquée"; break;
+                case "closed": sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet; break;
+                default: break;
             }
         }
     } else { error = true, message = "Vous ne pouvez pas encore créer de feuille" }
@@ -300,9 +290,7 @@ export function close_sheets(sheets: Sheet[], sheetid: string, closeat: Date, re
         sheet.closeAt = new Date(closeat);
         sheet.closeReason = reason;
     } else { error = true, message = "La feuille ne peut pas être bloquée" }
-
     updated_sheets[sheetIndex] = sheet!;
-
     return { error, message, updated_sheets };
 }
 
@@ -320,9 +308,7 @@ export function update_case(sheets: Sheet[], sheetid: string, caseid: string, st
             sheet.cases[_caseIndex] = _case;
         } else { error = true, message = "Already updated" }
     } else { error = true, message = "Vous ne pouvez pas cotiser pour cette feuille" }
-
     updated_sheets[sheetIndex] = sheet!;
-
     return { error, message, updated_sheets };
 }
 
@@ -350,13 +336,8 @@ export async function allContributions(): Promise<Contribution[]> {
 }
 
 const notificationdata = {
-    // Add APNS (Apple) config
     "apns": {
-        "payload": {
-            "aps": {
-                "contentAvailable": true,
-            },
-        },
+        "payload": { "aps": { "contentAvailable": true, }, },
         "headers": {
             "apns-push-type": "background",
             "apns-priority": "5", // Must be `5` when `contentAvailable` is set to true.
@@ -395,11 +376,8 @@ export async function sendNotificationToTopic(topic: string, title: string, body
 
 // Find products by list id ([id...])
 export const products_byids = async (content: string[]) => {
-    const result = await prisma.product.findMany({
-        where: { id: { in: content } }
-    });
+    const result = await prisma.product.findMany({ where: { id: { in: content } } });
     if (!result) return { error: true, message: "none", data: {} };
-    // console.log(result)
     return { error: false, message: "ok!", data: result };
 }
 
