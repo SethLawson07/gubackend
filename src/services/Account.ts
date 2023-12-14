@@ -75,7 +75,7 @@ export async function create_book(req: Request, res: Response) {
         let b_data = validation_result.data;
         const bookOpenedVerification = await prisma.book.findFirst({ where: { status: "opened", customer: validation_result.data.customer } });
         if (bookOpenedVerification) return res.status(400).send({ error: true, message: "Vous ne pouvez pas encore créé de carnet", data: {} })
-        var created_book = await prisma.book.create({
+        let created_book = await prisma.book.create({
             data: {
                 bookNumber: b_data.b_number,
                 createdAt: new Date(b_data.createdAt),
@@ -297,11 +297,26 @@ export async function contribute(req: Request, res: Response) {
             targetted_account = (await prisma.account.findFirst({ where: { user: user.id } }))!;
             targetted_user = user;
         }
+        const userAgent = await prisma.user.findUnique({ where: { id: targetted_user.agentId! } });
+        if (!userAgent) return res.status(404).send({ error: true, message: "Agent not found", data: {} })
         const book = await opened_book(targetted_user);
-        var result = await sheet_contribute(targetted_user.id, data.amount, data.p_method);
-        var crtCtrtion: Contribution;
+        let result = await sheet_contribute(targetted_user.id, data.amount, data.p_method);
+        let contribution: Contribution;
         if (!result.error) {
-            crtCtrtion = await prisma.contribution.create({
+            const report = await prisma.report.create({
+                data: {
+                    amount: data.amount,
+                    createdat: data.createdAt,
+                    payment: data.p_method,
+                    sheet: result.sheet!,
+                    cases: result.cases,
+                    status: "awaiting",
+                    agentId: userAgent!.id,
+                    customerId: targetted_user.id,
+                }
+            });
+            if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
+            contribution = await prisma.contribution.create({
                 data: {
                     account: targetted_account?.id!,
                     createdAt: data.createdAt,
@@ -313,29 +328,16 @@ export async function contribute(req: Request, res: Response) {
                     cases: result.cases!,
                     agent: targetted_user.agentId,
                     sheet: result.sheet!.id,
+                    reportId: report.id,
                 },
             });
-            if (crtCtrtion) {
-                const userAgent = await prisma.user.findUnique({ where: { id: targetted_user.agentId! } });
+            if (contribution) {
                 await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
                 user.role == "customer" && userAgent?.device_token! != "" ? await sendPushNotification(userAgent?.device_token!, "Cotisation", `${user.user_name} vient de cotiser la somme de ${data.amount} FCFA pour son compte tontine`) : {};
-                await prisma.transaction.create({
-                    data: {
-                        amount: data.amount,
-                        date: (new Date(data.createdAt).toDateString()),
-                        user: user.id,
-                        detail: user.role == "customer" ? `Cotisation de ${data.amount} en cours de validation` : `Cotisation de ${data.amount} pour ${targetted_user.user_name} en cours de validation`
-                    }
-                });
-                return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
-            } else {
-                return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: crtCtrtion! });
-            }
+                return res.status(200).send({ error: false, message: "Cotisation éffectée", data: contribution! });
+            } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: contribution! }); }
         } else {
-            if (result.isSheetFull) {
-                await forceclosesheet(user);
-                return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, });
-            };
+            if (result.isSheetFull) { await forceclosesheet(user); return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, }); };
             return res.status(200).send({ error: result.error, message: result.message, data: {} });
         }
     } catch (e) {
@@ -348,39 +350,30 @@ export async function contribute(req: Request, res: Response) {
 export async function validate_contribution(req: Request, res: Response) {
     try {
         const contribution = req.params.id;
+        const schema = z.object({ validatedat: z.coerce.date(), });
+        // const validation = schema.safeParse(req.body);
+        // if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
         const { user } = req.body.user as { user: User };
-        var targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
+        let targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
         if (targeted_contribution) {
             const customer = await prisma.user.findUnique({ where: { id: targeted_contribution.userId! } });
             const status = user.role == "admin" ? "paid" : "awaiting";
             const book = await opened_book(customer!);
-            var result = await sheet_validate(customer!, targeted_contribution.cases, status);
-            var validated: Contribution;
+            let result = await sheet_validate(customer!, targeted_contribution.cases, status);
+            let validated: Contribution;
             if (!result.error) {
-                validated = await prisma.contribution.update({
-                    where: { id: contribution },
-                    data: { awaiting: user.role == "agent" ? "admin" : "none", status: status, }
-                });
+                validated = await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: status } });
                 if (validated) {
                     const targeted_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
-                    var amount = (targeted_acount?.amount! + targeted_contribution.amount);
+                    let amount = (targeted_acount?.amount! + targeted_contribution.amount);
                     if (user.role == "admin") {
                         if (result.cases.includes(0)) await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: (amount - result.sheet.bet!) } });
                         else { await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } }); }
                         // Send 20% of bet to agent
                     }
+                    await prisma.report.update({ where: { id: validated.reportId }, data: { status: validated.status, } });
                     await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
-                    if (user.role == "admin" && customer?.device_token!) {
-                        await sendPushNotification(customer?.device_token!, "Cotisation", `Votre cotisation en attente vient d'être validé`);
-                    }
-                    await prisma.transaction.create({
-                        data: {
-                            amount: targeted_contribution.amount,
-                            date: (new Date()).toDateString(),
-                            user: user.id,
-                            detail: `Validation de cotisation du client: ${customer?.user_name}`
-                        }
-                    });
+                    if (user.role == "admin" && customer?.device_token!) { await sendPushNotification(customer?.device_token!, "Cotisation", `Votre cotisation en attente vient d'être validé`); };
                     return res.status(200).send({ status: 200, error: false, message: "Cotisation validée", data: validated! });
                 } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} }); }
             }
@@ -395,7 +388,7 @@ export async function validate_contribution(req: Request, res: Response) {
 // Liste des cotisations utilisateurs
 export async function user_contributions(req: Request, res: Response) {
     const { user } = req.body.user as { user: User };
-    var contributions: Object[];
+    let contributions: Object[];
     switch (user.role) {
         case "customer": contributions = await customerContributions(user); break;
         case "agent": contributions = await userAgentContributions(user); break;
@@ -408,8 +401,8 @@ export async function user_contributions(req: Request, res: Response) {
 // Trouver une cotisation
 export async function target_contribution(req: Request, res: Response) {
     const contribution = req.params.id;
-    var targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
-    var targeted_user = await prisma.user.findUnique({ where: { id: targeted_contribution!.userId } });
+    let targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
+    let targeted_user = await prisma.user.findUnique({ where: { id: targeted_contribution!.userId } });
     return res.status(200).send({ error: false, message: "Request end", data: { ...targeted_contribution, customer: targeted_user } });
 }
 

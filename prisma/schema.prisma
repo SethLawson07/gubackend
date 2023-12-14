@@ -29,6 +29,10 @@ model User {
     Contribution    Contribution[]
     Delivery        Delivery[]
     Order           Order[]
+    Commission      Commission[]
+    Customer        Report[]       @relation("Customer")
+    Driver          Report[]       @relation("Agent")
+    Activity        Activity[]
 }
 
 model Category {
@@ -220,19 +224,23 @@ model Book {
 }
 
 model Contribution {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    customer  User     @relation(fields: [userId], references: [id])
-    userId    String   @db.ObjectId()
-    cases     Int[]
-    sheet     String
-    amount    Float    @default(0.0)
-    agent     String?
-    admin     String?
-    account   String
-    pmethod   String   @default("") // (payment method)  agent, tmoney, moovmoney
-    awaiting  String   @default("") // agent, admin, none
-    status    String   @default("unpaid") //paid, unpaid, awaiting
-    createdAt DateTime
+    id           String      @id @default(auto()) @map("_id") @db.ObjectId
+    customer     User        @relation(fields: [userId], references: [id])
+    userId       String      @db.ObjectId()
+    cases        Int[]
+    sheet        String
+    amount       Float       @default(0.0)
+    agent        String?
+    admin        String?
+    account      String
+    pmethod      String      @default("") // (payment method)  agent, tmoney, moovmoney
+    awaiting     String      @default("") // agent, admin, none
+    status       String      @default("unpaid") //paid, unpaid, awaiting
+    createdAt    DateTime
+    report       Report      @relation(fields: [reportId], references: [id])
+    reportId     String      @db.ObjectId
+    commission   Commission? @relation(fields: [commissionId], references: [id])
+    commissionId String?     @db.ObjectId
 }
 
 model Notification {
@@ -282,8 +290,43 @@ model Deposit {
 
 model Activity {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    user      String
-    title     String
-    body      String
+    user      User     @relation(fields: [userId], references: [id])
+    userId    String   @db.ObjectId()
+    title     String?  @default("")
+    type      String // deposit, contribution, delivery
+    body      String?
+    amount    Float?   @default(0)
     createdat DateTime
+}
+
+model Commission {
+    id       String @id @default(auto()) @map("_id") @db.ObjectId
+    amount   Float
+    customer User   @relation(fields: [userId], references: [id])
+    userId   String @db.ObjectId()
+    sheet    String
+    payment  String // agent, flooz, tmoney
+
+    createdat    DateTime
+    Contribution Contribution[]
+}
+
+model Report {
+    id      String @id @default(auto()) @map("_id") @db.ObjectId
+    payment String // agent, tmoney, flooz
+    cases   Int[]
+    sheet   Sheet
+
+    amount      Float
+    createdat   DateTime
+    validatedat DateTime?
+
+    customer   User   @relation("Customer", fields: [customerId], references: [id])
+    customerId String @db.ObjectId()
+
+    agent   User   @relation("Agent", fields: [agentId], references: [id])
+    agentId String @db.ObjectId()
+
+    status       String
+    Contribution Contribution[]
 }
