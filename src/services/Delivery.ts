@@ -150,7 +150,7 @@ export async function deliver(req: Request, res: Response) {
         const delivery = await prisma.delivery.update({ where: { id }, data: { status: "DELIVERED", deliveredat: validation_result.data.deliveredat } });
         const customer: User = targetted_delivery.customer as User;
         const { user } = req.body.user as { user: User };
-        await prisma.activity.create({ data: { title: `Colis livré à ${customer!.user_name}`, createdat: validation_result.data.deliveredat, body: "", user: user.id } })
+        await prisma.activity.create({ data: { type: "delivery", title: `Colis livré à ${customer!.user_name}`, createdat: validation_result.data.deliveredat, body: "", userId: user.id } })
         return res.status(200).send({ error: false, data: delivery, message: "Ça y est vous être choisi pour livrer la commande" });
     } catch (err) {
         console.error(`Error while cancelling order ${err}`)
