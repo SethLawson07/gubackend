@@ -285,7 +285,9 @@ model Deposit {
     createdAt DateTime
     payment   String // agent,tmoney,moovmoney
     amount    Float
-    madeby    String // User transaction (User role)
+    madeby    String // User transaction (User role) or agent, tmoney, moovmoney
+    report    Report   @relation(fields: [reportId], references: [id])
+    reportId  String   @db.ObjectId
 }
 
 model Activity {
@@ -315,7 +317,8 @@ model Report {
     id      String @id @default(auto()) @map("_id") @db.ObjectId
     payment String // agent, tmoney, flooz
     cases   Int[]
-    sheet   Sheet
+    sheet   Sheet?
+    type    String // contribution, deposit
 
     amount      Float
     createdat   DateTime
@@ -329,4 +332,5 @@ model Report {
 
     status       String
     Contribution Contribution[]
+    Deposit      Deposit[]
 }

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
 import { store } from "../utils/store";
-import { opened_book, sheet_contribute, sheet_contribute_mobile } from "../utils";
+import { opened_book, operatorChecker, sheet_contribute, sheet_contribute_mobile } from "../utils";
 import { Contribution } from "@prisma/client";
 import dayjs from "dayjs";
 
@@ -131,12 +131,28 @@ export async function contribution_event(req: Request, res: Response) {
         store.push(validation_result.data.cpm_trans_id);
         if (validation_result.data.cpm_error_message === "SUCCES") {
             const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
+            if (!targetedUser) return res.status(404).send({ error: true, message: "User not found", data: {} });
+            const userAgent = await prisma.user.findUnique({ where: { id: targetedUser.agentId! } });
             const book = await opened_book(targetedUser!);
-            var result = await sheet_contribute(data.customer, data.amount, data.p_method);
+            let result = await sheet_contribute(data.customer, data.amount, data.p_method);
             const userAccount = await prisma.account.findFirst({ where: { user: data.customer } });
-            var crtCtrtion: Contribution; // CreatedContribution
+            let contribution: Contribution; // CreatedContribution
             if (!result.error) {
-                crtCtrtion = await prisma.contribution.create({
+                const report = await prisma.report.create({
+                    data: {
+                        type: "contribution",
+                        amount: data.amount,
+                        createdat: data.createdAt,
+                        payment: operatorChecker(validation_result.data.cel_phone_num),
+                        sheet: result.sheet!,
+                        cases: result.cases,
+                        status: "paid",
+                        agentId: userAgent!.id,
+                        customerId: targetedUser.id,
+                    }
+                });
+                if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
+                contribution = await prisma.contribution.create({
                     data: {
                         account: userAccount?.id!,
                         createdAt: new Date(dayjs(data.createdAt).format("MM/DD/YYYY")),
@@ -148,16 +164,17 @@ export async function contribution_event(req: Request, res: Response) {
                         cases: result.cases!,
                         agent: data.agent,
                         sheet: result.sheet!.id,
+                        reportId: report.id,
                     },
                 });
-                if (crtCtrtion) {
+                if (contribution) {
                     const targeted_acount = await prisma.account.findFirst({ where: { user: data.customer } });
-                    var amount = (targeted_acount?.amount! + data.amount);
+                    let amount = (targeted_acount?.amount! + data.amount);
                     if (result.cases!.includes(0)) await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: (amount - result.sheet?.bet!) } });
                     else { await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } }); }
                     await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } });
                     await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
-                    return res.status(200).send({ error: false, message: "Cotisation éffectée", data: crtCtrtion! });
+                    return res.status(200).send({ error: false, message: "Cotisation éffectée", data: contribution! });
                 } else {
                     return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
                 }

@@ -36,6 +36,10 @@ export function password_is_valid(plain_text_password: string, db_hash: string) 
     return bcrypt.compareSync(plain_text_password, db_hash);
 }
 
+
+export const firsttwonumberstogocomArray = ["90", "91", "92", "93", "70"]
+export const firsttwonumbersmoovafricaArray = ["96", "97", "98", "99"]
+
 type user_data = {
     is_admin: boolean;
     role: string;
@@ -437,4 +441,14 @@ const getItemsWithId = async (subcatid: string) => {
         }
     });
     return result!;
+}
+
+export const operatorChecker = (phone: string) => {
+    let operator = "moovmoney";
+    if (phone.startsWith("228")) {
+        const first = phone.replace('228', "").trim().slice(0, 2);
+        console.log(first);
+        if (firsttwonumberstogocomArray.includes(first)) { operator = "tmoney"; }
+    } else { }
+    return operator;
 }

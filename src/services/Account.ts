@@ -305,6 +305,7 @@ export async function contribute(req: Request, res: Response) {
         if (!result.error) {
             const report = await prisma.report.create({
                 data: {
+                    type: "contribution",
                     amount: data.amount,
                     createdat: data.createdAt,
                     payment: data.p_method,
@@ -418,6 +419,7 @@ export const makeDeposit = async (req: Request, res: Response) => {
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ error: true, status: 400, message: "Veuillez vérifier les champs", data: {} });
         const { user } = req.body.user as { user: User };
+        const data = validation.data;
         let targetted_user: User;
         let targetted_account: Account;
         if (user.role == "agent") {
@@ -428,35 +430,35 @@ export const makeDeposit = async (req: Request, res: Response) => {
             if (!findAccount) return res.status(404).send({ error: true, status: 404, message: "Compte non trouvé", data: {} });
             targetted_account = findAccount;
         } else {
-            targetted_account = (await prisma.account.findFirst({ where: { user: user.id } }))!;
-            targetted_user = user;
+            targetted_account = (await prisma.account.findFirst({ where: { user: user.id } }))!; targetted_user = user;
         }
+        const report = await prisma.report.create({
+            data: {
+                type: "deposit",
+                amount: data.amount,
+                createdat: data.createdAt,
+                payment: data.p_method,
+                status: "paid",
+                agentId: targetted_user.agentId!,
+                customerId: targetted_user.id,
+            }
+        });
+        if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
         const deposit = await prisma.deposit.create({
             data: {
                 account: targetted_account.id,
                 amount: validation.data.amount,
                 createdAt: validation.data.createdAt,
                 customer: targetted_user.id,
-                madeby: user.role,
+                madeby: "agent",
                 payment: validation.data.p_method,
+                reportId: report.id
             }
         });
         if (deposit) {
-            const transaction = await prisma.account.update({
-                where: { id: targetted_account.id }, data: { amount: targetted_account.amount + validation.data.amount }
-            })
-            if (!transaction) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} })
-        } else {
-            return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
-        }
-        await prisma.transaction.create({
-            data: {
-                amount: validation.data.amount,
-                date: (new Date(validation.data.createdAt).toDateString()),
-                user: targetted_user.id,
-                detail: `Dépôt de ${validation.data.amount} FCFA`
-            }
-        });
+            const transaction = await prisma.account.update({ where: { id: targetted_account.id }, data: { amount: targetted_account.amount + validation.data.amount } })
+            if (!transaction) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
+        } else { return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} }); }
         return res.status(200).send({ status: 200, error: false, message: "Dépôt éffectué avec succès", data: deposit });
     } catch (err) {
         console.log(err);
@@ -497,6 +499,18 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
             const findAccount = await prisma.account.findFirst({ where: { user: findUser.id } });
             if (!findAccount) return res.status(404).send({ error: true, status: 404, message: "Compte non trouvé", data: {} });
             targetted_account = findAccount;
+            const report = await prisma.report.create({
+                data: {
+                    type: "deposit",
+                    amount: data.amount,
+                    createdat: data.createdAt,
+                    payment: data.p_method,
+                    status: "paid",
+                    agentId: targetted_user.agentId!,
+                    customerId: targetted_user.id,
+                }
+            });
+            if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
             const deposit = await prisma.deposit.create({
                 data: {
                     account: targetted_account.id,
@@ -505,6 +519,7 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
                     customer: targetted_user.id,
                     madeby: targetted_user.role,
                     payment: data.p_method,
+                    reportId: report.id,
                 }
             });
             if (!deposit) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
