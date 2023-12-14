@@ -342,7 +342,7 @@ export async function contribute(req: Request, res: Response) {
             return res.status(200).send({ error: result.error, message: result.message, data: {} });
         }
     } catch (e) {
-        console.log(e)
+        console.log(e);
         return res.status(500).send({ error: true, message: "Une erreur interne est survenue" });
     }
 }
