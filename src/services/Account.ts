@@ -546,6 +546,16 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
     }
 }
 
+export const report_all = async (req: Request, res: Response) => {
+    try {
+        const reports = await prisma.report.findMany({});
+        return res.status(200).send({ error: false, data: reports, message: "ok" });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
+    }
+}
+
 // Get user contributions
 export const userContributions = async (req: Request, res: Response) => {
     try {
