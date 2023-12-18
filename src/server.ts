@@ -30,6 +30,7 @@ import notification from "./routes/notification";
 import section from "./routes/section";
 import delivery from "./routes/delivery";
 import home from "./routes/home";
+import { validateContributionJobQueue } from "./queues/queues";
 
 
 const PORT = process.env.PORT || 5000;
@@ -42,7 +43,7 @@ serverAdapter.setBasePath('/admin/queues');
 
 const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
     queues: [
-        // new BullMQAdapter(carRequestJobQueue),
+        new BullMQAdapter(validateContributionJobQueue),
     ],
     serverAdapter: serverAdapter,
 });
