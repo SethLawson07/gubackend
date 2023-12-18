@@ -11,28 +11,32 @@ datasource db {
 }
 
 model User {
-    id              String         @id @default(auto()) @map("_id") @db.ObjectId()
+    id              String           @id @default(auto()) @map("_id") @db.ObjectId()
     user_name       String
-    email           String?        @unique
-    agentId         String?        @db.ObjectId
-    agent           User?          @relation("agent_customeur", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    customers       User[]         @relation(name: "agent_customeur")
+    email           String?          @unique
+    agentId         String?          @db.ObjectId
+    agent           User?            @relation("agent_customeur", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    customers       User[]           @relation(name: "agent_customeur")
     password        String
-    phone           String         @unique
+    phone           String           @unique
     profile_picture String
     is_admin        Boolean
-    finance_pro_id  String?        @default("")
-    is_verified     Boolean?       @default(false)
+    finance_pro_id  String?          @default("")
+    is_verified     Boolean?         @default(false)
     role            String //customer,agent,delivery_man,command_handler,admin
-    first_login     Boolean        @default(true)
-    device_token    String         @default("")
+    first_login     Boolean          @default(true)
+    device_token    String           @default("")
     Contribution    Contribution[]
     Delivery        Delivery[]
     Order           Order[]
     Commission      Commission[]
-    Customer        Report[]       @relation("Customer")
-    Driver          Report[]       @relation("Agent")
     Activity        Activity[]
+    RepCustomer     Report[]         @relation("Customer")
+    RepAgent        Report[]         @relation("Agent")
+    CBetForReport   BetForReport[]   @relation("BFCustomer")
+    ABetForReport   BetForReport[]   @relation("BFAgent")
+    CSheetForReport SheetForReport[] @relation("SFAgent")
+    ASheetForReport SheetForReport[] @relation("SFCustomer")
 }
 
 model Category {
@@ -333,4 +337,28 @@ model Report {
     status       String
     Contribution Contribution[]
     Deposit      Deposit[]
+}
+
+// For reports
+model BetForReport {
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    gooAmount  Float // Gain Goodness sur une cotisation de prmière case
+    AgeAmount  Float // Gain Agent sur une cotisation de première case
+    customer   User     @relation("BFCustomer", fields: [customerId], references: [id])
+    customerId String   @db.ObjectId()
+    agent      User?    @relation("BFAgent", fields: [agentId], references: [id])
+    agentId    String?  @db.ObjectId()
+    // madeby     String // agent/customer
+    createdat  DateTime
+}
+
+model SheetForReport {
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    amount     Float?   @default(300)
+    customer   User     @relation("SFCustomer", fields: [customerId], references: [id])
+    customerId String   @db.ObjectId()
+    agent      User?    @relation("SFAgent", fields: [agentId], references: [id])
+    agentId    String?  @db.ObjectId()
+    madeby     String // agent/customer
+    createdat  DateTime
 }

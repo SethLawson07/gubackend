@@ -58,10 +58,7 @@ export async function adduser(req: Request, res: Response) {
             profile_picture: z.string().optional().default(""),
             role: z.string().default('customer')
         })
-
-        let user_schema_partial = user_schema.partial({
-            email: true
-        })
+        let user_schema_partial = user_schema.partial({ email: true });
         const validation_result = user_schema_partial.safeParse(req.body)
         if (!validation_result.success) {
             console.log(fromZodError(validation_result.error));
@@ -71,19 +68,10 @@ export async function adduser(req: Request, res: Response) {
         const hashed_password = hash_pwd(user_data.password)
         user_data.password = hashed_password
         const potential_duplicate = await prisma.user.findMany({
-            where: {
-                OR: [
-                    { email: user_data.email },
-                    { phone: user_data.phone }
-                ]
-            }
-        })
-
+            where: { OR: [{ email: user_data.email }, { phone: user_data.phone }] }
+        });
         if (potential_duplicate.length) return res.status(409).send({ status: 409, error: true, message: "Un autre utilisateur possède les mêmes informations" })
-        const createdUser = await prisma.user.create({
-            data: user_data
-        })
-
+        const createdUser = await prisma.user.create({ data: user_data });
         const token = sign_token(user_data)
         return res.status(201).send({ status: 201, error: false, message: 'Utilisateur créé', data: { token: token, id: createdUser.id } });
     } catch (err) {
@@ -102,7 +90,6 @@ export async function updateuser(req: Request, res: Response) {
             profile_picture: z.string(),
             role: z.string().default('customer')
         })
-
         const validation_result = user_schema.safeParse(req.body)
         if (!validation_result.success) {
             console.log(fromZodError(validation_result.error));
@@ -116,13 +103,9 @@ export async function updateuser(req: Request, res: Response) {
                 profile_picture: user_data.profile_picture,
                 role: user_data.role
             },
-            where: {
-                phone: user_data.phone,
-            }
+            where: { phone: user_data.phone, }
         })
-
         return res.status(201).send({ status: 201, error: false, message: 'Modification réussie', data: {} })
-
     } catch (err) {
         console.error(`Error while registering ${err}`)
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
@@ -140,20 +123,13 @@ export async function updateUserOnFirstLogin(req: Request, res: Response) {
         const { data } = validation_result
         const { user: current_user } = req.body.user as { user: User }
         const targetted_user = await prisma.user.findUnique({
-            where: {
-                phone: current_user.phone as string
-            }
+            where: { phone: current_user.phone as string }
         });
         if (!targetted_user) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouve" })
         if (!password_is_valid(data.old, targetted_user.password)) return res.status(400).send({ status: 404, error: false, message: "Mot de passe invalide" })
         await prisma.user.update({
-            where: {
-                phone: targetted_user.phone as string
-            },
-            data: {
-                password: hash_pwd(data.new),
-                first_login: false,
-            }
+            where: { phone: targetted_user.phone as string },
+            data: { password: hash_pwd(data.new), first_login: false, }
         });
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
         const token = sign_token({ ...user_data });

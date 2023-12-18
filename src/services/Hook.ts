@@ -2,9 +2,10 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
 import { store } from "../utils/store";
-import { opened_book, operatorChecker, sheet_contribute, sheet_contribute_mobile } from "../utils";
+import { opened_book, operatorChecker, sheet_contribute, sheet_contribute_mobile, todateTime } from "../utils";
 import { Contribution } from "@prisma/client";
 import dayjs from "dayjs";
+import { mMoneyContributionJobQueue } from "../queues/queues";
 
 
 export async function momo_payment_event(req: Request, res: Response) {
@@ -140,40 +141,19 @@ export async function contribution_event(req: Request, res: Response) {
             if (!result.error) {
                 const report = await prisma.report.create({
                     data: {
-                        type: "contribution",
-                        amount: data.amount,
-                        createdat: data.createdAt,
-                        payment: operatorChecker(validation_result.data.cel_phone_num),
-                        sheet: result.sheet!,
-                        cases: result.cases,
-                        status: "paid",
-                        agentId: userAgent!.id,
-                        customerId: targetedUser.id,
+                        type: "contribution", amount: data.amount, createdat: todateTime(data.createdAt), payment: operatorChecker(validation_result.data.cel_phone_num),
+                        sheet: result.sheet!, cases: result.cases, status: "paid", agentId: userAgent!.id, customerId: targetedUser.id,
                     }
                 });
                 if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
                 contribution = await prisma.contribution.create({
                     data: {
-                        account: userAccount?.id!,
-                        createdAt: new Date(dayjs(data.createdAt).format("MM/DD/YYYY")),
-                        userId: targetedUser?.id!,
-                        pmethod: data.p_method,
-                        awaiting: "none",
-                        status: "paid",
-                        amount: data.amount,
-                        cases: result.cases!,
-                        agent: data.agent,
-                        sheet: result.sheet!.id,
-                        reportId: report.id,
+                        account: userAccount?.id!, createdAt: todateTime(data.createdAt), userId: targetedUser?.id!, pmethod: data.p_method, awaiting: "none",
+                        status: "paid", amount: data.amount, cases: result.cases!, agent: data.agent, sheet: result.sheet!.id, reportId: report.id,
                     },
                 });
                 if (contribution) {
-                    const targeted_acount = await prisma.account.findFirst({ where: { user: data.customer } });
-                    let amount = (targeted_acount?.amount! + data.amount);
-                    if (result.cases!.includes(0)) await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: (amount - result.sheet?.bet!) } });
-                    else { await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } }); }
-                    await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } });
-                    await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
+                    await mMoneyContributionJobQueue.add("mMoneyContribution", { data, result, book });
                     return res.status(200).send({ error: false, message: "Cotisation éffectée", data: contribution! });
                 } else {
                     return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });

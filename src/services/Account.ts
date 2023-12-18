@@ -1,12 +1,12 @@
-import { Request, Response } from "express";
-import { prisma } from "../server";
-import { z } from "zod";
-import { fromZodError } from 'zod-validation-error';
-import { allContributions, all_category_products, create_sheets, customerContributions, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_close, sheet_to_open, sheet_validate, update_sheets, userAgentContributions } from "../utils";
+import { allContributions, create_sheets, customerContributions, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_close, sheet_validate, todateTime, update_sheets, userAgentContributions, utilsNonSpecifiedReport, utilsTotalReport } from "../utils";
 import { Account, Book, Contribution, Sheet, User } from "@prisma/client";
-import dayjs from "dayjs";
+import { validateContributionJobQueue } from "../queues/queues";
+import { fromZodError } from 'zod-validation-error';
+import { Request, Response } from "express";
 import { store } from "../utils/store";
+import { prisma } from "../server";
 const Agenda = require('agenda');
+import { z } from "zod";
 
 const agenda = new Agenda();
 agenda.database(process.env.DATABASE);
@@ -197,6 +197,7 @@ export async function open_sheet(req: Request, res: Response) {
         const book = await opened_book(user);
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
         await prisma.book.update({ where: { id: book!.id }, data: { sheets: sheets.updated_sheets } });
+        // await prisma.
         // await agenda.schedule('in 10 seconds', 'closesheet', { user, date: validation_result.data.openedAt });
         await agenda.schedule('in 31 days', 'closesheet', { user, date: validation_result.data.openedAt });
         await agenda.start();
@@ -258,8 +259,6 @@ const forceclosesheet = async (user: User) => {
         const sheet: Sheet = (await sheet_to_close(user))!;
         let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
         let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
-        // const contributions = await prisma.contribution.findMany({ where: { sheet: sheet.id, status: "awaiting" } });
-        // if (contributions.length > 0) return { error: true, message: "Vous ne pouvez pas cotiser" };
         sheet.status = "closed";
         updated_sheets[sheetIndex] = sheet!;
         await prisma.book.update({ where: { id: book!.id }, data: { sheets: updated_sheets } });
@@ -277,8 +276,8 @@ export async function contribute(req: Request, res: Response) {
         const schema = z.object({
             customer: z.string().min(1),
             amount: z.number(),
-            createdAt: z.coerce.date(),
             p_method: z.string(),
+            createdAt: z.coerce.date(),
         });
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
@@ -305,31 +304,15 @@ export async function contribute(req: Request, res: Response) {
         if (!result.error) {
             const report = await prisma.report.create({
                 data: {
-                    type: "contribution",
-                    amount: data.amount,
-                    createdat: data.createdAt,
-                    payment: data.p_method,
-                    sheet: result.sheet!,
-                    cases: result.cases!.map(chiffre => chiffre + 1),
-                    status: "awaiting",
-                    agentId: userAgent!.id,
-                    customerId: targetted_user.id,
+                    type: "contribution", amount: data.amount, createdat: data.createdAt, payment: data.p_method, sheet: result.sheet!,
+                    cases: result.cases!.map(chiffre => chiffre + 1), status: "awaiting", agentId: userAgent!.id, customerId: targetted_user.id,
                 }
             });
             if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
             contribution = await prisma.contribution.create({
                 data: {
-                    account: targetted_account?.id!,
-                    createdAt: data.createdAt,
-                    userId: targetted_user.id,
-                    pmethod: data.p_method,
-                    status: "awaiting",
-                    awaiting: user.role == "agent" ? "admin" : "agent",
-                    amount: data.amount,
-                    cases: result.cases!.map(chiffre => chiffre + 1),
-                    agent: targetted_user.agentId,
-                    sheet: result.sheet!.id,
-                    reportId: report.id,
+                    account: targetted_account?.id!, createdAt: data.createdAt, userId: targetted_user.id, pmethod: data.p_method, status: "awaiting", reportId: report.id,
+                    awaiting: user.role == "agent" ? "admin" : "agent", amount: data.amount, cases: result.cases!.map(chiffre => chiffre + 1), agent: targetted_user.agentId, sheet: result.sheet!.id,
                 },
             });
             if (contribution) {
@@ -352,8 +335,8 @@ export async function validate_contribution(req: Request, res: Response) {
     try {
         const contribution = req.params.id;
         const schema = z.object({ validatedat: z.coerce.date(), });
-        // const validation = schema.safeParse(req.body);
-        // if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
         const { user } = req.body.user as { user: User };
         let targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
         if (targeted_contribution) {
@@ -361,20 +344,10 @@ export async function validate_contribution(req: Request, res: Response) {
             const status = user.role == "admin" ? "paid" : "awaiting";
             const book = await opened_book(customer!);
             let result = await sheet_validate(customer!, targeted_contribution.cases, status);
-            let validated: Contribution;
             if (!result.error) {
-                validated = await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: status } });
+                const validated = await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: status } });
                 if (validated) {
-                    const targeted_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
-                    let amount = (targeted_acount?.amount! + targeted_contribution.amount);
-                    if (user.role == "admin") {
-                        if (result.cases.includes(0)) await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: (amount - result.sheet.bet!) } });
-                        else { await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } }); }
-                        // Send 20% of bet to agent
-                    }
-                    await prisma.report.update({ where: { id: validated.reportId }, data: { status: validated.status, } });
-                    await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
-                    if (user.role == "admin" && customer?.device_token!) { await sendPushNotification(customer?.device_token!, "Cotisation", `Votre cotisation en attente vient d'être validé`); };
+                    await validateContributionJobQueue.add("validateContribution", { customer, targeted_contribution, user, result, schemadata: validation.data, validated, book });
                     return res.status(200).send({ status: 200, error: false, message: "Cotisation validée", data: validated! });
                 } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} }); }
             }
@@ -433,26 +406,13 @@ export const makeDeposit = async (req: Request, res: Response) => {
             targetted_account = (await prisma.account.findFirst({ where: { user: user.id } }))!; targetted_user = user;
         }
         const report = await prisma.report.create({
-            data: {
-                type: "deposit",
-                amount: data.amount,
-                createdat: data.createdAt,
-                payment: data.p_method,
-                status: "paid",
-                agentId: targetted_user.agentId!,
-                customerId: targetted_user.id,
-            }
+            data: { type: "deposit", amount: data.amount, createdat: data.createdAt, payment: data.p_method, status: "paid", agentId: targetted_user.agentId!, customerId: targetted_user.id, }
         });
         if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
         const deposit = await prisma.deposit.create({
             data: {
-                account: targetted_account.id,
-                amount: validation.data.amount,
-                createdAt: validation.data.createdAt,
-                customer: targetted_user.id,
-                madeby: "agent",
-                payment: validation.data.p_method,
-                reportId: report.id
+                account: targetted_account.id, amount: validation.data.amount, createdAt: validation.data.createdAt, customer: targetted_user.id,
+                madeby: "agent", payment: validation.data.p_method, reportId: report.id
             }
         });
         if (deposit) {
@@ -501,25 +461,15 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
             targetted_account = findAccount;
             const report = await prisma.report.create({
                 data: {
-                    type: "deposit",
-                    amount: data.amount,
-                    createdat: data.createdAt,
-                    payment: data.p_method,
-                    status: "paid",
-                    agentId: targetted_user.agentId!,
-                    customerId: targetted_user.id,
+                    type: "deposit", amount: data.amount, createdat: data.createdAt, payment: data.p_method, status: "paid",
+                    agentId: targetted_user.agentId!, customerId: targetted_user.id,
                 }
             });
             if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
             const deposit = await prisma.deposit.create({
                 data: {
-                    account: targetted_account.id,
-                    amount: data.amount,
-                    createdAt: new Date(dayjs(data.createdAt).format("MM/DD/YYYY")),
-                    customer: targetted_user.id,
-                    madeby: targetted_user.role,
-                    payment: data.p_method,
-                    reportId: report.id,
+                    account: targetted_account.id, amount: data.amount, createdAt: todateTime(data.createdAt), customer: targetted_user.id,
+                    madeby: targetted_user.role, payment: data.p_method, reportId: report.id,
                 }
             });
             if (!deposit) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
@@ -529,14 +479,6 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
                 })
                 if (!transaction) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} })
             }
-            await prisma.transaction.create({
-                data: {
-                    amount: data.amount,
-                    date: (new Date(data.createdAt).toDateString()),
-                    user: targetted_user.id,
-                    detail: `Dépôt de ${data.amount} FCFA`
-                }
-            });
             return res.status(200).send({ status: 200, error: false, message: "Dépôt éffectué avec succès", data: deposit });
         }
         console.log(`A payment failed`)
@@ -562,6 +504,30 @@ export const userContributions = async (req: Request, res: Response) => {
         const userId = req.params.userid;
         const contributions = await prisma.contribution.findMany({ where: { userId: userId }, include: { customer: true } });
         return res.status(200).send({ error: false, data: contributions, message: "ok" });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
+    }
+}
+
+export const totalReport = async (req: Request, res: Response) => {
+    try {
+        const schema = z.object({
+            value: z.string().default("total"),
+            agent: z.array(z.string()),
+            method: z.string().default(""),
+            type: z.string().default("contribution"),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const data = validation.data;
+        switch (data.value) {
+            case "total":
+                utilsTotalReport(data.type, data.agent, data.method); break;
+            case "":
+                utilsNonSpecifiedReport(data.type, data.agent, data.method); break;
+            default: break;
+        }
     } catch (err) {
         console.log(err);
         return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });

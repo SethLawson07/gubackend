@@ -1,3 +1,4 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 import express, { NextFunction, Request, Response } from "express";
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -6,6 +7,9 @@ import cors from "cors";
 import swagger from "swagger-ui-express";
 import swagger_doc from "./swagger.json";
 import { PrismaClient } from "@prisma/client";
+import { ExpressAdapter } from "@bull-board/express";
+import { createBullBoard } from "@bull-board/api";
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 
 import auth from "./routes/auth";
 import category from "./routes/category";
@@ -31,6 +35,18 @@ import home from "./routes/home";
 const PORT = process.env.PORT || 5000;
 
 const app = express();
+
+// BullBoard
+const serverAdapter = new ExpressAdapter();
+serverAdapter.setBasePath('/admin/queues');
+
+const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
+    queues: [
+        // new BullMQAdapter(carRequestJobQueue),
+    ],
+    serverAdapter: serverAdapter,
+});
+app.use('/admin/queues', serverAdapter.getRouter());
 
 export const prisma = new PrismaClient();
 

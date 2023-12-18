@@ -324,6 +324,10 @@ export function todate(date: Date) {
     return dtime;
 }
 
+export function todateTime(date: any) {
+    return dayjs(date).format("YYYY-MM-DDTHH:mm:ss");
+}
+
 // Customer contributions
 export async function customerContributions(user: User): Promise<Contribution[]> {
     return prisma.contribution.findMany({ where: { userId: user.id }, include: { customer: true } });
@@ -451,4 +455,41 @@ export const operatorChecker = (phone: string) => {
         if (firsttwonumberstogocomArray.includes(first)) { operator = "tmoney"; }
     } else { }
     return operator;
+}
+
+export const utilsTotalReport = async (type: string, agent: string[], method: string) => {
+    // {
+    //     const totalDeposit = (await prisma.deposit.aggregate({ _sum: { amount: true } }))._sum ?? 0;
+    //     const totalContribution = (await prisma.deposit.aggregate({ _sum: { amount: true } }))._sum ?? 0;
+    //     const total = totalContribution.amount! + totalDeposit.amount!;
+    // }
+    switch (type) {
+        case "contribution":
+            const contribution = await prisma.contribution.findMany({
+                where: { agent: { in: agent }, pmethod: method }
+            });
+            break;
+        case "deposit":
+            const deposit = await prisma.deposit.findMany({
+                where: { payment: method }
+            });
+        default:
+            break;
+    }
+}
+
+export const utilsNonSpecifiedReport = async (type: string, agent: string[], method: string) => {
+    switch (type) {
+        case "contribution":
+            const contribution = await prisma.contribution.findMany({
+                where: { agent: { in: agent }, pmethod: method }
+            });
+            break;
+        case "deposit":
+            const deposit = await prisma.deposit.findMany({
+                where: { payment: method }
+            });
+        default:
+            break;
+    }
 }
