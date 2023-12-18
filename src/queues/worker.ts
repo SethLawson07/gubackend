@@ -6,6 +6,12 @@ import { prisma } from "../server";
 
 const agentContributionWorkerHandler = async (job: Job) => {
     const jobdata = job.data;
+    const { } = jobdata;
+}
+
+
+const validateContributionWorkerHandler = async (job: Job) => {
+    const jobdata = job.data;
     const { customer, targeted_contribution, user, result, schemadata, validated, book } = jobdata;
 
     const user_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
@@ -51,6 +57,8 @@ const mMoneyContributionWorkerHandler = async (job: Job) => {
 const connection = new Redis(process.env.REDIS_URL!);
 
 new Worker("agentContribution", agentContributionWorkerHandler, { connection: connection });
+
+new Worker("validateContribution", validateContributionWorkerHandler, { connection: connection });
 
 new Worker("mMoneyContribution", mMoneyContributionWorkerHandler, { connection: connection });
 
