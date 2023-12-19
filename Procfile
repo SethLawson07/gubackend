@@ -1,2 +1,2 @@
 web: npm start
-worker: node dist/queue/worker.js
+worker: node dist/queues/worker.js
