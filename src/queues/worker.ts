@@ -56,9 +56,9 @@ const mMoneyContributionWorkerHandler = async (job: Job) => {
 
 const connection = new Redis(process.env.REDIS_URL!);
 
-new Worker("agentContribution", agentContributionWorkerHandler, { connection: connection });
+new Worker("agentContribution", agentContributionWorkerHandler, { connection: connection, autorun: true });
 
-new Worker("validateContribution", validateContributionWorkerHandler, { connection: connection });
+new Worker("validateContribution", validateContributionWorkerHandler, { connection: connection, autorun: true });
 
-new Worker("mMoneyContribution", mMoneyContributionWorkerHandler, { connection: connection });
+new Worker("mMoneyContribution", mMoneyContributionWorkerHandler, { connection: connection, autorun: true });
 
