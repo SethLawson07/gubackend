@@ -51,9 +51,7 @@ router.route("/book/:id").get(Auth, UserIsCustomer, get_book);
 // Close sheet
 router.route("/closesheet").post(Auth, UserIsCustomer, close_sheet);
 
-
-router.route("/reports").get(Auth, UserIsAdmin, report_all);
-
+router.route("/reports").get(report_all);
 
 router.route("/saving").get(totalReport);
 

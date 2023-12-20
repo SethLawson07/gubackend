@@ -491,7 +491,8 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
 export const report_all = async (req: Request, res: Response) => {
     try {
         const reports = await prisma.report.findMany({ include: { agent: true, customer: true } });
-        return res.status(200).send({ error: false, data: reports, message: "ok" });
+        const calc = await prisma.contribution.groupBy({ by: ["pmethod"], _sum: { amount: true } });
+        return res.status(200).send({ error: false, data: { reports, calc }, message: "ok" });
     } catch (err) {
         console.log(err);
         return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
