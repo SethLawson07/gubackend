@@ -490,9 +490,28 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
 
 export const report_all = async (req: Request, res: Response) => {
     try {
-        const reports = await prisma.report.findMany({ include: { agent: true, customer: true } });
-        const calc = await prisma.contribution.groupBy({ by: ["pmethod"], _sum: { amount: true } });
-        return res.status(200).send({ error: false, data: { reports, calc }, message: "ok" });
+        const schema = z.object({
+            type: z.string(),
+            startDate: z.coerce.date(),
+            endDate: z.coerce.date(),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const vdata = validation.data;
+
+        const reportData = await prisma.report.findMany({ where: { type: vdata.type, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true } });
+        const aggregate = await prisma.report.groupBy({ by: ["payment"], _sum: { amount: true }, where: { type: vdata.type, createdat: { gte: vdata.startDate, lte: vdata.endDate, } } });
+
+        const aggregatedData = aggregate.reduce<{ [key: string]: number; total: number }>((result, item) => {
+            const paymentMethod = item.payment;
+            const amount = item._sum.amount ?? 0.0;
+            result[paymentMethod] = (result[paymentMethod] || 0) + amount;
+            result.total = (result.total || 0) + amount;
+            return result;
+        }, { total: 0 });
+        const data = { reports: reportData, ...aggregatedData };
+
+        return res.status(200).send({ error: false, data, message: "ok" });
     } catch (err) {
         console.log(err);
         return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
