@@ -325,7 +325,7 @@ export function todate(date: Date) {
 }
 
 export function todateTime(date: any) {
-    return dayjs(date).format("YYYY-MM-DDTHH:mm:ss").toString();
+    return dayjs(date).format();
 }
 
 // Customer contributions
