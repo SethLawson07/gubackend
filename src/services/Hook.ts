@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
 import { store } from "../utils/store";
-import { opened_book, operatorChecker, sheet_contribute, sheet_contribute_mobile, todateTime } from "../utils";
+import { opened_book, operatorChecker, sheet_contribute, todateTime } from "../utils";
 import { Contribution } from "@prisma/client";
 import dayjs from "dayjs";
 import { mMoneyContributionJobQueue } from "../queues/queues";

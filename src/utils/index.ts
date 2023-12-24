@@ -136,24 +136,28 @@ export function create_cases(sheet: string): Case[] {
     }) as Case[];
 }
 
-// Carnet ouver
+// Carnet ouvert
 export async function opened_book(user: User) {
-    return await prisma.book.findFirst({ where: { customer: user.id, status: "opened" } });
+    const book = await prisma.book.findFirst({ where: { customer: user.id, status: "opened" } });
+    if (!book) return { error: true, message: "Pas de carnet ouvert", book: false, data: null };
+    return { error: false, message: "ok", book: true, data: book };
 }
 
 // Feuille ouverte
 export async function opened_sheet(user: User) {
     const book = await opened_book(user);
-    var sheetOpened = book!.sheets.find((st) => st.status === "opened");
-    if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte" }
-    return { error: false, message: "", data: sheetOpened as Sheet };
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false };
+    var sheetOpened = book.data.sheets.find((st) => st.status === "opened");
+    if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte", book: true };
+    return { error: false, message: "", data: sheetOpened as Sheet, book: true };
 }
 
 // Case remplie
 export async function empty_case(user: User) {
     const book = await opened_book(user);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false };
     var lastContributedCase: Case;
-    var sheetOpened = book!.sheets.find((st) => st.status === "opened");
+    var sheetOpened = book.data.sheets.find((st) => st.status === "opened");
     if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte" }
     // const lctCase = sheetOpened.cases.findLast(cse => cse.contributionStatus == ("paid" || "awaiting")); // lct for LastContributedCase
     const lctCase = sheetOpened.cases.find(cse => cse.contributionStatus == "unpaid"); // lct for LastContributedCase || First unpaid case
@@ -168,28 +172,37 @@ export async function empty_case(user: User) {
 
 // Feuille à ouvrir
 export async function sheet_to_open(user: User) {
-    var book = (await opened_book(user));
+    var book = await opened_book(user);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false };
+    if (!book) return { error: true, message: "Pas de carnet ouvert", book: false, data: null };
     var sheetToOpen: Sheet;
-    const findLastClosedSheet = book!.sheets.findLast((st) => st.status === "closed");
+    const findLastClosedSheet = book.data.sheets.findLast((st) => st.status === "closed");
     if (!findLastClosedSheet) {
-        sheetToOpen = book!.sheets[0];
-    } else sheetToOpen = book!.sheets[findLastClosedSheet.index + 1];
-    return { error: false, data: sheetToOpen };
+        sheetToOpen = book.data.sheets[0];
+    } else sheetToOpen = book.data.sheets[findLastClosedSheet.index + 1];
+    return { error: false, message: "ok", data: sheetToOpen, book: true };
 }
 
-export async function sheet_to_close(user: User): Promise<Sheet | undefined> {
-    var book = (await opened_book(user));
-    const sheetToClose = book!.sheets.find((st) => st.status === "opened");
-    return sheetToClose;
+export async function sheet_to_close(user: User) {
+    var book = await opened_book(user);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, data: null };
+    const sheetToClose = book.data.sheets.find((st) => st.status === "opened");
+    // return sheetToClose;
+    if (!sheetToClose) return { error: true, message: "Aucune feuille ouverte", book: false, data: null };
+    return { error: false, message: "ok", book: false, data: sheetToClose };
 }
 
 // Open sheet
 export async function update_sheets(user: User, openedat: Date, bet: number) {
     let error: boolean = false;
     let message: string = "";
-    const sheets = (await opened_book(user))!.sheets;
-    const sheet: Sheet = (await sheet_to_open(user)).data;
-    let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+    const book = await opened_book(user);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const sheets = book.data.sheets;
+    const openedSheet = await sheet_to_open(user);
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    const sheet: Sheet = openedSheet.data;
+    let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     if (sheet) {
         if (sheetIndex == 0) { sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet }
@@ -203,7 +216,7 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
         }
     } else { error = true, message = "Vous ne pouvez pas encore créer de feuille" }
     updated_sheets[sheetIndex] = sheet!;
-    return { error, message, updated_sheets };
+    return { error, message, updated_sheets, book: true };
 }
 
 // Update sheet for contribution (Method: agent)
@@ -212,9 +225,13 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
     const status = pmethod === "agent" ? "awaiting" : "paid";
     let error: boolean = false;
     let message: string = "";
-    const sheets = (await opened_book(user))!.sheets;
-    const sheet: Sheet = (await sheet_to_open(user)).data;
-    let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+    const book = await opened_book(user);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const sheets = book.data.sheets;
+    const openedSheet = await sheet_to_open(user);
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    const sheet: Sheet = openedSheet.data;
+    let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     const emptycase: Case = (await empty_case(user)).data!;
     var nbCases = amount / sheet.bet!;
@@ -234,9 +251,13 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
 export async function sheet_validate(user: User, cases: number[], status: string) {
     let error: boolean = false;
     let message: string = "";
-    const sheets = (await opened_book(user))!.sheets;
-    const sheet: Sheet = (await sheet_to_open(user)).data;
-    let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+    const book = await opened_book(user);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const sheets = book.data.sheets;
+    const openedSheet = await sheet_to_open(user);
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    const sheet: Sheet = openedSheet.data;
+    let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     for (let i = 0; i < cases.length; i++) sheet.cases[cases[i]].contributionStatus = status;
     updated_sheets[sheetIndex] = sheet!;
@@ -268,13 +289,16 @@ export async function sheet_contribute_mobile(user: string, amount: number, stat
     const targeted_user = await prisma.user.findUnique({ where: { id: user } });
     let error: boolean = false;
     let message: string = "";
-    const sheets = (await opened_book(targeted_user!))!.sheets;
-    const sheet: Sheet = (await sheet_to_open(targeted_user!)).data;
-    let updated_sheets: Sheet[] = (await opened_book(targeted_user!))!.sheets;
+    const book = await opened_book(targeted_user!);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const sheets = book.data.sheets;
+    const openedSheet = await sheet_to_open(targeted_user!);
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    const sheet: Sheet = openedSheet.data;
+    let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     const emptycase: Case = (await empty_case(targeted_user!)).data!;
     var nbCases = amount / sheet.bet!;
-    // console.log("Mise" + sheet.bet!)
     if (!utilisIsInt(nbCases)) return { error: true, message: "Montant saisie invalide" };
     var targetdIndex = emptycase.index == 0 ? emptycase.index : emptycase.index + 1;
     // for (let i = 0; i < nbCases; i++) sheet.cases[i + targetdIndex].contributionStatus = status;

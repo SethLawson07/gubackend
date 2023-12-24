@@ -21,13 +21,17 @@ agenda.define('closebook', async (job: any) => {
 agenda.define('closesheet', async (job: any) => {
     const { user, date } = job.attrs.data as { user: User, date: any };
     const book = await opened_book(user);
-    const sheets = book!.sheets;
-    const sheet: Sheet = (await sheet_to_close(user))!;
-    let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const sheets = book.data.sheets;
+    const sheetToClose = await sheet_to_close(user);
+    if (sheetToClose.error || sheetToClose.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    const sheet: Sheet = sheetToClose.data;
+    // const sheet: Sheet = (await sheet_to_close(user))!;
+    let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     sheet.status = "closed";
     updated_sheets[sheetIndex] = sheet!;
-    await prisma.book.update({ where: { id: book!.id }, data: { sheets: updated_sheets } });
+    await prisma.book.update({ where: { id: book.data.id }, data: { sheets: updated_sheets } });
 });
 
 // Créer un compte tontine ou depot utilisateur
@@ -195,8 +199,9 @@ export async function open_sheet(req: Request, res: Response) {
         const { user } = req.body.user as { user: User };
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
         const book = await opened_book(user);
+        if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
-        await prisma.book.update({ where: { id: book!.id }, data: { sheets: sheets.updated_sheets } });
+        await prisma.book.update({ where: { id: book.data.id }, data: { sheets: sheets.updated_sheets } });
         // await prisma.
         // await agenda.schedule('in 10 seconds', 'closesheet', { user, date: validation_result.data.openedAt });
         await agenda.schedule('in 31 days', 'closesheet', { user, date: validation_result.data.openedAt });
@@ -234,15 +239,18 @@ export async function close_sheet(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
         const book = await opened_book(user);
-        const sheets = book!.sheets;
-        const sheet: Sheet = (await sheet_to_close(user))!;
-        let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+        if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
+        const sheets = book.data.sheets;
+        const sheetToClose = await sheet_to_close(user);
+        if (sheetToClose.error || sheetToClose.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+        const sheet: Sheet = sheetToClose.data;
+        let updated_sheets: Sheet[] = sheets;
         let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
         const contributions = await prisma.contribution.findMany({ where: { sheet: sheet.id, status: "awaiting" } });
         if (contributions.length > 0) { return res.status(400).send({ error: true, message: "Des cotisations sont en cours de validation" }) };
         sheet.status = "closed";
         updated_sheets[sheetIndex] = sheet!;
-        const targeted_book = await prisma.book.update({ where: { id: book!.id }, data: { sheets: updated_sheets } });
+        const targeted_book = await prisma.book.update({ where: { id: book.data.id }, data: { sheets: updated_sheets } });
         return res.status(200).send({ status: 201, error: false, message: 'Feuille bloquée', data: targeted_book, });
     } catch (err) {
         console.log(err);
@@ -255,13 +263,16 @@ export async function close_sheet(req: Request, res: Response) {
 const forceclosesheet = async (user: User) => {
     try {
         const book = await opened_book(user);
-        const sheets = book!.sheets;
-        const sheet: Sheet = (await sheet_to_close(user))!;
-        let updated_sheets: Sheet[] = (await opened_book(user))!.sheets;
+        if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+        const sheets = book.data.sheets;
+        const sheetToClose = await sheet_to_close(user);
+        if (sheetToClose.error || sheetToClose.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+        const sheet: Sheet = sheetToClose.data;
+        let updated_sheets: Sheet[] = sheets;
         let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
         sheet.status = "closed";
         updated_sheets[sheetIndex] = sheet!;
-        await prisma.book.update({ where: { id: book!.id }, data: { sheets: updated_sheets } });
+        await prisma.book.update({ where: { id: book.data.id }, data: { sheets: updated_sheets } });
         return { error: false, message: "ok", data: {} };
     } catch (err) {
         console.log(err);
@@ -299,6 +310,7 @@ export async function contribute(req: Request, res: Response) {
         const userAgent = await prisma.user.findUnique({ where: { id: targetted_user.agentId! } });
         if (!userAgent) return res.status(404).send({ error: true, message: "Agent not found", data: {} })
         const book = await opened_book(targetted_user);
+        if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
         let result = await sheet_contribute(targetted_user.id, data.amount, data.p_method);
         let contribution: Contribution;
         if (!result.error) {
@@ -316,7 +328,7 @@ export async function contribute(req: Request, res: Response) {
                 },
             });
             if (contribution) {
-                await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
+                await prisma.book.update({ where: { id: book.data.id! }, data: { sheets: result.updated_sheets! } });
                 user.role == "customer" && userAgent?.device_token! != "" ? await sendPushNotification(userAgent?.device_token!, "Cotisation", `${user.user_name} vient de cotiser la somme de ${data.amount} FCFA pour son compte tontine`) : {};
                 return res.status(200).send({ error: false, message: "Cotisation éffectée", data: contribution! });
             } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: contribution! }); }
