@@ -55,7 +55,7 @@ router.route("/reports").post(report_all);
 
 router.route("/saving").get(totalReport);
 
-router.route("/activity").get(Auth, userActivity);
+router.route("/activity").post(Auth, userActivity);
 
 router.route("/activity/last").get(Auth, userLastActivities);
 
