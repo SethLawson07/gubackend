@@ -194,10 +194,12 @@ export async function open_sheet(req: Request, res: Response) {
         const schema = z.object({
             bet: z.number().min(300).default(300),
             openedAt: z.coerce.date(),
+            userId: z.string(),
         });
         const validation_result = schema.safeParse(req.body);
-        const { user } = req.body.user as { user: User };
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
+        const user = await prisma.user.findUnique({ where: { id: validation_result.data.userId } });
+        if (!user) return res.status(404).send({ error: true, message: "Utilisateur non trouvé", data: {} });
         const book = await opened_book(user);
         if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
