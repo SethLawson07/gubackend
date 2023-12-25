@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer, UserIsCustomer, UserIsCustomerOrAdmin } from "../../utils/middlewares";
-import { check_for_opened_sheet, close_sheet, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, report_all, target_contribution, totalReport, userContributions, user_contributions, validate_contribution } from "../../services/Account";
+import { check_for_opened_sheet, close_sheet, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, report_all, target_contribution, totalReport, userActivity, userContributions, user_contributions, validate_contribution } from "../../services/Account";
 
 const router = Router();
 
@@ -40,7 +40,7 @@ router.route("/contribution/:id").get(Auth, UserIsAgentOrAdmin, target_contribut
 router.route("/acc/:id").get(Auth, UserIsCustomerOrAdmin, get_account);
 
 // Get user account with user id
-router.route("/user/:id").get(Auth, UserIsCustomerOrAdmin, get_user_account);
+router.route("/user/:id").get(Auth, UserIsAgentCustomerOrAdmin, get_user_account);
 
 // Get User books
 router.route("/books").get(Auth, UserIsCustomer, get_books);
@@ -54,6 +54,9 @@ router.route("/closesheet").post(Auth, UserIsCustomer, close_sheet);
 router.route("/reports").post(report_all);
 
 router.route("/saving").get(totalReport);
+
+router.route("/activity").get(Auth, userActivity);
+
 
 
 

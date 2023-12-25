@@ -93,7 +93,7 @@ export async function create_book(req: Request, res: Response) {
             where: { id: created_book.id },
             data: { sheets: sheets },
         });
-        await agenda.schedule('in 1 year', 'closebook', { created_book });
+        await agenda.schedule('in 372 days', 'closebook', { created_book });
         await agenda.start();
         return res.status(201).send({ status: 201, error: false, message: 'Le carnet a été créé', data: created_book })
     } catch (err) {
@@ -216,10 +216,7 @@ export async function open_sheet(req: Request, res: Response) {
 // Trouver une feuille
 export async function get_sheet(req: Request, res: Response) {
     try {
-        const schema = z.object({
-            b_id: z.string(),
-            s_id: z.string(),
-        });
+        const schema = z.object({ b_id: z.string(), s_id: z.string() });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(404).send({ error: true, message: "Données non validées", data: {} });
         const book = await prisma.book.findUnique({ where: { id: validation.data.b_id } });
@@ -275,8 +272,20 @@ const forceclosesheet = async (user: User) => {
         await prisma.book.update({ where: { id: book.data.id }, data: { sheets: updated_sheets } });
         return { error: false, message: "ok", data: {} };
     } catch (err) {
-        console.log(err);
-        console.log("Error while closing sheet");
+        console.log(err); console.log("Error while closing sheet");
+        return false;
+    }
+}
+
+// Close sheet on file
+const forceclosebook = async (user: User) => {
+    try {
+        const book = await opened_book(user);
+        if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+        await prisma.book.update({ where: { id: book.data.id }, data: { status: "closed" } });
+        return { error: false, message: "ok", data: {} };
+    } catch (err) {
+        console.log(err); console.log("Error while closing sheet");
         return false;
     }
 }
@@ -334,6 +343,7 @@ export async function contribute(req: Request, res: Response) {
             } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: contribution! }); }
         } else {
             if (result.isSheetFull) { await forceclosesheet(user); return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, }); };
+            if (result.isBookFull) { await forceclosebook(user); return res.status(200).send({ error: result.error, message: result.message, data: { isBookFull: true }, }); };
             return res.status(200).send({ error: result.error, message: result.message, data: {} });
         }
     } catch (e) {
@@ -427,10 +437,7 @@ export const makeDeposit = async (req: Request, res: Response) => {
                 madeby: "agent", payment: validation.data.p_method, reportId: report.id
             }
         });
-        if (deposit) {
-            const transaction = await prisma.account.update({ where: { id: targetted_account.id }, data: { amount: targetted_account.amount + validation.data.amount } })
-            if (!transaction) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
-        } else { return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} }); }
+        if (!deposit) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
         return res.status(200).send({ status: 200, error: false, message: "Dépôt éffectué avec succès", data: deposit });
     } catch (err) {
         console.log(err);
@@ -485,12 +492,6 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
                 }
             });
             if (!deposit) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
-            if (deposit) {
-                let transaction = await prisma.account.update({
-                    where: { id: targetted_account.id }, data: { amount: targetted_account.amount + data.amount }
-                })
-                if (!transaction) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} })
-            }
             return res.status(200).send({ status: 200, error: false, message: "Dépôt éffectué avec succès", data: deposit });
         }
         console.log(`A payment failed`)
@@ -563,5 +564,20 @@ export const totalReport = async (req: Request, res: Response) => {
     } catch (err) {
         console.log(err);
         return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
+    }
+}
+
+export const userActivity = async (req: Request, res: Response) => {
+    try {
+        const schema = z.object({ startDate: z.coerce.date(), endDate: z.coerce.date(), userId: z.string(), });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const vdata = validation.data;
+        const user = await prisma.user.findUnique({ where: { id: vdata.userId } });
+        if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
+        const data = await prisma.report.findMany({ where: { customerId: user.id, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true } });
+        return res.status(200).send({ error: false, data, message: "ok" });
+    } catch (err) {
+        console.log(err); return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
     }
 }
