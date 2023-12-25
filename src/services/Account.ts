@@ -203,6 +203,7 @@ export async function open_sheet(req: Request, res: Response) {
         const book = await opened_book(user);
         if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
+        if (sheets.error) return res.status(400).send({ error: true, message: sheets.message, data: {} });
         await prisma.book.update({ where: { id: book.data.id }, data: { sheets: sheets.updated_sheets } });
         // await prisma.
         // await agenda.schedule('in 10 seconds', 'closesheet', { user, date: validation_result.data.openedAt });
