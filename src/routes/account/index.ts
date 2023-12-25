@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer, UserIsCustomer, UserIsCustomerOrAdmin } from "../../utils/middlewares";
-import { check_for_opened_sheet, close_sheet, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, report_all, target_contribution, totalReport, userActivity, userContributions, user_contributions, validate_contribution } from "../../services/Account";
+import { check_for_opened_sheet, close_sheet, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, report_all, target_contribution, totalReport, userActivity, userContributions, userLastActivities, user_contributions, validate_contribution } from "../../services/Account";
 
 const router = Router();
 
@@ -56,6 +56,8 @@ router.route("/reports").post(report_all);
 router.route("/saving").get(totalReport);
 
 router.route("/activity").get(Auth, userActivity);
+
+router.route("/activity/last/:userid").get(Auth, userLastActivities);
 
 
 

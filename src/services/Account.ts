@@ -578,7 +578,25 @@ export const userActivity = async (req: Request, res: Response) => {
         const vdata = validation.data;
         const user = await prisma.user.findUnique({ where: { id: vdata.userId } });
         if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
-        const data = await prisma.report.findMany({ where: { customerId: user.id, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true } });
+        const data = await prisma.report.findMany({
+            where: user.role == "customer" ? { customerId: user.id, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }
+                : { agentId: user.id, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true }
+        });
+        return res.status(200).send({ error: false, data, message: "ok" });
+    } catch (err) {
+        console.log(err); return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
+    }
+}
+
+export const userLastActivities = async (req: Request, res: Response) => {
+    try {
+        const userId = req.params.userid;
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
+        const data = await prisma.report.findMany({
+            where: user.role == "customer" ? { customerId: user.id, } : { agentId: user.id }, include: { agent: true, customer: true },
+            take: 3
+        });
         return res.status(200).send({ error: false, data, message: "ok" });
     } catch (err) {
         console.log(err); return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
