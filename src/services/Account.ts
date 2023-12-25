@@ -590,9 +590,7 @@ export const userActivity = async (req: Request, res: Response) => {
 
 export const userLastActivities = async (req: Request, res: Response) => {
     try {
-        const userId = req.params.userid;
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
+        const { user } = req.body.user as { user: User };
         const data = await prisma.report.findMany({
             where: user.role == "customer" ? { customerId: user.id, } : { agentId: user.id }, include: { agent: true, customer: true },
             take: 3
