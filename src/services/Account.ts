@@ -515,8 +515,8 @@ export const report_all = async (req: Request, res: Response) => {
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
         const vdata = validation.data;
 
-        const reportData = await prisma.report.findMany({ where: { type: vdata.type, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true } });
-        const aggregate = await prisma.report.groupBy({ by: ["payment"], _sum: { amount: true }, where: { type: vdata.type, createdat: { gte: vdata.startDate, lte: vdata.endDate, } } });
+        const reportData = await prisma.report.findMany({ where: { type: vdata.type, status: 'paid', createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true } });
+        const aggregate = await prisma.report.groupBy({ by: ["payment"], _sum: { amount: true }, where: { status: 'paid', type: vdata.type, createdat: { gte: vdata.startDate, lte: vdata.endDate, } } });
 
         const aggregatedData = aggregate.reduce<{ [key: string]: number; total: number }>((result, item) => {
             const paymentMethod = item.payment;
