@@ -260,7 +260,7 @@ export async function sheet_validate(user: User, cases: number[], status: string
     const sheet: Sheet = openedSheet.data;
     let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
-    for (let i = 0; i < cases.length; i++) sheet.cases[cases[i]].contributionStatus = status;
+    for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = status;
     updated_sheets[sheetIndex] = sheet!;
     return { error, message, updated_sheets, cases, sheet };
 }
