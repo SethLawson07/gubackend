@@ -14,6 +14,8 @@ const validateContributionWorkerHandler = async (job: Job) => {
     const jobdata = job.data;
     const { customer, targeted_contribution, user, result, schemadata, validated, book } = jobdata;
 
+    console.log("=================================");
+
     const user_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
     let amount = (user_acount?.amount! + targeted_contribution.amount);
     if (user.role == "admin") {
