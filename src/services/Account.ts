@@ -368,6 +368,7 @@ export async function validate_contribution(req: Request, res: Response) {
             const customer = await prisma.user.findUnique({ where: { id: targeted_contribution.userId! } });
             const status = user.role == "admin" ? "paid" : "awaiting";
             const book = await opened_book(customer!);
+            if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
             let result = await sheet_validate(customer!, targeted_contribution.cases, status);
             if (!result.error) {
                 const validated = await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: status } });

@@ -14,12 +14,8 @@ const validateContributionWorkerHandler = async (job: Job) => {
     const jobdata = job.data;
     const { customer, targeted_contribution, user, result, schemadata, validated, book } = jobdata;
 
-    console.log("=================================");
-
     const user_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
     let amount = (user_acount?.amount! + targeted_contribution.amount);
-    await prisma.report.update({ where: { id: validated.reportId }, data: { status: validated.status, } });
-    await prisma.book.update({ where: { id: book?.id! }, data: { sheets: result.updated_sheets! } });
     if (user.role == "admin") {
         if (result.cases.includes(0)) {
             const agent_acount = await prisma.account.findFirst({ where: { user: customer?.agentId! } });
@@ -38,8 +34,10 @@ const validateContributionWorkerHandler = async (job: Job) => {
             })
         }
         else { await prisma.account.update({ where: { id: user_acount?.id! }, data: { amount: amount } }); }
-        customer?.device_token! && await sendPushNotification(customer?.device_token!, "Cotisation", `Votre cotisation en attente vient d'être validé`);
     }
+    await prisma.report.update({ where: { id: validated.reportId }, data: { status: validated.status, } });
+    await prisma.book.update({ where: { id: book.data.id }, data: { sheets: result.updated_sheets! } });
+    if (user.role == "admin" && customer?.device_token!) { await sendPushNotification(customer?.device_token!, "Cotisation", `Votre cotisation en attente vient d'être validé`); };
 }
 
 
