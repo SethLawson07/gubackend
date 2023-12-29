@@ -395,7 +395,7 @@ export async function user_contributions(req: Request, res: Response) {
         case "admin": contributions = await allContributions(); break;
         default: break;
     }
-    return res.status(200).send({ error: false, message: "ok", data: contributions! })
+    return res.status(200).send({ error: false, message: "Requête aboutie", data: contributions! })
 }
 
 // Trouver une cotisation

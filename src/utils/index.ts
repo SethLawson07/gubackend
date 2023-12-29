@@ -343,13 +343,10 @@ export function update_case(sheets: Sheet[], sheetid: string, caseid: string, st
 
 // Timestamp from string || Date
 export function todate(date: Date) {
-    const djsdate = dayjs(date).format("MM/DD/YYYY");
-    const tdate = new Date(djsdate);
-    const dtime = tdate.getTime();
-    return dtime;
+    return dayjs(date).format("YYYY-MM-DD");
 }
 
-export function todateTime(date: any) {
+export function todateTime(date: Date) {
     return dayjs(date).format();
 }
 

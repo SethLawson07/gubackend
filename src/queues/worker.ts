@@ -17,7 +17,7 @@ const validateContributionWorkerHandler = async (job: Job) => {
     const user_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
     let amount = (user_acount?.amount! + targeted_contribution.amount);
     if (user.role == "admin") {
-        if (result.cases.includes(0)) {
+        if (result.cases.includes(1)) {
             const agent_acount = await prisma.account.findFirst({ where: { user: customer?.agentId! } });
             const agent_benefit = (result.sheet.bet! * 20) / 100;
             const goodness_benefit = result.sheet.bet! - agent_benefit;
