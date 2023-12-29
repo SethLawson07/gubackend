@@ -239,7 +239,7 @@ model Contribution {
     account      String
     pmethod      String      @default("") // (payment method)  agent, tmoney, moovmoney
     awaiting     String      @default("") // agent, admin, none
-    status       String      @default("unpaid") //paid, unpaid, awaiting
+    status       String      @default("unpaid") //paid, unpaid, awaiting, rejected
     createdAt    DateTime
     report       Report      @relation(fields: [reportId], references: [id])
     reportId     String      @db.ObjectId

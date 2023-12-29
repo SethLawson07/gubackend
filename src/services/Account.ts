@@ -1,4 +1,4 @@
-import { allContributions, create_sheets, customerContributions, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_to_close, sheet_validate, todateTime, update_sheets, userAgentContributions, utilsNonSpecifiedReport, utilsTotalReport } from "../utils";
+import { allContributions, create_sheets, customerContributions, opened_book, opened_sheet, sendPushNotification, sheet_contribute, sheet_reject, sheet_to_close, sheet_validate, todateTime, update_sheets, userAgentContributions, utilsNonSpecifiedReport, utilsTotalReport } from "../utils";
 import { Account, Book, Contribution, Sheet, User } from "@prisma/client";
 import { validateContributionJobQueue } from "../queues/queues";
 import { fromZodError } from 'zod-validation-error';
@@ -378,6 +378,35 @@ export async function validate_contribution(req: Request, res: Response) {
                     await validateContributionJobQueue.add("validateContribution", { customer, targeted_contribution, user, result, schemadata: validation.data, validated, book });
                     return res.status(200).send({ status: 200, error: false, message: "Cotisation validée", data: validated! });
                 } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} }); }
+            }
+        } else { return res.status(401).send({ error: true, message: "Ressources non trouvées", data: {} }); }
+    } catch (err) {
+        console.log(err);
+        console.log("Error while ... action");
+        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
+    }
+}
+
+// Reject contribution
+export async function reject_contribution(req: Request, res: Response) {
+    try {
+        const contribution = req.params.id;
+        const schema = z.object({ validatedat: z.coerce.date(), });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const { user } = req.body.user as { user: User };
+        let targeted_contribution = await prisma.contribution.findUnique({ where: { id: contribution } });
+        if (targeted_contribution) {
+            const customer = await prisma.user.findUnique({ where: { id: targeted_contribution.userId! } });
+            const status = user.role == "admin" ? "paid" : "awaiting";
+            const book = await opened_book(customer!);
+            if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
+            let result = await sheet_reject(customer!, targeted_contribution.cases);
+            if (!result.error) {
+                const validated = await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: "rejected" } });
+                return res.status(200).send({ error: false, message: "Cotisation rejetée", data: {} });
+            } else {
+                return res.status(400).send({ error: result.error, message: result.message, data: {} });
             }
         } else { return res.status(401).send({ error: true, message: "Ressources non trouvées", data: {} }); }
     } catch (err) {

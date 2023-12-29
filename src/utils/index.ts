@@ -264,6 +264,24 @@ export async function sheet_validate(user: User, cases: number[], status: string
     return { error, message, updated_sheets, cases, sheet };
 }
 
+
+// Update sheet for contribution (Method: agent)
+export async function sheet_reject(user: User, cases: number[]) {
+    let error: boolean = false;
+    let message: string = "";
+    const book = await opened_book(user);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const sheets = book.data.sheets;
+    const openedSheet = await sheet_to_open(user);
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    const sheet: Sheet = openedSheet.data;
+    let updated_sheets: Sheet[] = sheets;
+    let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
+    for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = "rejected";
+    updated_sheets[sheetIndex] = sheet!;
+    return { error, message, updated_sheets, cases, sheet };
+}
+
 // // Update sheet for contribution (Method: agent)
 // export async function sheet_contribute(user: User, amount: number, status: string) {
 //     const targeted_user = await prisma.user.findUnique({ where: { id: user } });
