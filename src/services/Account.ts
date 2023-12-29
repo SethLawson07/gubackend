@@ -246,8 +246,10 @@ export async function close_sheet(req: Request, res: Response) {
         const sheet: Sheet = sheetToClose.data;
         let updated_sheets: Sheet[] = sheets;
         let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
-        const contributions = await prisma.contribution.findMany({ where: { sheet: sheet.id, status: "awaiting" } });
-        if (contributions.length > 0) { return res.status(400).send({ error: true, message: "Des cotisations sont en cours de validation" }) };
+        const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: sheet.id, status: "awaiting" } });
+        if (awaitingContributions.length > 0) { return res.status(400).send({ error: true, message: "Des cotisations sont en cours de validation" }) };
+        const unpaidCases = sheet.cases.filter((e) => e.contributionStatus == "unpaid");
+        if (unpaidCases && unpaidCases.length >= 31) { return res.status(400).send({ error: true, message: "Impossible de bloquer la feuille vierge" }) };
         sheet.status = "closed";
         updated_sheets[sheetIndex] = sheet!;
         const targeted_book = await prisma.book.update({ where: { id: book.data.id }, data: { sheets: updated_sheets } });

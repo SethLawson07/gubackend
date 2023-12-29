@@ -187,7 +187,6 @@ export async function sheet_to_close(user: User) {
     var book = await opened_book(user);
     if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, data: null };
     const sheetToClose = book.data.sheets.find((st) => st.status === "opened");
-    // return sheetToClose;
     if (!sheetToClose) return { error: true, message: "Aucune feuille ouverte", book: false, data: null };
     return { error: false, message: "ok", book: false, data: sheetToClose };
 }
