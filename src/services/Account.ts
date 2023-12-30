@@ -77,22 +77,13 @@ export async function create_book(req: Request, res: Response) {
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
         let b_data = validation_result.data;
-        const bookOpenedVerification = await prisma.book.findFirst({ where: { status: "opened", userId: validation_result.data.customer } });
-        if (bookOpenedVerification) return res.status(400).send({ error: true, message: "Vous ne pouvez pas encore créé de carnet", data: {} })
+        const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: validation_result.data.customer } });
+        if (bookIsOpened) return res.status(400).send({ error: true, message: "Création de carnet impossible", data: {} })
         let created_book = await prisma.book.create({
-            data: {
-                bookNumber: b_data.b_number,
-                createdAt: new Date(b_data.createdAt),
-                userId: b_data.customer,
-                status: "opened",
-                sheets: []
-            }
-        })
-        const sheets = create_sheets(created_book, validation_result.data.bet, validation_result.data.createdAt);
-        if (sheets) created_book = await prisma.book.update({
-            where: { id: created_book.id },
-            data: { sheets: sheets },
+            data: { bookNumber: b_data.b_number, createdAt: new Date(b_data.createdAt), userId: b_data.customer, status: "opened", sheets: [] }
         });
+        const sheets = create_sheets(created_book, validation_result.data.bet, validation_result.data.createdAt);
+        if (sheets) created_book = await prisma.book.update({ where: { id: created_book.id }, data: { sheets: sheets }, });
         await agenda.schedule('in 372 days', 'closebook', { created_book });
         await agenda.start();
         return res.status(201).send({ status: 201, error: false, message: 'Le carnet a été créé', data: created_book })
