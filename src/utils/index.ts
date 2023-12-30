@@ -488,11 +488,13 @@ const getItemsWithId = async (subcatid: string) => {
 
 export const operatorChecker = (phone: string) => {
     let operator = "moovmoney";
-    if (phone.startsWith("228")) {
-        const first = phone.replace('228', "").trim().slice(0, 2);
-        console.log(first);
-        if (firsttwonumberstogocomArray.includes(first)) { operator = "tmoney"; }
-    } else { }
+    // if (phone.startsWith("228")) {
+    //     const first = phone.replace('228', "").trim().slice(0, 2);
+    //     console.log(first);
+
+    // } else { }
+    if (firsttwonumberstogocomArray.includes(phone.trim().slice(0, 2))) { operator = "tmoney"; }
+    if (firsttwonumbersmoovafricaArray.includes(phone.trim().slice(0, 2))) { operator = "moovmoney"; }
     return operator;
 }
 
