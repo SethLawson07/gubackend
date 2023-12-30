@@ -134,7 +134,8 @@ export async function contribution_event(req: Request, res: Response) {
             const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
             if (!targetedUser) return res.status(404).send({ error: true, message: "User not found", data: {} });
             const userAgent = await prisma.user.findUnique({ where: { id: targetedUser.agentId! } });
-            const book = await opened_book(targetedUser!);
+            const book = await opened_book(targetedUser);
+            if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
             let result = await sheet_contribute(data.customer, data.amount, data.p_method);
             const userAccount = await prisma.account.findFirst({ where: { user: data.customer } });
             let contribution: Contribution; // CreatedContribution

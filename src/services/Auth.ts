@@ -338,12 +338,13 @@ export async function get_deliverypersons(_req: Request, res: Response) {
 
 export async function get_agent_customers(req: Request, res: Response) {
     try {
-        const schema = z.object({
-            agent: z.string()
-        });
+        const schema = z.object({ agent: z.string() });
         const validation = schema.safeParse({ agent: req.params.agent });
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
-        const data = await prisma.user.findMany({ where: { role: "customer", agentId: validation.data.agent, is_verified: true } });
+        const data = await prisma.user.findMany({
+            where: { role: "customer", agentId: validation.data.agent, is_verified: true }
+            , include: { Book: { where: { status: "opened", sheets: { some: { status: "opened", } } } } }
+        });
         return res.status(200).send({ status: 200, error: false, data: { customers: data } });
     } catch (err) {
         console.log(`Error while getting list of customers ${err}`);

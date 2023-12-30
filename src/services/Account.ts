@@ -77,13 +77,13 @@ export async function create_book(req: Request, res: Response) {
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
         let b_data = validation_result.data;
-        const bookOpenedVerification = await prisma.book.findFirst({ where: { status: "opened", customer: validation_result.data.customer } });
+        const bookOpenedVerification = await prisma.book.findFirst({ where: { status: "opened", userId: validation_result.data.customer } });
         if (bookOpenedVerification) return res.status(400).send({ error: true, message: "Vous ne pouvez pas encore créé de carnet", data: {} })
         let created_book = await prisma.book.create({
             data: {
                 bookNumber: b_data.b_number,
                 createdAt: new Date(b_data.createdAt),
-                customer: b_data.customer,
+                userId: b_data.customer,
                 status: "opened",
                 sheets: []
             }
@@ -107,7 +107,7 @@ export async function create_book(req: Request, res: Response) {
 export async function get_books(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
-        let books = await prisma.book.findMany({ where: { customer: user.id } });
+        let books = await prisma.book.findMany({ where: { userId: user.id } });
         if (!books) return res.status(404).send({ error: true, message: "Aucun livre pour cet utilisateur", data: {} });
         return res.status(200).send({ error: false, message: "Requête aboutie", data: books })
     } catch (err) {
@@ -166,7 +166,7 @@ export async function get_user_account(req: Request, res: Response) {
 export async function get_opened_book(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
-        let book = await prisma.book.findFirst({ where: { status: "opened", customer: user.id } });
+        let book = await prisma.book.findFirst({ where: { status: "opened", userId: user.id } });
         if (!book) return res.status(404).send({ error: true, message: "Aucun livre ouvert", data: {} });
         return res.status(200).send({ error: false, message: "", data: book });
     } catch (err) {

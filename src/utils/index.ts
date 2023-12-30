@@ -138,7 +138,7 @@ export function create_cases(sheet: string): Case[] {
 
 // Carnet ouvert
 export async function opened_book(user: User) {
-    const book = await prisma.book.findFirst({ where: { customer: user.id, status: "opened" } });
+    const book = await prisma.book.findFirst({ where: { userId: user.id, status: "opened" } });
     if (!book) return { error: true, message: "Pas de carnet ouvert", book: false, data: null };
     return { error: false, message: "ok", book: true, data: book };
 }

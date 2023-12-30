@@ -37,6 +37,7 @@ model User {
     ABetForReport   BetForReport[]   @relation("BFAgent")
     CSheetForReport SheetForReport[] @relation("SFAgent")
     ASheetForReport SheetForReport[] @relation("SFCustomer")
+    Book            Book[]
 }
 
 model Category {
@@ -219,12 +220,13 @@ type Sheet {
 
 model Book {
     id          String   @id @default(auto()) @map("_id") @db.ObjectId
-    customer    String
+    customer    User     @relation(fields: [userId], references: [id])
     bookNumber  String
     createdAt   DateTime
     status      String // "*()notopened" "opened" "closed"
     sheets      Sheet[]
     closeReason String?
+    userId      String   @db.ObjectId()
 }
 
 model Contribution {
