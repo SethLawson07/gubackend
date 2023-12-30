@@ -125,6 +125,7 @@ export async function contribution_event(req: Request, res: Response) {
             console.log(`Error while parsing response from cinet pay ${req.body}`)
             return res.status(400).send()
         }
+        console.log(validation_result.data.cel_phone_num);
         if (store.includes(validation_result.data.cpm_trans_id)) {
             console.log(`Found duplicate id in store ${validation_result.data.cpm_trans_id} : Aborting processing`)
             return res.status(409).send({ error: true, message: "", data: {} });
