@@ -8,7 +8,7 @@ const router = Router();
 router.route("/create").post(Auth, UserIsAdmin, create_account);
 
 // Create user book
-router.route("/addbook").post(Auth, UserIsAdmin, create_book);
+router.route("/addbook").post(Auth, UserIsAgentCustomerOrAdmin, create_book);
 
 // Check for user opened sheet
 router.route("/sheetcheck").get(Auth, UserIsCustomer, check_for_opened_sheet);
