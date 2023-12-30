@@ -181,7 +181,7 @@ export async function check_for_opened_sheet(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
         const sheet = await opened_sheet(user);
-        return res.status(200).send({ error: sheet.error, message: sheet.message, data: sheet.data })
+        return res.status(200).send({ error: sheet.error, message: sheet.message, data: sheet.data, book: sheet.book });
     } catch (e) {
         console.log(e);
         res.status(500).send({ error: true, message: "Une erreur interne est survenue", data: {} });
