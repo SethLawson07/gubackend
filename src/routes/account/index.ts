@@ -13,7 +13,7 @@ router.route("/addbook").post(Auth, UserIsAgentCustomerOrAdmin, create_book);
 // Check for user opened sheet
 router.route("/sheetcheck").get(Auth, UserIsCustomer, check_for_opened_sheet);
 
-router.route("/validatecases").get(Auth, cases_valiation);
+router.route("/validatecases").post(Auth, cases_valiation);
 
 // Open User sheet
 router.route("/opensheet").post(Auth, UserIsAgentOrCustomer, open_sheet);
