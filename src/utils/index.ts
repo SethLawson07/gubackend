@@ -198,23 +198,23 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
     const book = await opened_book(user);
     if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
     const sheets = book.data.sheets;
-    const openedSheet = await sheet_to_open(user);
-    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
-    const sheet: Sheet = openedSheet.data;
+    const sheetToOpen = await sheet_to_open(user);
+    if (sheetToOpen.error || sheetToOpen.data == null) return { error: true, message: sheetToOpen.message, book: false, update_sheets: null };
+    const sheet: Sheet = sheetToOpen.data;
     let updated_sheets: Sheet[] = sheets;
-    let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
+    let sheetToOpenIndex = sheets.findIndex(e => e.id === sheet.id);
     if (sheet) {
-        if (sheetIndex == 0) { sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet }
+        if (sheetToOpenIndex == 0) { sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet }
         else {
-            switch (sheets[sheetIndex - 1].status) {
-                case "notopened": error = true; message = "Feuille actuelle non ouverte"; break;
+            switch (sheets[sheetToOpenIndex - 1].status) {
+                case "notopened": error = true; message = "Feuille actuelle non ouverte | Erreur fatale"; break;
                 case "opened": error = true; message = "Feuille actuelle non bloquée"; break;
                 case "closed": sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet; break;
                 default: break;
             }
         }
     } else { error = true, message = "Vous ne pouvez pas encore créer de feuille" }
-    updated_sheets[sheetIndex] = sheet!;
+    updated_sheets[sheetToOpenIndex] = sheet!;
     return { error, message, updated_sheets, book: true };
 }
 
