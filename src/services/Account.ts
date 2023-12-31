@@ -243,8 +243,9 @@ export async function close_sheet(req: Request, res: Response) {
         if (unpaidCases && unpaidCases.length >= 31) { return res.status(400).send({ error: true, message: "Impossible de bloquer la feuille vierge" }) };
         sheet.status = "closed";
         updated_sheets[sheetIndex] = sheet!;
-        const targeted_book = await prisma.book.update({ where: { id: book.data.id }, data: { sheets: updated_sheets } });
-        return res.status(200).send({ status: 201, error: false, message: 'Feuille bloquée', data: targeted_book, });
+        let update_book = await prisma.book.update({ where: { id: book.data.id }, data: { sheets: updated_sheets } });
+        if (update_book && sheetToClose.data.index == 11) { update_book = await prisma.book.update({ where: { id: book.data.id }, data: { status: "closed" } }); }
+        return res.status(200).send({ status: 201, error: false, message: 'Feuille bloquée', data: update_book, });
     } catch (err) {
         console.log(err);
         console.log("Error while closing sheet");
@@ -394,7 +395,7 @@ export async function reject_contribution(req: Request, res: Response) {
             if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
             let result = await sheet_reject(customer!, targeted_contribution.cases);
             if (!result.error) {
-                const validated = await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: "rejected" } });
+                await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: "rejected" } });
                 return res.status(200).send({ error: false, message: "Cotisation rejetée", data: {} });
             } else {
                 return res.status(400).send({ error: result.error, message: result.message, data: {} });

@@ -180,6 +180,10 @@ export async function sheet_to_open(user: User) {
     if (!findLastClosedSheet) {
         sheetToOpen = book.data.sheets[0];
     } else sheetToOpen = book.data.sheets[findLastClosedSheet.index + 1];
+    if (findLastClosedSheet?.index == 11) {
+        await prisma.book.update({ where: { id: book.data.id }, data: { status: "closed" } });
+        return { error: false, message: "Fin de feuille", book: false }
+    }
     return { error: false, message: "ok", data: sheetToOpen, book: true };
 }
 
@@ -204,21 +208,22 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
     let updated_sheets: Sheet[] = sheets;
     let sheetToOpenIndex = sheets.findIndex(e => e.id === sheet.id);
     if (sheet) {
-        if (sheetToOpenIndex == 0) {
-            if (sheet.status == "opened") return { error: true, message: "Feuille actuelle non bloquée", book: true, update_sheets: null, data: {} };
-            sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
-        } else {
-            switch (sheets[sheetToOpenIndex - 1].status) {
-                case "notopened": return { error: true, message: "Feuille actuelle non ouverte | Erreur fatale", book: true, update_sheets: null, data: {} };
-                case "opened": return { error: true, message: "Feuille actuelle non bloquée", book: true, update_sheets: null, data: {} };
-                case "closed": if (sheetToOpenIndex == 11) {
-                    return { error: true, message: "Vous êtes sur la dernière feuille", book: true, update_sheets: null, data: {} };
-                } else {
-                    sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
+        if (sheetToOpenIndex)
+            if (sheetToOpenIndex == 0) {
+                if (sheet.status == "opened") return { error: true, message: "Feuille actuelle non bloquée", book: true, update_sheets: null, data: {} };
+                sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
+            } else {
+                switch (sheets[sheetToOpenIndex - 1].status) {
+                    case "notopened": return { error: true, message: "Feuille actuelle non ouverte | Erreur fatale", book: true, update_sheets: null, data: {} };
+                    case "opened": return { error: true, message: "Feuille actuelle non bloquée", book: true, update_sheets: null, data: {} };
+                    case "closed": if (sheetToOpenIndex == 11) {
+                        return { error: true, message: "Vous êtes sur la dernière feuille", book: true, update_sheets: null, data: {} };
+                    } else {
+                        sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
+                    }
+                    default: break;
                 }
-                default: break;
             }
-        }
     } else {
         return { error: true, message: "Ouverture de feuille impossible", book: true, update_sheets: null, data: {} }
     }
