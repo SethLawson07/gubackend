@@ -199,7 +199,7 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
     if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
     const sheets = book.data.sheets;
     const sheetToOpen = await sheet_to_open(user);
-    if (sheetToOpen.error || sheetToOpen.data == null) return { error: true, message: sheetToOpen.message, book: false, update_sheets: null };
+    if (sheetToOpen.error || sheetToOpen.data == null) return { error: true, message: sheetToOpen.message, book: true, update_sheets: null };
     const sheet: Sheet = sheetToOpen.data;
     let updated_sheets: Sheet[] = sheets;
     let sheetToOpenIndex = sheets.findIndex(e => e.id === sheet.id);
@@ -207,13 +207,16 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
         if (sheetToOpenIndex == 0) { sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet }
         else {
             switch (sheets[sheetToOpenIndex - 1].status) {
-                case "notopened": error = true; message = "Feuille actuelle non ouverte | Erreur fatale"; break;
-                case "opened": error = true; message = "Feuille actuelle non bloquée"; break;
-                case "closed": sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet; break;
+                case "notopened": return { error: true, message: "Feuille actuelle non ouverte | Erreur fatale", book: true, update_sheets: null, data: {} };
+                case "opened": return { error: true, message: "Feuille actuelle non bloquée", book: true, update_sheets: null, data: {} };
+                case "closed": sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
+                    break;
                 default: break;
             }
         }
-    } else { error = true, message = "Vous ne pouvez pas encore créer de feuille" }
+    } else {
+        return { error: true, message: "Ouverture de feuille impossible", book: true, update_sheets: null, data: {} }
+    }
     updated_sheets[sheetToOpenIndex] = sheet!;
     return { error, message, updated_sheets, book: true };
 }
