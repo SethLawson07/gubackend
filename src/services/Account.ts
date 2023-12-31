@@ -1,4 +1,4 @@
-import { allContributions, create_sheets, customerContributions, opened_book, opened_sheet, operatorChecker, sendPushNotification, sheet_contribute, sheet_reject, sheet_to_close, sheet_validate, todateTime, update_sheets, userAgentContributions, utilsNonSpecifiedReport, utilsTotalReport } from "../utils";
+import { allContributions, create_sheets, customerContributions, opened_book, opened_sheet, operatorChecker, sendPushNotification, sheet_contribute, sheet_reject, sheet_to_close, sheet_validate, sheet_validation, todateTime, update_sheets, userAgentContributions, utilsNonSpecifiedReport, utilsTotalReport } from "../utils";
 import { Account, Book, Contribution, Sheet, User } from "@prisma/client";
 import { validateContributionJobQueue } from "../queues/queues";
 import { fromZodError } from 'zod-validation-error';
@@ -401,6 +401,25 @@ export async function reject_contribution(req: Request, res: Response) {
                 return res.status(400).send({ error: result.error, message: result.message, data: {} });
             }
         } else { return res.status(401).send({ error: true, message: "Ressources non trouvées", data: {} }); }
+    } catch (err) {
+        console.log(err);
+        console.log("Error while ... action");
+        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
+    }
+}
+
+
+// Sheet cases Validation
+export async function cases_valiation(req: Request, res: Response) {
+    try {
+        const schema = z.object({ amount: z.number().min(300) });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: "Amount required", data: {} });
+        const data = validation.data;
+        const { user } = req.body.user as { user: User };
+        const result = await sheet_validation(user.id, data.amount);
+        if (result.error) return res.status(400).send({ error: true, message: result.message, data: {} });
+        return res.status(200).send({ error: false, data: {}, message: "ok" });
     } catch (err) {
         console.log(err);
         console.log("Error while ... action");

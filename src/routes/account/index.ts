@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer, UserIsCustomer, UserIsCustomerOrAdmin } from "../../utils/middlewares";
-import { check, check_for_opened_sheet, close_sheet, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, reject_contribution, report_all, target_contribution, totalReport, userActivity, userContributions, userLastActivities, user_contributions, validate_contribution } from "../../services/Account";
+import { cases_valiation, check, check_for_opened_sheet, close_sheet, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, reject_contribution, report_all, target_contribution, totalReport, userActivity, userContributions, userLastActivities, user_contributions, validate_contribution } from "../../services/Account";
 
 const router = Router();
 
@@ -13,7 +13,7 @@ router.route("/addbook").post(Auth, UserIsAgentCustomerOrAdmin, create_book);
 // Check for user opened sheet
 router.route("/sheetcheck").get(Auth, UserIsCustomer, check_for_opened_sheet);
 
-router.route("/check").get(check);
+router.route("/validatecases").get(Auth, cases_valiation);
 
 // Open User sheet
 router.route("/opensheet").post(Auth, UserIsAgentOrCustomer, open_sheet);
