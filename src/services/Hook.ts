@@ -143,7 +143,7 @@ export async function contribution_event(req: Request, res: Response) {
                 const report = await prisma.report.create({
                     data: {
                         type: "contribution", amount: data.amount, createdat: todateTime(data.createdAt), payment: operatorChecker(validation_result.data.cel_phone_num),
-                        sheet: result.sheet!, cases: result.cases, status: "paid", agentId: userAgent!.id, customerId: targetedUser.id,
+                        sheet: result.sheet!, cases: result.cases, status: "unpaid", agentId: userAgent!.id, customerId: targetedUser.id,
                     }
                 });
                 if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
@@ -154,7 +154,7 @@ export async function contribution_event(req: Request, res: Response) {
                     },
                 });
                 if (contribution) {
-                    await mMoneyContributionJobQueue.add("mMoneyContribution", { data, result, book });
+                    await mMoneyContributionJobQueue.add("mMoneyContribution", { data, result, book, report });
                     return res.status(200).send({ error: false, message: "Cotisation éffectée", data: contribution! });
                 } else {
                     return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });

@@ -43,7 +43,7 @@ const validateContributionWorkerHandler = async (job: Job) => {
 
 const mMoneyContributionWorkerHandler = async (job: Job) => {
     const jobdata = job.data;
-    const { data, result, book } = jobdata;
+    const { data, result, book, report } = jobdata;
 
     const targeted_acount = await prisma.account.findFirst({ where: { user: data.customer } });
     let amount = (targeted_acount?.amount! + data.amount);
@@ -53,6 +53,7 @@ const mMoneyContributionWorkerHandler = async (job: Job) => {
         await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: amount } });
     }
     await prisma.book.update({ where: { id: book.data.id }, data: { sheets: result.updated_sheets! } });
+    await prisma.report.update({ where: { id: report.id }, data: { status: "paid" } });
 }
 
 
