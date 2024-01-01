@@ -8,7 +8,7 @@ import { prisma } from "../server";
 const Agenda = require('agenda');
 import { z } from "zod";
 
-const agenda = new Agenda();
+export const agenda = new Agenda();
 agenda.database(process.env.DATABASE);
 
 // Définition de la tâche
@@ -87,6 +87,37 @@ export async function create_book(req: Request, res: Response) {
         await agenda.schedule('in 372 days', 'closebook', { created_book });
         await agenda.start();
         return res.status(201).send({ status: 201, error: false, message: 'Le carnet a été créé', data: created_book })
+    } catch (err) {
+        console.log(err)
+        console.error(`Error while creating book`)
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
+// addbook
+export async function addBook(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            createdAt: z.coerce.date(),
+            customer: z.string()
+        });
+        const validation_result = schema.safeParse(req.body);
+        if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
+        let b_data = validation_result.data;
+        const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: validation_result.data.customer } });
+        if (bookIsOpened) return res.status(400).send({ error: true, message: "Création de carnet impossible", data: {} });
+        const account = await prisma.account.findFirst({ where: { user: b_data.customer } });
+        if (!account) return res.status(404).send({ error: true, message: "User account not found", data: {} });
+        if (account.amount < 300) return res.status(403).send({ error: true, message: "Solde inssufisant", data: {} });
+        const [addedbook, debit] = await prisma.$transaction([
+            prisma.book.create({ data: { bookNumber: "", createdAt: new Date(b_data.createdAt), userId: b_data.customer, status: "opened", sheets: [] } }),
+            prisma.account.update({ where: { id: account.id }, data: { amount: account.amount - 300 } }),
+        ]);
+        const sheets = create_sheets(addedbook, 300, validation_result.data.createdAt);
+        if (sheets) await prisma.book.update({ where: { id: addedbook.id }, data: { sheets: sheets }, });
+        await agenda.schedule('in 372 days', 'closebook', { created_book: addedbook });
+        await agenda.start();
+        return res.status(201).send({ status: 201, error: false, message: 'Le carnet a été créé', data: addedbook });
     } catch (err) {
         console.log(err)
         console.error(`Error while creating book`)

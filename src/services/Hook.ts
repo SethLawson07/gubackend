@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../server";
 import { store } from "../utils/store";
-import { opened_book, operatorChecker, sheet_contribute, todateTime } from "../utils";
+import { create_sheets, opened_book, operatorChecker, sheet_contribute, todateTime } from "../utils";
 import { Contribution } from "@prisma/client";
 import dayjs from "dayjs";
 import { mMoneyContributionJobQueue } from "../queues/queues";
+import { agenda } from "./Account";
 
 
 export async function momo_payment_event(req: Request, res: Response) {
@@ -164,6 +165,49 @@ export async function contribution_event(req: Request, res: Response) {
                 console.log("Error");
                 return res.status(200).send({ error: result.error, message: result.message, data: {} });
             }
+        }
+        console.log(`A payment failed`)
+    } catch (err) {
+        console.error(`Error while handling payment event ${err}`)
+        return res.status(500).send()
+    }
+}
+
+
+export async function addbook_event(req: Request, res: Response) {
+    try {
+        let buffer = Buffer.from(req.params.data, 'base64');
+        let text = buffer.toString('ascii');
+        let data = JSON.parse(text);
+        const schema = z.object({
+            cpm_amount: z.string(),
+            cpm_trans_id: z.string(),
+            payment_method: z.string(),
+            cel_phone_num: z.string(),
+            cpm_error_message: z.string(),
+            cpm_trans_date: z.string()
+        });
+        const validation_result = schema.safeParse(req.body);
+        if (!validation_result.success) {
+            console.log(`Error while parsing response from cinet pay ${req.body}`)
+            return res.status(400).send()
+        }
+        if (store.includes(validation_result.data.cpm_trans_id)) {
+            console.log(`Found duplicate id in store ${validation_result.data.cpm_trans_id} : Aborting processing`)
+            return res.status(409).send({ error: true, message: "", data: {} });
+        }
+        store.push(validation_result.data.cpm_trans_id);
+        if (validation_result.data.cpm_error_message === "SUCCES") {
+            const user = await prisma.user.findUnique({ where: { id: data.customer } });
+            if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
+            const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: user.id } });
+            if (bookIsOpened) return res.status(400).send({ error: true, message: "Création de carnet impossible", data: {} });
+            const created_book = await prisma.book.create({ data: { bookNumber: "", createdAt: todateTime(data.createdAt), userId: user.id, status: "opened", sheets: [] } });
+            if (!created_book) return res.status(400).send({ error: true, message: "Cound not create", data: {} });
+            const sheets = create_sheets(created_book, 300, data.createdAt);
+            if (sheets) await prisma.book.update({ where: { id: created_book.id }, data: { sheets: sheets }, });
+            await agenda.schedule('in 372 days', 'closebook', { created_book });
+            await agenda.start();
         }
         console.log(`A payment failed`)
     } catch (err) {
