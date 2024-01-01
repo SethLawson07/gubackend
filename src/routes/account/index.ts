@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { Auth, UserIsAdmin, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer, UserIsCustomer, UserIsCustomerOrAdmin } from "../../utils/middlewares";
-import { cases_valiation, check, check_for_opened_sheet, close_sheet, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, reject_contribution, report_all, target_contribution, totalReport, userActivity, userContributions, userLastActivities, user_contributions, validate_contribution } from "../../services/Account";
+import { Auth, UserIsAdmin, UserIsAgent, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer, UserIsCustomer, UserIsCustomerOrAdmin } from "../../utils/middlewares";
+import { cases_valiation, check, check_for_opened_sheet, close_sheet, contribute, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, reject_contribution, report_all, target_contribution, totalReport, userActivity, userContributions, userLastActivities, user_contributions, user_rejected_contributions, validate_contribution } from "../../services/Account";
 
 const router = Router();
 
@@ -13,7 +13,11 @@ router.route("/addbook").post(Auth, UserIsAgentCustomerOrAdmin, create_book);
 // Check for user opened sheet
 router.route("/sheetcheck").get(Auth, UserIsCustomer, check_for_opened_sheet);
 
+// Verification de la disponibité de cases avant cotisation par mobile money
 router.route("/validatecases").post(Auth, cases_valiation);
+
+// Cotisations rejetées pour un utilisateur donné
+router.route("/unvalidated/:userId").post(Auth, UserIsAgentOrAdmin, user_rejected_contributions);
 
 // Open User sheet
 router.route("/opensheet").post(Auth, UserIsAgentOrCustomer, open_sheet);
@@ -55,12 +59,16 @@ router.route("/book/:id").get(Auth, UserIsCustomer, get_book);
 // Close sheet
 router.route("/closesheet").post(Auth, UserIsCustomer, close_sheet);
 
+// Rapport Global
 router.route("/reports").post(report_all);
 
+//
 router.route("/saving").get(totalReport);
 
+// Liste des activités utilisateurs (Filtrés en date)
 router.route("/activity").post(Auth, userActivity);
 
+// Liste des trois dernières activités
 router.route("/activity/last").get(Auth, userLastActivities);
 
 

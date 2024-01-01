@@ -1,4 +1,4 @@
-import { allContributions, create_sheets, customerContributions, opened_book, opened_sheet, operatorChecker, sendPushNotification, sheet_contribute, sheet_reject, sheet_to_close, sheet_validate, sheet_validation, todateTime, update_sheets, userAgentContributions, utilsNonSpecifiedReport, utilsTotalReport } from "../utils";
+import { allContributions, create_sheets, customerContributions, opened_book, opened_sheet, operatorChecker, sendPushNotification, sheet_contribute, sheet_reject, sheet_to_close, sheet_to_open, sheet_validate, sheet_validation, todateTime, update_sheets, userAgentContributions, utilsNonSpecifiedReport, utilsTotalReport } from "../utils";
 import { Account, Book, Contribution, Sheet, User } from "@prisma/client";
 import { validateContributionJobQueue } from "../queues/queues";
 import { fromZodError } from 'zod-validation-error';
@@ -237,7 +237,7 @@ export async function close_sheet(req: Request, res: Response) {
         const sheet: Sheet = sheetToClose.data;
         let updated_sheets: Sheet[] = sheets;
         let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
-        const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: sheet.id, status: "awaiting" } });
+        const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: sheet.id, status: { in: ["awaiting", "rejected"] } } });
         if (awaitingContributions.length > 0) { return res.status(400).send({ error: true, message: "Des cotisations sont en cours de validation" }) };
         const unpaidCases = sheet.cases.filter((e) => e.contributionStatus == "unpaid");
         if (unpaidCases && unpaidCases.length >= 31) { return res.status(400).send({ error: true, message: "Impossible de bloquer la feuille vierge" }) };
@@ -425,6 +425,22 @@ export async function cases_valiation(req: Request, res: Response) {
         console.log("Error while ... action");
         return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
     }
+}
+
+// Liste des cotisations utilisateurs
+export async function user_rejected_contributions(req: Request, res: Response) {
+    const schema = z.object({ userId: z.string() });
+    const validation = schema.safeParse(req.params);
+    if (!validation.success) return res.status(400).send({ error: true, message: "User Id is needed", data: {} });
+    const data = validation.data;
+    const user = await prisma.user.findUnique({ where: { id: data.userId } });
+    if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
+    const book = await opened_book(user);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false };
+    const sheet = await sheet_to_open(user);
+    if (sheet.error || sheet.data == null) return { error: true, message: sheet.message, book: true, update_sheets: null };
+    const contributions = await prisma.contribution.findMany({ where: { status: "rejected", userId: user.id, sheet: sheet.data.id } });
+    return res.status(200).send({ error: false, message: "Requête aboutie", data: { contributions, book: sheet.book } });
 }
 
 // Liste des cotisations utilisateurs
