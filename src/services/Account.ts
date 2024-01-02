@@ -585,7 +585,7 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
             const [deposit, aUpdate] = await prisma.$transaction([
                 prisma.deposit.create({
                     data: {
-                        account: targetted_account.id, amount: data.amount, createdAt: todateTime(data.createdAt), customer: targetted_user.id,
+                        account: targetted_account.id, amount: data.amount, createdAt: todateTime(new Date(data.createdAt)), customer: targetted_user.id,
                         madeby: "agent", payment: operatorChecker(validation_result.data.cel_phone_num), reportId: report.id
                     }
                 }),
