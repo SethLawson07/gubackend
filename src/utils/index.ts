@@ -240,7 +240,7 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
     if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
     const sheets = book.data.sheets;
     const openedSheet = await sheet_to_open(user);
-    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null, sheet: null };
     const sheet: Sheet = openedSheet.data;
     let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
