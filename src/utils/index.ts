@@ -255,8 +255,8 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
         sheet.cases[i + emptycase.index].contributionStatus = status;
         cases.push((emptycase.index + i));
     };
-    updated_sheets[sheetIndex] = sheet!;
-    return { error, message, updated_sheets, cases, sheet };
+    updated_sheets[sheetIndex] = sheet;
+    return { error, message, updated_sheets, cases, sheet, sheetId: sheet.id };
 }
 
 

@@ -350,10 +350,6 @@ export async function contribute(req: Request, res: Response) {
         if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
         let result = await sheet_contribute(targetted_user.id, data.amount, data.p_method);
 
-        const openedSheet = await sheet_to_open(user);
-        if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
-        const sheet: Sheet = openedSheet.data;
-
         let contribution: Contribution;
         if (!result.error) {
             const report = await prisma.report.create({
@@ -376,8 +372,8 @@ export async function contribute(req: Request, res: Response) {
             } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: contribution! }); }
         } else {
             if (result.isSheetFull) {
-                const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: sheet.id, status: { in: ["awaiting", "rejected"] } } });
-                if (awaitingContributions.length > 0) return;
+                const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: result.sheetId, status: { in: ["awaiting", "rejected"] } } });
+                if (awaitingContributions.length > 0) return res.status(200).send({ error: true, message: "Feuille remplie", data: {}, });
                 await forceclosesheet(user); return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, });
             };
             if (result.isBookFull) { await forceclosebook(user); return res.status(200).send({ error: result.error, message: result.message, data: { isBookFull: true }, }); };
