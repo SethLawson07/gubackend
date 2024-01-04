@@ -292,7 +292,7 @@ export async function sheet_cases_validate(status: string, reference: number, sh
     let update_sheet = sheet;
     switch (status) {
         case "paid": {
-            for (let i = 0; i < size; i++) update_sheet.cases[reference + i].contributionStatus = "paid";
+            for (let i = 0; i < size; i++) update_sheet.cases[reference + i + 1].contributionStatus = "paid";
         };
         case "unpaid": {
             const lg = reference - size;
