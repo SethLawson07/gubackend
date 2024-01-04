@@ -297,7 +297,8 @@ export async function sheet_cases_validate(status: string, reference: number, sh
         };
         case "unpaid": {
             const lg = reference - size + 1;
-            for (let i = 0; i < lg; i++) update_sheet.cases[lg + i].contributionStatus = "unpaid";
+            if (lg > 0) for (let i = 0; i < lg; i++) update_sheet.cases[lg + i].contributionStatus = "unpaid";
+            else { update_sheet.cases[0].contributionStatus = "unpaid"; }
             break;
         };
         // case "awaiting": referenceBox = sheet.cases.findIndex((cs) => cs.contributionStatus == "unpaid"); break;
