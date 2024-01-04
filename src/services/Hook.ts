@@ -142,24 +142,16 @@ export async function contribution_event(req: Request, res: Response) {
             let contribution: Contribution; // CreatedContribution
             if (!result.error) {
                 const report = await prisma.report.create({
-                    data: {
-                        type: "contribution", amount: data.amount, createdat: todateTime(data.createdAt), payment: operatorChecker(validation_result.data.cel_phone_num),
-                        sheet: result.sheet!, cases: result.cases, status: "unpaid", agentId: userAgent!.id, customerId: targetedUser.id,
-                    }
+                    data: { type: "contribution", amount: data.amount, createdat: todateTime(data.createdAt), payment: operatorChecker(validation_result.data.cel_phone_num), sheet: result.sheet!, cases: result.cases, status: "unpaid", customerId: targetedUser.id, }
                 });
                 if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
                 contribution = await prisma.contribution.create({
-                    data: {
-                        account: userAccount?.id!, createdAt: todateTime(data.createdAt), userId: targetedUser?.id!, pmethod: data.p_method, awaiting: "none",
-                        status: "paid", amount: data.amount, cases: result.cases!, agent: data.agent, sheet: result.sheet!.id, reportId: report.id,
-                    },
+                    data: { account: userAccount?.id!, createdAt: todateTime(data.createdAt), userId: targetedUser?.id!, pmethod: data.p_method, awaiting: "none", status: "paid", amount: data.amount, cases: result.cases!, sheet: result.sheet!.id, reportId: report.id, },
                 });
                 if (contribution) {
                     await mMoneyContributionJobQueue.add("mMoneyContribution", { data, result, book, report });
                     return res.status(200).send({ error: false, message: "Cotisation éffectée", data: contribution! });
-                } else {
-                    return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} });
-                }
+                } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} }); }
             } else {
                 console.log(result.message);
                 console.log("Error");

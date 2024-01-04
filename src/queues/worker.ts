@@ -25,16 +25,12 @@ const validateContributionWorkerHandler = async (job: Job) => {
                 prisma.account.update({ where: { id: user_acount?.id! }, data: { amount: (amount - result.sheet.bet!) } }),
                 prisma.account.update({ where: { id: agent_acount?.id! }, data: { amount: agent_acount?.amount! + agent_benefit } }),
             ]);
-            if (uaUpdate && aaUpdate) {
-                await prisma.betForReport.create({
-                    data: { gooAmount: goodness_benefit, AgeAmount: agent_benefit, createdat: todateTime(schemadata.validatedat), agentId: customer?.agentId!, customerId: customer?.id!, }
-                });
-            }
+            if (uaUpdate && aaUpdate) await prisma.betForReport.create({ data: { gooAmount: goodness_benefit, AgeAmount: agent_benefit, createdat: todateTime(schemadata.validatedat), agentId: customer?.agentId!, customerId: customer?.id!, } });
         }
         else { await prisma.account.update({ where: { id: user_acount?.id! }, data: { amount: amount } }); }
     }
     await prisma.book.update({ where: { id: book.data.id }, data: { sheets: result.updated_sheets! } });
-    await prisma.report.update({ where: { id: validated.reportId }, data: { status: validated.status, } });
+    await prisma.report.update({ where: { id: validated.reportId }, data: { agentId: customer.agentId, status: validated.status, } });
     if (user.role == "admin" && customer?.device_token!) { await sendPushNotification(customer?.device_token!, "Cotisation", `Votre cotisation en attente vient d'être validé`); };
 }
 

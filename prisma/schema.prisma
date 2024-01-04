@@ -333,8 +333,8 @@ model Report {
     customer   User   @relation("Customer", fields: [customerId], references: [id])
     customerId String @db.ObjectId()
 
-    agent   User   @relation("Agent", fields: [agentId], references: [id])
-    agentId String @db.ObjectId()
+    agent   User?   @relation("Agent", fields: [agentId], references: [id])
+    agentId String? @db.ObjectId()
 
     status       String
     Contribution Contribution[]
