@@ -279,6 +279,32 @@ export async function sheet_validation(userid: string, amount: number) {
     return { error: false, message: "ok", updated_sheets, cases: [], sheet };
 }
 
+export async function sheet_case_reference(status: string, sheet: Sheet): Promise<number> {
+    let referenceBox = undefined;
+    switch (status) {
+        case "paid": referenceBox = sheet.cases.find((cs) => cs.contributionStatus == "awaiting")?.index; break;
+        case "unpaid": referenceBox = sheet.cases.findLast((cs) => cs.contributionStatus == "awaiting")?.index; break;
+        case "awaiting": referenceBox = sheet.cases.find((cs) => cs.contributionStatus == "unpaid")?.index; break;
+        default: referenceBox = 0;
+    }
+    return referenceBox!;
+}
+
+export async function sheet_cases_validate(status: string, reference: number, sheet: Sheet, size: number): Promise<Sheet> {
+    let update_sheet = sheet;
+    switch (status) {
+        case "paid": {
+            for (let i = 0; i < size; i++) update_sheet.cases[reference + i].contributionStatus = "paid";
+        };
+        case "unpaid": {
+            for (let i = 0; i < reference - size + 1; i++) update_sheet.cases[reference + i].contributionStatus = "unpaid";
+        };
+        // case "awaiting": referenceBox = sheet.cases.findIndex((cs) => cs.contributionStatus == "unpaid"); break;
+        default: update_sheet = sheet;
+    }
+    return update_sheet;
+}
+
 // Update sheet for contribution (Method: agent)
 export async function sheet_validate(user: User, cases: number[], status: string) {
     let error: boolean = false;
@@ -288,11 +314,16 @@ export async function sheet_validate(user: User, cases: number[], status: string
     const sheets = book.data.sheets;
     const openedSheet = await sheet_to_open(user);
     if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
-    const sheet: Sheet = openedSheet.data;
+    let sheet: Sheet = openedSheet.data;
     let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
-    for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = status;
-    updated_sheets[sheetIndex] = sheet!;
+    if (status == "awaiting") { ; }
+    else {
+        const reference = await sheet_case_reference(status, sheet);
+        sheet = await sheet_cases_validate(status, reference, sheet, cases.length);
+        // for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = status;
+    }
+    updated_sheets[sheetIndex] = sheet;
     return { error, message, updated_sheets, cases, sheet };
 }
 
