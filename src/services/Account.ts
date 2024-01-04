@@ -372,7 +372,7 @@ export async function contribute(req: Request, res: Response) {
             contribution = await prisma.contribution.create({
                 data: {
                     account: targetted_account?.id!, createdAt: data.createdAt, userId: targetted_user.id, pmethod: data.p_method, status: "awaiting", reportId: report.id,
-                    awaiting: user.role == "agent" ? "admin" : "agent", amount: data.amount, cases: result.cases!.map(chiffre => chiffre + 1), sheet: result.sheet!.id,
+                    awaiting: user.role == "agent" ? "admin" : "agent", amount: data.amount, cases: result.cases!.map(chiffre => chiffre + 1), sheet: result.sheet!.id, agent: targetted_user.agentId,
                 },
             });
             if (contribution) {
@@ -443,7 +443,8 @@ export async function reject_contribution(req: Request, res: Response) {
             let result = await sheet_reject(customer, targeted_contribution.cases);
             if (!result.error) {
                 await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: "rejected" } });
-                await prisma.book.update({ where: { id: book.data.id }, data: { sheets: result.updated_sheets } })
+                await prisma.book.update({ where: { id: book.data.id }, data: { sheets: result.updated_sheets } });
+                if (customer.device_token) { await sendPushNotification(customer.device_token, "Cotisation", `Votre cotisation a été rejetée`); };
                 return res.status(200).send({ error: false, message: "Cotisation rejetée", data: {} });
             } else {
                 return res.status(400).send({ error: result.error, message: result.message, data: {} });
