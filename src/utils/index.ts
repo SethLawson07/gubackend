@@ -295,7 +295,8 @@ export async function sheet_cases_validate(status: string, reference: number, sh
             for (let i = 0; i < size; i++) update_sheet.cases[reference + i].contributionStatus = "paid";
         };
         case "unpaid": {
-            for (let i = 0; i < reference - size + 1; i++) update_sheet.cases[reference + i].contributionStatus = "unpaid";
+            const lg = reference - size;
+            for (let i = 0; i < lg + 1; i++) update_sheet.cases[lg + i].contributionStatus = "unpaid";
         };
         // case "awaiting": referenceBox = sheet.cases.findIndex((cs) => cs.contributionStatus == "unpaid"); break;
         default: update_sheet = sheet;
@@ -317,8 +318,7 @@ export async function sheet_validate(user: User, cases: number[], status: string
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     if (status == "awaiting") { ; }
     else {
-        const reference = await sheet_case_reference(status, sheet);
-        sheet = await sheet_cases_validate(status, reference, sheet, cases.length);
+        const reference = await sheet_case_reference(status, sheet); sheet = await sheet_cases_validate(status, reference, sheet, cases.length);
         // for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = status;
     }
     updated_sheets[sheetIndex] = sheet;
