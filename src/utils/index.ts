@@ -293,10 +293,12 @@ export async function sheet_cases_validate(status: string, reference: number, sh
     switch (status) {
         case "paid": {
             for (let i = 0; i < size; i++) update_sheet.cases[reference + i + 1].contributionStatus = "paid";
+            break;
         };
         case "unpaid": {
-            const lg = reference - size;
-            for (let i = 0; i < lg + 1; i++) update_sheet.cases[lg + i].contributionStatus = "unpaid";
+            const lg = reference - size + 1;
+            for (let i = 0; i < lg; i++) update_sheet.cases[lg + i].contributionStatus = "unpaid";
+            break;
         };
         // case "awaiting": referenceBox = sheet.cases.findIndex((cs) => cs.contributionStatus == "unpaid"); break;
         default: update_sheet = sheet;
@@ -341,7 +343,7 @@ export async function sheet_reject(user: User, cases: number[]) {
     const reference = await sheet_case_reference("unpaid", sheet);
     sheet = await sheet_cases_validate("unpaid", reference, sheet, cases.length);
     // for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = "rejected";
-    updated_sheets[sheetIndex] = sheet!;
+    updated_sheets[sheetIndex] = sheet;
     return { error, message, updated_sheets, cases, sheet };
 }
 
