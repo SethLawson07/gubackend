@@ -217,16 +217,14 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
                 case "opened": return { error: true, message: "Feuille actuelle non bloquée", book: true, update_sheets: null, data: {} };
                 case "closed": if (sheetToOpenIndex == 11) {
                     return { error: true, message: "Vous êtes sur la dernière feuille", book: true, update_sheets: null, data: {} };
-                } else {
-                    sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
-                }
+                } else { sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet; }
                 default: break;
             }
         }
     } else {
         return { error: true, message: "Ouverture de feuille impossible", book: true, update_sheets: null, data: {} }
     }
-    updated_sheets[sheetToOpenIndex] = sheet!;
+    updated_sheets[sheetToOpenIndex] = sheet;
     return { error, message, updated_sheets, book: true };
 }
 
@@ -337,10 +335,12 @@ export async function sheet_reject(user: User, cases: number[]) {
     const sheets = book.data.sheets;
     const openedSheet = await sheet_to_open(user);
     if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
-    const sheet: Sheet = openedSheet.data;
+    let sheet: Sheet = openedSheet.data;
     let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
-    for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = "rejected";
+    const reference = await sheet_case_reference("unpaid", sheet);
+    sheet = await sheet_cases_validate("unpaid", reference, sheet, cases.length);
+    // for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = "rejected";
     updated_sheets[sheetIndex] = sheet!;
     return { error, message, updated_sheets, cases, sheet };
 }
