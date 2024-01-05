@@ -237,8 +237,6 @@ export async function open_sheet(req: Request, res: Response) {
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
         if (sheets.error) return res.status(400).send({ error: true, message: sheets.message, data: {} });
         await prisma.book.update({ where: { id: book.data.id }, data: { sheets: sheets.updated_sheets } });
-        // await prisma.
-        // await agenda.schedule('in 10 seconds', 'closesheet', { user, date: validation_result.data.openedAt });
         await agenda.schedule('in 31 days', 'closesheet', { user, date: validation_result.data.openedAt });
         await agenda.start();
         return res.status(200).send({ error: false, message: "Feuille ouverte", data: {} });
@@ -283,7 +281,7 @@ export async function close_sheet(req: Request, res: Response) {
         const unpaidCases = sheet.cases.filter((e) => e.contributionStatus == "unpaid");
         if (unpaidCases && unpaidCases.length >= 31) { return res.status(400).send({ error: true, message: "Impossible de bloquer la feuille vierge" }) };
         sheet.status = "closed";
-        updated_sheets[sheetIndex] = sheet!;
+        updated_sheets[sheetIndex] = sheet;
         let update_book = await prisma.book.update({ where: { id: book.data.id }, data: { sheets: updated_sheets } });
         if (update_book && sheetToClose.data.index == 11) { update_book = await prisma.book.update({ where: { id: book.data.id }, data: { status: "closed" } }); }
         return res.status(200).send({ status: 201, error: false, message: 'Feuille bloquée', data: update_book, });
@@ -376,9 +374,9 @@ export async function contribute(req: Request, res: Response) {
                 },
             });
             if (contribution) {
-                await prisma.book.update({ where: { id: book.data.id! }, data: { sheets: result.updated_sheets! } });
+                await prisma.book.update({ where: { id: book.data.id! }, data: { sheets: result.updated_sheets } });
                 user.role == "customer" && userAgent?.device_token! != "" ? await sendPushNotification(userAgent?.device_token!, "Cotisation", `${user.user_name} vient de cotiser la somme de ${data.amount} FCFA pour son compte tontine`) : {};
-                return res.status(200).send({ error: false, message: "Cotisation éffectée", data: contribution! });
+                return res.status(200).send({ error: false, message: "Cotisation éffectée", data: contribution });
             } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: contribution! }); }
         } else {
             if (result.isSheetFull) {

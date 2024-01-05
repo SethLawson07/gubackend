@@ -179,10 +179,12 @@ export async function sheet_to_open(user: User) {
     const findLastClosedSheet = book.data.sheets.findLast((st) => st.status === "closed");
     if (!findLastClosedSheet) {
         sheetToOpen = book.data.sheets[0];
-    } else sheetToOpen = book.data.sheets[findLastClosedSheet.index + 1];
-    if (findLastClosedSheet?.index == 11) {
-        await prisma.book.update({ where: { id: book.data.id }, data: { status: "closed" } });
-        return { error: false, message: "Fin de feuille", book: false }
+    } else {
+        if (findLastClosedSheet.index == 11) {
+            await prisma.book.update({ where: { id: book.data.id }, data: { status: "closed" } });
+            return { error: false, message: "Fin de feuille", book: false }
+        }
+        sheetToOpen = book.data.sheets[findLastClosedSheet.index + 1];
     }
     return { error: false, message: "ok", data: sheetToOpen, book: true };
 }
@@ -250,8 +252,7 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
     if (emptycase.index + nbCases > 31) return { error: true, message: `Il ne reste plus que ${31 - emptycase.index} case(s)` };
     let cases = [];
     for (let i = 0; i < nbCases; i++) {
-        sheet.cases[i + emptycase.index].contributionStatus = status;
-        cases.push((emptycase.index + i));
+        sheet.cases[i + emptycase.index].contributionStatus = status; cases.push((emptycase.index + i));
     };
     updated_sheets[sheetIndex] = sheet;
     return { error, message, updated_sheets, cases, sheet, sheetId: sheet.id };
