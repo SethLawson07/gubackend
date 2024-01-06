@@ -84,7 +84,7 @@ export async function create_book(req: Request, res: Response) {
         });
         const sheets = create_sheets(created_book, validation_result.data.bet, validation_result.data.createdAt);
         if (sheets) created_book = await prisma.book.update({ where: { id: created_book.id }, data: { sheets: sheets }, });
-        await agenda.schedule('in 372 days', 'closebook', { created_book });
+        await agenda.schedule('in 1 years, 7 days', 'closebook', { created_book });
         await agenda.start();
         return res.status(201).send({ status: 201, error: false, message: 'Le carnet a été créé', data: created_book })
     } catch (err) {
@@ -125,7 +125,7 @@ export async function addBook(req: Request, res: Response) {
                 await prisma.account.update({ where: { id: agentaccount.id }, data: { amount: agentaccount.amount + 50 } });
             }
         }
-        await agenda.schedule('in 372 days', 'closebook', { created_book: addedbook });
+        await agenda.schedule('in 1 years, 7 days', 'closebook', { created_book: addedbook });
         await agenda.start();
         return res.status(201).send({ status: 201, error: false, message: 'Le carnet a été créé', data: addedbook });
     } catch (err) {
