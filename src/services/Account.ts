@@ -385,14 +385,7 @@ export async function contribute(req: Request, res: Response) {
             } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: contribution! }); }
         } else {
             if (result.isSheetFull) {
-                const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: result.sheetId, status: "awaiting" } });
-                console.log(awaitingContributions);
-                if (awaitingContributions.length > 0) {
-                    return res.status(400).send({ error: true, message: "Feuille remplie. Cotisations en cours de validation." });
-                } else {
-                    await forceclosesheet(user);
-                    return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, });
-                }
+                await forceclosesheet(user); return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, });
             };
             if (result.isBookFull) { await forceclosebook(user); return res.status(200).send({ error: result.error, message: result.message, data: { isBookFull: true }, }); };
             return res.status(200).send({ error: result.error, message: result.message, data: {} });
