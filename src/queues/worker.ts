@@ -42,10 +42,15 @@ const mMoneyContributionWorkerHandler = async (job: Job) => {
     const jobdata = job.data;
     const { customer, amount, result, book, report } = jobdata;
 
-    const targeted_acount = await prisma.account.findFirst({ where: { user: customer } });
-    let balance = (targeted_acount?.amount! + amount);
-    if (result.cases!.includes(1)) { await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: (balance - result.sheet?.bet!) } }); }
-    else { await prisma.account.update({ where: { id: targeted_acount?.id! }, data: { amount: balance } }); }
+    const user_acount = await prisma.account.findFirst({ where: { user: customer } });
+    if (!user_acount) return false;
+    let balance = (user_acount?.amount! + amount);
+    if (result.cases.includes(1)) {
+        prisma.account.update({ where: { id: user_acount?.id! }, data: { amount: (balance - result.sheet.bet!) } });
+    }
+    else {
+        await prisma.account.update({ where: { id: user_acount.id }, data: { amount: balance } });
+    }
     await prisma.book.update({ where: { id: book.data.id }, data: { sheets: result.updated_sheets! } });
     await prisma.report.update({ where: { id: report.id }, data: { status: "paid" } });
 }
