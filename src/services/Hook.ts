@@ -193,7 +193,7 @@ export async function addbook_event(req: Request, res: Response) {
             const user = await prisma.user.findUnique({ where: { id: data.customer } });
             if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
             const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: user.id } });
-            if (bookIsOpened) return res.status(400).send({ error: true, message: "Création de carnet impossible", data: {} });
+            if (bookIsOpened) return res.status(400).send({ error: true, message: "Impossible de créer le carnet", data: {} });
             const [created_book, report_bet] = await prisma.$transaction([
                 prisma.book.create({ data: { bookNumber: "", createdAt: todateTime(data.createdAt), userId: user.id, status: "opened", sheets: [] } }),
                 prisma.betReport.create({ data: { goodnessbalance: 300, agentbalance: 0, createdat: todateTime(data.createdAt), agentId: user.agentId, customerId: user.id, type: "book" } }),

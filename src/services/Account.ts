@@ -80,7 +80,7 @@ export async function create_book(req: Request, res: Response) {
         const user = await prisma.user.findUnique({ where: { id: b_data.customer } });
         if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
         const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: user.id } });
-        if (bookIsOpened) return res.status(400).send({ error: true, message: "Création de carnet impossible", data: {} });
+        if (bookIsOpened) return res.status(400).send({ error: true, message: "Impossible de créer le carnet", data: {} });
         const [created_book, report_bet] = await prisma.$transaction([
             prisma.book.create({ data: { bookNumber: b_data.b_number, createdAt: new Date(b_data.createdAt), userId: user.id, status: "opened", sheets: [] } }),
             prisma.betReport.create({ data: { goodnessbalance: 250, agentbalance: 50, createdat: b_data.createdAt, agentId: user.agentId, customerId: user.id, type: "book" } }),
@@ -110,7 +110,7 @@ export async function addBook(req: Request, res: Response) {
         let b_data = validation_result.data;
         const { user } = req.body.user as { user: User };
         const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: validation_result.data.customer } });
-        if (bookIsOpened) return res.status(400).send({ error: true, message: "Création de carnet impossible", data: {} });
+        if (bookIsOpened) return res.status(400).send({ error: true, message: "Impossible de créer le carnet", data: {} });
         const customer = await prisma.user.findUnique({ where: { id: b_data.customer } });
         if (!customer) return res.status(404).send({ error: true, message: "User not found", data: {} });
         const account = await prisma.account.findFirst({ where: { user: customer.id } });
@@ -385,7 +385,7 @@ export async function contribute(req: Request, res: Response) {
             } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: contribution! }); }
         } else {
             if (result.isSheetFull) {
-                const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: result.sheetId, status: { in: ["awaiting"] } } });
+                const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: result.sheetId, status: "awaiting" } });
                 if (awaitingContributions.length > 0) return res.status(200).send({ error: true, message: "Feuille remplie, Cotisations en cours de validation", data: {}, });
                 await forceclosesheet(user); return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, });
             };
