@@ -444,7 +444,7 @@ export async function reject_contribution(req: Request, res: Response) {
             let result = await sheet_reject(customer, targeted_contribution.cases);
             if (!result.error) {
                 await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: "rejected" } });
-                await prisma.report.update({ where: { id: targeted_contribution.reportId }, data: { status: "rejected", agentId: customer.agentId } });
+                await prisma.report.update({ where: { id: targeted_contribution.reportId }, data: { status: "unpaid", agentId: customer.agentId } });
                 await prisma.book.update({ where: { id: book.data.id }, data: { sheets: result.updated_sheets } });
                 if (customer.device_token) { await sendPushNotification(customer.device_token, "Cotisation", `Votre cotisation a été rejetée`); };
                 return res.status(200).send({ error: false, message: "Cotisation rejetée", data: {} });
@@ -684,8 +684,8 @@ export const userActivity = async (req: Request, res: Response) => {
         const user = await prisma.user.findUnique({ where: { id: vdata.userId } });
         if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
         const data = await prisma.report.findMany({
-            where: user.role == "customer" ? { customerId: user.id, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }
-                : { agentId: user.id, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true }
+            where: user.role == "customer" ? { status: { in: ["unpaid", "paid"] }, customerId: user.id, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }
+                : { status: { in: ["unpaid", "paid"] }, agentId: user.id, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true }
         });
         return res.status(200).send({ error: false, data, message: "ok" });
     } catch (err) {
