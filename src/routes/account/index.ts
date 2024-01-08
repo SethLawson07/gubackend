@@ -41,7 +41,7 @@ router.route("/reject/:id").post(Auth, UserIsAgentOrAdmin, reject_contribution);
 // Get Contributions  | admin or Agent
 router.route("/contribution").get(Auth, UserIsAgentCustomerOrAdmin, user_contributions);
 
-router.route("/contribution/agent").get(Auth, UserIsAgent, contributions_agent);
+router.route("/contribution/agent").post(Auth, UserIsAgent, contributions_agent);
 
 router.route("/user/contributions/:userid").get(Auth, userContributions);
 
