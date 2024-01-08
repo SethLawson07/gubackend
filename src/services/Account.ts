@@ -717,21 +717,21 @@ export const totalBetReport = async (req: Request, res: Response) => {
         const reportData = await prisma.betReport.findMany({ where: { createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true } });
         const goodnessAggregate = await prisma.betReport.groupBy({ by: ["type"], _sum: { goodnessbalance: true }, where: { createdat: { gte: vdata.startDate, lte: vdata.endDate, } } });
         const commercialAggregate = await prisma.betReport.groupBy({ by: ["type"], _sum: { agentbalance: true }, where: { createdat: { gte: vdata.startDate, lte: vdata.endDate, } } });
-        const commAggregatedData = commercialAggregate.reduce<{ [key: string]: number; total: number }>((result, item) => {
-            const type = item.type;
+        const commAggregatedData = commercialAggregate.reduce<{ [key: string]: number; totalagent: number }>((result, item) => {
+            const type = item.type + "agent";
             const amount = item._sum.agentbalance ?? 0.0;
             result[type] = (result[type] || 0) + amount;
-            result.total = (result.total || 0) + amount;
+            result.totalagent = (result.totalagent || 0) + amount;
             return result;
-        }, { total: 0 });
+        }, { totalagent: 0 });
 
-        const goodAggregatedData = goodnessAggregate.reduce<{ [key: string]: number; total: number }>((result, item) => {
-            const type = item.type;
+        const goodAggregatedData = goodnessAggregate.reduce<{ [key: string]: number; totalgood: number }>((result, item) => {
+            const type = item.type + "good";
             const amount = item._sum.goodnessbalance ?? 0.0;
             result[type] = (result[type] || 0) + amount;
-            result.total = (result.total || 0) + amount;
+            result.totalgood = (result.totalgood || 0) + amount;
             return result;
-        }, { total: 0 });
+        }, { totalgood: 0 });
 
         const data = { reports: reportData, ...commAggregatedData, ...goodAggregatedData };
 
