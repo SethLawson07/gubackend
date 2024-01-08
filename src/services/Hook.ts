@@ -134,11 +134,11 @@ export async function contribution_event(req: Request, res: Response) {
         if (validation_result.data.cpm_error_message === "SUCCES") {
             const targetedUser = await prisma.user.findUnique({ where: { id: data.customer } });
             if (!targetedUser) return res.status(404).send({ error: true, message: "User not found", data: {} });
-            const userAgent = await prisma.user.findUnique({ where: { id: targetedUser.agentId! } });
             const book = await opened_book(targetedUser);
             if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
             let result = await sheet_contribute(data.customer, data.amount, data.p_method);
             const userAccount = await prisma.account.findFirst({ where: { user: data.customer } });
+            if (!userAccount) return res.status(404).send({ error: true, message: "User account not found", data: {} });
             let contribution: Contribution; // CreatedContribution
             if (!result.error) {
                 const report = await prisma.report.create({
@@ -149,7 +149,7 @@ export async function contribution_event(req: Request, res: Response) {
                     data: { account: userAccount?.id!, createdAt: todateTime(data.createdAt), userId: targetedUser?.id!, pmethod: data.p_method, awaiting: "none", status: "paid", amount: data.amount, cases: result.cases!, sheet: result.sheet!.id, reportId: report.id, },
                 });
                 if (contribution) {
-                    await mMoneyContributionJobQueue.add("mMoneyContribution", { data, result, book, report });
+                    await mMoneyContributionJobQueue.add("mMoneyContribution", { customer: data.customer, amount: data.amount, result, book, report });
                     return res.status(200).send({ error: false, message: "Cotisation éffectée", data: contribution! });
                 } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: {} }); }
             } else {
