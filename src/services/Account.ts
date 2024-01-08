@@ -507,6 +507,17 @@ export async function user_contributions(req: Request, res: Response) {
     return res.status(200).send({ error: false, message: "Requête aboutie", data: contributions! })
 }
 
+// Liste des cotisations utilisateurs
+export async function contributions_agent(req: Request, res: Response) {
+    const schema = z.object({ type: z.string().default("all") });
+    const validation = schema.safeParse(req.body);
+    if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+    const data = validation.data;
+    const { user } = req.body.user as { user: User };
+    const contributions = await prisma.contribution.findMany({ where: { agent: user.id, status: data.type == "all" ? { in: ["paid", "unpaid", "awaiting", "rejected"] } : data.type }, include: { customer: true } });
+    return res.status(200).send({ error: false, message: "Requête aboutie", data: contributions })
+}
+
 // Trouver une cotisation
 export async function target_contribution(req: Request, res: Response) {
     const contribution = req.params.id;
