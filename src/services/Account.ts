@@ -77,13 +77,13 @@ export async function create_book(req: Request, res: Response) {
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
         let b_data = validation_result.data;
-        const user = await prisma.user.findUnique({ where: { id: b_data.customer } });
-        if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
-        const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: user.id } });
+        const tUser = await prisma.user.findUnique({ where: { id: b_data.customer } });
+        if (!tUser) return res.status(404).send({ error: true, message: "User not found", data: {} });
+        const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: tUser.id } });
         if (bookIsOpened) return res.status(400).send({ error: true, message: "Impossible de créer le carnet", data: {} });
         const [created_book, report_bet] = await prisma.$transaction([
-            prisma.book.create({ data: { bookNumber: b_data.b_number, createdAt: new Date(b_data.createdAt), userId: user.id, status: "opened", sheets: [] } }),
-            prisma.betReport.create({ data: { goodnessbalance: 250, agentbalance: 50, createdat: b_data.createdAt, agentId: user.agentId, customerId: user.id, type: "book" } }),
+            prisma.book.create({ data: { bookNumber: b_data.b_number, createdAt: new Date(b_data.createdAt), userId: tUser.id, status: "opened", sheets: [] } }),
+            prisma.betReport.create({ data: { goodnessbalance: 250, agentbalance: 50, createdat: b_data.createdAt, agentId: tUser.agentId, customerId: tUser.id, type: "book" } }),
         ]);
         if (!create_book || !report_bet) return res.status(400).send({ error: true, message: "Erreur interne", data: {} });
         const sheets = create_sheets(created_book, validation_result.data.bet, validation_result.data.createdAt);
@@ -124,11 +124,11 @@ export async function addBook(req: Request, res: Response) {
         const sheets = create_sheets(addedbook, 300, validation_result.data.createdAt);
         if (sheets) {
             await prisma.book.update({ where: { id: addedbook.id }, data: { sheets: sheets }, });
-            if (user.role == "agent") {
-                const agentaccount = await prisma.account.findFirst({ where: { user: user.id } });
-                if (!agentaccount) return res.status(404).send({ error: true, message: "Agent account not found", data: {} });
-                await prisma.account.update({ where: { id: agentaccount.id }, data: { amount: agentaccount.amount + 50 } });
-            }
+            // if (user.role == "agent") {
+            //     const agentaccount = await prisma.account.findFirst({ where: { user: user.id } });
+            //     if (!agentaccount) return res.status(404).send({ error: true, message: "Agent account not found", data: {} });
+            //     await prisma.account.update({ where: { id: agentaccount.id }, data: { amount: agentaccount.amount + 50 } });
+            // }
         }
         await agenda.schedule('in 1 years, 7 days', 'closebook', { created_book: addedbook });
         await agenda.start();
