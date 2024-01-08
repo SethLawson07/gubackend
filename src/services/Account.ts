@@ -444,6 +444,7 @@ export async function reject_contribution(req: Request, res: Response) {
             let result = await sheet_reject(customer, targeted_contribution.cases);
             if (!result.error) {
                 await prisma.contribution.update({ where: { id: contribution }, data: { awaiting: user.role == "agent" ? "admin" : "none", status: "rejected" } });
+                await prisma.report.update({ where: { id: targeted_contribution.reportId }, data: { status: "rejected", agentId: customer.agentId } });
                 await prisma.book.update({ where: { id: book.data.id }, data: { sheets: result.updated_sheets } });
                 if (customer.device_token) { await sendPushNotification(customer.device_token, "Cotisation", `Votre cotisation a été rejetée`); };
                 return res.status(200).send({ error: false, message: "Cotisation rejetée", data: {} });
