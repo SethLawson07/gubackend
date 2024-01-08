@@ -697,7 +697,7 @@ export const userLastActivities = async (req: Request, res: Response) => {
     try {
         const { user } = req.body.user as { user: User };
         const data = await prisma.report.findMany({
-            where: user.role == "customer" ? { customerId: user.id, } : { agentId: user.id }, include: { agent: true, customer: true }, take: 3
+            where: user.role == "customer" ? { customerId: user.id, status: { in: ["paid", "unpaid"] } } : { agentId: user.id, status: { in: ["paid", "unpaid"] } }, include: { agent: true, customer: true }, take: 3
         });
         return res.status(200).send({ error: false, data, message: "ok" });
     } catch (err) {
