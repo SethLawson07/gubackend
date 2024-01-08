@@ -194,14 +194,17 @@ export async function addbook_event(req: Request, res: Response) {
             if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
             const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: user.id } });
             if (bookIsOpened) return res.status(400).send({ error: true, message: "Création de carnet impossible", data: {} });
-            const created_book = await prisma.book.create({ data: { bookNumber: "", createdAt: todateTime(data.createdAt), userId: user.id, status: "opened", sheets: [] } });
-            if (!created_book) return res.status(400).send({ error: true, message: "Cound not create", data: {} });
+            const [created_book, report_bet] = await prisma.$transaction([
+                prisma.book.create({ data: { bookNumber: "", createdAt: todateTime(data.createdAt), userId: user.id, status: "opened", sheets: [] } }),
+                prisma.betReport.create({ data: { goodnessbalance: 300, agentbalance: 0, createdat: todateTime(data.createdAt), agentId: user.agentId, customerId: user.id, type: "book" } }),
+            ]);
+            if (!created_book || !report_bet) return res.status(400).send({ error: true, message: "Cound not create", data: {} });
             const sheets = create_sheets(created_book, 300, data.createdAt);
             if (sheets) await prisma.book.update({ where: { id: created_book.id }, data: { sheets: sheets }, });
-            await agenda.schedule('in 372 days', 'closebook', { created_book });
+            await agenda.schedule('in 1 years, 7 days', 'closebook', { created_book });
             await agenda.start();
         }
-        console.log(`A payment failed`)
+        console.log(`A payment failed`);
     } catch (err) {
         console.error(`Error while handling payment event ${err}`)
         return res.status(500).send()

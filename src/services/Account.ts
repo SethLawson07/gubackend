@@ -77,13 +77,17 @@ export async function create_book(req: Request, res: Response) {
         const validation_result = schema.safeParse(req.body);
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
         let b_data = validation_result.data;
-        const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: validation_result.data.customer } });
-        if (bookIsOpened) return res.status(400).send({ error: true, message: "Création de carnet impossible", data: {} })
-        let created_book = await prisma.book.create({
-            data: { bookNumber: b_data.b_number, createdAt: new Date(b_data.createdAt), userId: b_data.customer, status: "opened", sheets: [] }
-        });
+        const user = await prisma.user.findUnique({ where: { id: b_data.customer } });
+        if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
+        const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: user.id } });
+        if (bookIsOpened) return res.status(400).send({ error: true, message: "Création de carnet impossible", data: {} });
+        const [created_book, report_bet] = await prisma.$transaction([
+            prisma.book.create({ data: { bookNumber: b_data.b_number, createdAt: new Date(b_data.createdAt), userId: user.id, status: "opened", sheets: [] } }),
+            prisma.betReport.create({ data: { goodnessbalance: 250, agentbalance: 50, createdat: b_data.createdAt, agentId: user.agentId, customerId: user.id, type: "book" } }),
+        ]);
+        if (!create_book || !report_bet) return res.status(400).send({ error: true, message: "Erreur interne", data: {} });
         const sheets = create_sheets(created_book, validation_result.data.bet, validation_result.data.createdAt);
-        if (sheets) created_book = await prisma.book.update({ where: { id: created_book.id }, data: { sheets: sheets }, });
+        if (sheets) await prisma.book.update({ where: { id: created_book.id }, data: { sheets: sheets }, });
         await agenda.schedule('in 1 years, 7 days', 'closebook', { created_book });
         await agenda.start();
         return res.status(201).send({ status: 201, error: false, message: 'Le carnet a été créé', data: created_book })
@@ -115,6 +119,7 @@ export async function addBook(req: Request, res: Response) {
         const [addedbook, debit] = await prisma.$transaction([
             prisma.book.create({ data: { bookNumber: "", createdAt: new Date(b_data.createdAt), userId: customer.id, status: "opened", sheets: [] } }),
             prisma.account.update({ where: { id: account.id }, data: { amount: account.amount - 300 } }),
+            prisma.betReport.create({ data: { goodnessbalance: 250, agentbalance: 50, createdat: b_data.createdAt, agentId: customer.agentId, customerId: customer.id, type: "book" } }),
         ]);
         const sheets = create_sheets(addedbook, 300, validation_result.data.createdAt);
         if (sheets) {
@@ -380,8 +385,8 @@ export async function contribute(req: Request, res: Response) {
             } else { return res.status(401).send({ error: true, message: "Une erreur s'est produite réessayer", data: contribution! }); }
         } else {
             if (result.isSheetFull) {
-                const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: result.sheetId, status: { in: ["awaiting", "rejected"] } } });
-                if (awaitingContributions.length > 0) return res.status(200).send({ error: true, message: "Feuille remplie", data: {}, });
+                const awaitingContributions = await prisma.contribution.findMany({ where: { sheet: result.sheetId, status: { in: ["awaiting"] } } });
+                if (awaitingContributions.length > 0) return res.status(200).send({ error: true, message: "Feuille remplie, Cotisations en cours de validation", data: {}, });
                 await forceclosesheet(user); return res.status(200).send({ error: result.error, message: result.message, data: { isSheetFull: true }, });
             };
             if (result.isBookFull) { await forceclosebook(user); return res.status(200).send({ error: result.error, message: result.message, data: { isBookFull: true }, }); };

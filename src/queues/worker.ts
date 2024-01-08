@@ -15,19 +15,22 @@ const validateContributionWorkerHandler = async (job: Job) => {
     const { customer, targeted_contribution, user, result, schemadata, validated, book } = jobdata;
 
     const user_acount = await prisma.account.findFirst({ where: { user: customer?.id! } });
-    let amount = (user_acount?.amount! + targeted_contribution.amount);
+    let balance = (user_acount?.amount! + targeted_contribution.amount);
     if (user.role == "admin") {
         if (result.cases.includes(1)) {
-            const agent_acount = await prisma.account.findFirst({ where: { user: customer?.agentId! } });
-            const agent_benefit = (result.sheet.bet! * 20) / 100;
-            const goodness_benefit = result.sheet.bet! - agent_benefit;
-            const [uaUpdate, aaUpdate] = await prisma.$transaction([
-                prisma.account.update({ where: { id: user_acount?.id! }, data: { amount: (amount - result.sheet.bet!) } }),
-                prisma.account.update({ where: { id: agent_acount?.id! }, data: { amount: agent_acount?.amount! + agent_benefit } }),
+            const agent_benefit = result.sheet.bet! * 0.2;
+            const [uaUpdate, report_bet] = await prisma.$transaction([
+                prisma.account.update({ where: { id: user_acount?.id! }, data: { amount: (balance - result.sheet.bet!) } }),
+                prisma.betReport.create({
+                    data: {
+                        goodnessbalance: result.sheet.bet! - agent_benefit, agentbalance: agent_benefit, createdat: schemadata.validatedat,
+                        agentId: customer.agentId, customerId: customer.id, type: "bet"
+                    }
+                }),
             ]);
-            if (uaUpdate && aaUpdate) await prisma.betForReport.create({ data: { gooAmount: goodness_benefit, AgeAmount: agent_benefit, createdat: todateTime(schemadata.validatedat), agentId: customer?.agentId!, customerId: customer?.id!, } });
+            if (!uaUpdate || !report_bet) return false;
         }
-        else { await prisma.account.update({ where: { id: user_acount?.id! }, data: { amount: amount } }); }
+        else { await prisma.account.update({ where: { id: user_acount?.id! }, data: { amount: balance } }); }
     }
     await prisma.book.update({ where: { id: book.data.id }, data: { sheets: result.updated_sheets! } });
     await prisma.report.update({ where: { id: validated.reportId }, data: { agentId: customer.agentId, status: validated.status, } });
