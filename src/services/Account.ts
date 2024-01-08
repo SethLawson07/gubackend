@@ -698,8 +698,7 @@ export const userLastActivities = async (req: Request, res: Response) => {
     try {
         const { user } = req.body.user as { user: User };
         const data = await prisma.report.findMany({
-            where: user.role == "customer" ? { customerId: user.id, } : { agentId: user.id }, include: { agent: true, customer: true },
-            take: 3
+            where: user.role == "customer" ? { customerId: user.id, } : { agentId: user.id }, include: { agent: true, customer: true }, take: 3
         });
         return res.status(200).send({ error: false, data, message: "ok" });
     } catch (err) {
@@ -707,8 +706,39 @@ export const userLastActivities = async (req: Request, res: Response) => {
     }
 }
 
-export async function check(req: Request, res: Response) {
-    const data = await prisma.book.findFirst({ where: { status: "opened", userId: "65901d12afb1fd43947f2838" } });
+export const totalBetReport = async (req: Request, res: Response) => {
+    try {
+        const schema = z.object({
+            startDate: z.coerce.date(), endDate: z.coerce.date(),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const vdata = validation.data;
+        const reportData = await prisma.betReport.findMany({ where: { createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true } });
+        const goodnessAggregate = await prisma.betReport.groupBy({ by: ["type"], _sum: { goodnessbalance: true }, where: { createdat: { gte: vdata.startDate, lte: vdata.endDate, } } });
+        const commercialAggregate = await prisma.betReport.groupBy({ by: ["type"], _sum: { agentbalance: true }, where: { createdat: { gte: vdata.startDate, lte: vdata.endDate, } } });
+        const commAggregatedData = commercialAggregate.reduce<{ [key: string]: number; total: number }>((result, item) => {
+            const type = item.type;
+            const amount = item._sum.agentbalance ?? 0.0;
+            result[type] = (result[type] || 0) + amount;
+            result.total = (result.total || 0) + amount;
+            return result;
+        }, { total: 0 });
 
-    return res.status(200).send({ data });
+        const goodAggregatedData = goodnessAggregate.reduce<{ [key: string]: number; total: number }>((result, item) => {
+            const type = item.type;
+            const amount = item._sum.goodnessbalance ?? 0.0;
+            result[type] = (result[type] || 0) + amount;
+            result.total = (result.total || 0) + amount;
+            return result;
+        }, { total: 0 });
+
+        const data = { reports: reportData, ...commAggregatedData, ...goodAggregatedData };
+
+        return res.status(200).send({ error: false, data, message: "ok" });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
+    }
 }
+
