@@ -742,3 +742,30 @@ export const totalBetReport = async (req: Request, res: Response) => {
     }
 }
 
+export const agentBalance = async (req: Request, res: Response) => {
+    try {
+        const schema = z.object({ startDate: z.coerce.date(), endDate: z.coerce.date(), agentId: z.string() });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const data = validation.data;
+        const balance = await prisma.betReport.aggregate({ where: { agentId: data.agentId, createdat: { gte: data.startDate, lte: data.endDate, } }, _sum: { agentbalance: true }, });
+        return res.status(200).send({ error: false, data: balance._sum.agentbalance ?? 0, message: "ok" });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
+    }
+}
+
+export const agentBalanceHistory = async (req: Request, res: Response) => {
+    try {
+        const schema = z.object({ startDate: z.coerce.date(), endDate: z.coerce.date(), agentId: z.string() });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const data = validation.data;
+        const balance = await prisma.betReport.aggregate({ where: { agentId: data.agentId, createdat: { gte: data.startDate, lte: data.endDate, } }, _sum: { agentbalance: true }, });
+        return res.status(200).send({ error: false, data: balance._sum.agentbalance ?? 0, message: "ok" });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
+    }
+}
