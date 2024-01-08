@@ -247,7 +247,7 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
     var nbCases = amount / sheet.bet!;
     if (!utilisIsInt(nbCases)) return { error: true, message: "Montant saisie invalide", };
     const awCases = sheet.cases.filter((cse) => cse.contributionStatus == "awaiting");
-    if (awCases && awCases.length > 0) return { error: true, message: "Feuille remplie, Cotisations en cours de validation." }
+    if (emptycase.index == 31 && awCases.length > 0) return { error: true, message: "Feuille remplie, Cotisations en cours de validation." }
     if (sheet.index == 11 && emptycase.index == 31) return { error: true, message: "Le carnet est remplie", isBookFull: true };
     if (emptycase.index == 31) return { error: true, message: "La feuille est remplie", isSheetFull: true };
     if (emptycase.index + nbCases > 31) return { error: true, message: `Il ne reste plus que ${31 - emptycase.index} case(s)` };
