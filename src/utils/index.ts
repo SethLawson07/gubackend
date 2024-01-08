@@ -183,8 +183,7 @@ export async function sheet_to_open(user: User) {
         if (findLastClosedSheet.index == 11) {
             await prisma.book.update({ where: { id: book.data.id }, data: { status: "closed" } });
             return { error: false, message: "Fin de feuille", book: false }
-        }
-        sheetToOpen = book.data.sheets[findLastClosedSheet.index + 1];
+        } else { sheetToOpen = book.data.sheets[findLastClosedSheet.index + 1]; }
     }
     return { error: false, message: "ok", data: sheetToOpen, book: true };
 }
