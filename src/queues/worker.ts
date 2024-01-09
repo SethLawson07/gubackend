@@ -45,7 +45,8 @@ const mMoneyContributionWorkerHandler = async (job: Job) => {
     const user_acount = await prisma.account.findFirst({ where: { user: customer } });
     if (!user_acount) return false;
     let balance = (user_acount?.amount! + amount);
-    if (result.cases.includes(1)) {
+    const cases = (result.cases as number[]).map(chiffre => chiffre + 1);
+    if (cases.includes(1)) {
         prisma.account.update({ where: { id: user_acount?.id! }, data: { amount: (balance - result.sheet.bet!) } });
     }
     else {

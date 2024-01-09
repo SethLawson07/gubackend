@@ -324,7 +324,8 @@ export async function sheet_validate(user: User, cases: number[], status: string
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     if (status == "awaiting") { ; }
     else {
-        const reference = await sheet_case_reference(status, sheet); sheet = await sheet_cases_validate(status, reference, sheet, cases.length);
+        const reference = await sheet_case_reference(status, sheet); 
+        sheet = await sheet_cases_validate(status, reference, sheet, cases.length);
         // for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = status;
     }
     updated_sheets[sheetIndex] = sheet;
