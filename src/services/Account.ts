@@ -19,19 +19,13 @@ agenda.define('closebook', async (job: any) => {
 
 // Définition de la tâche
 agenda.define('closesheet', async (job: any) => {
-    const { user, date } = job.attrs.data as { user: User, date: any };
-    const book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
-    const sheets = book.data.sheets;
-    const sheetToClose = await sheet_to_close(user);
-    if (sheetToClose.error || sheetToClose.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
-    const sheet: Sheet = sheetToClose.data;
-    // const sheet: Sheet = (await sheet_to_close(user))!;
+    const { book, sheet } = job.attrs.data as { user: User, book: Book, sheet: Sheet };
+    const sheets = book.sheets;
     let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     sheet.status = "closed";
-    updated_sheets[sheetIndex] = sheet!;
-    await prisma.book.update({ where: { id: book.data.id }, data: { sheets: updated_sheets } });
+    updated_sheets[sheetIndex] = sheet;
+    await prisma.book.update({ where: { id: book.id }, data: { sheets: updated_sheets } });
 });
 
 // Créer un compte tontine ou depot utilisateur
@@ -124,11 +118,6 @@ export async function addBook(req: Request, res: Response) {
         const sheets = create_sheets(addedbook, 300, validation_result.data.createdAt);
         if (sheets) {
             await prisma.book.update({ where: { id: addedbook.id }, data: { sheets: sheets }, });
-            // if (user.role == "agent") {
-            //     const agentaccount = await prisma.account.findFirst({ where: { user: user.id } });
-            //     if (!agentaccount) return res.status(404).send({ error: true, message: "Agent account not found", data: {} });
-            //     await prisma.account.update({ where: { id: agentaccount.id }, data: { amount: agentaccount.amount + 50 } });
-            // }
         }
         await agenda.schedule('in 1 years, 7 days', 'closebook', { created_book: addedbook });
         await agenda.start();
@@ -242,7 +231,7 @@ export async function open_sheet(req: Request, res: Response) {
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
         if (sheets.error) return res.status(400).send({ error: true, message: sheets.message, data: {} });
         await prisma.book.update({ where: { id: book.data.id }, data: { sheets: sheets.updated_sheets } });
-        await agenda.schedule('in 31 days', 'closesheet', { user, date: validation_result.data.openedAt });
+        await agenda.schedule('in 31 days', 'closesheet', { book, sheet: sheets.sheet });
         await agenda.start();
         return res.status(200).send({ error: false, message: "Feuille ouverte", data: {} });
     } catch (e) {

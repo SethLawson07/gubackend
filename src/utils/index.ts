@@ -227,7 +227,7 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
         return { error: true, message: "Ouverture de feuille impossible", book: true, update_sheets: null, data: {} }
     }
     updated_sheets[sheetToOpenIndex] = sheet;
-    return { error, message, updated_sheets, book: true };
+    return { error, message, updated_sheets, book: true, sheet };
 }
 
 // Update sheet for contribution (Method: agent)
@@ -324,7 +324,7 @@ export async function sheet_validate(user: User, cases: number[], status: string
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
     if (status == "awaiting") { ; }
     else {
-        const reference = await sheet_case_reference(status, sheet); 
+        const reference = await sheet_case_reference(status, sheet);
         sheet = await sheet_cases_validate(status, reference, sheet, cases.length);
         // for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = status;
     }

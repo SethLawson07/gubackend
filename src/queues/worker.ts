@@ -9,7 +9,6 @@ const agentContributionWorkerHandler = async (job: Job) => {
     const { } = jobdata;
 }
 
-
 const validateContributionWorkerHandler = async (job: Job) => {
     const jobdata = job.data;
     const { customer, targeted_contribution, user, result, schemadata, validated, book } = jobdata;
