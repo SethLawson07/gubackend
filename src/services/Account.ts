@@ -7,6 +7,9 @@ import { store } from "../utils/store";
 import { prisma } from "../server";
 const Agenda = require('agenda');
 import { z } from "zod";
+import { MongoClient } from "mongodb";
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 
 export const agenda = new Agenda();
 agenda.database(process.env.DATABASE);
@@ -757,12 +760,31 @@ export const agentBalance = async (req: Request, res: Response) => {
 
 export const agentBalanceHistory = async (req: Request, res: Response) => {
     try {
-        const schema = z.object({ startDate: z.coerce.date(), endDate: z.coerce.date(), agentId: z.string() });
-        const validation = schema.safeParse(req.body);
-        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
-        const data = validation.data;
-        const balance = await prisma.betReport.aggregate({ where: { agentId: data.agentId, createdat: { gte: data.startDate, lte: data.endDate, } }, _sum: { agentbalance: true }, });
-        return res.status(200).send({ error: false, data: balance._sum.agentbalance ?? 0, message: "ok" });
+        const agentId = '64fb08833574157938d4cd70';
+        const data = await prisma.betReport.aggregateRaw({
+            pipeline: [
+                { $match: { 'agentId': { "$oid": `${agentId}` } } },
+                {
+                    $group: {
+                        _id: {
+                            month: { $month: '$createdat' }, // Extract the month from the createdAt field
+                            year: { $year: '$createdat' },   // Extract the year from the createdAt field
+                        },
+                        data: { $push: '$$ROOT' },  // Optionally, include the actual documents in the result
+                        count: { $sum: 1 },
+                    },
+                },
+                {
+                    $sort: {
+                        '_id.year': 1,
+                        '_id.month': 1,
+                    },
+                },
+            ],
+        });
+
+        return res.status(200).send({ data: data });
+
     } catch (err) {
         console.log(err);
         return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });

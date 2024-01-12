@@ -212,14 +212,14 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
     if (sheet) {
         if (sheetToOpenIndex == 0) {
             if (sheet.status == "opened") return { error: true, message: "Feuille actuelle non bloquée", book: true, update_sheets: null, data: {} };
-            sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet;
+            sheet.status = "opened"; sheet.openedAt = new Date(openedat); sheet.bet = bet;
         } else {
             switch (sheets[sheetToOpenIndex - 1].status) {
                 case "notopened": return { error: true, message: "Feuille actuelle non ouverte | Erreur fatale", book: true, update_sheets: null, data: {} };
                 case "opened": return { error: true, message: "Feuille actuelle non bloquée", book: true, update_sheets: null, data: {} };
-                case "closed": if (sheetToOpenIndex == 11) {
+                case "closed": if (sheetToOpenIndex > 11) {
                     return { error: true, message: "Vous êtes sur la dernière feuille", book: true, update_sheets: null, data: {} };
-                } else { sheet.status = "opened"; sheet.openedAt = new Date(openedat!); sheet.bet = bet; }
+                } else { sheet.status = "opened"; sheet.openedAt = new Date(openedat); sheet.bet = bet; }
                 default: break;
             }
         }
