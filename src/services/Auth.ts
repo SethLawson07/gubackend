@@ -62,11 +62,11 @@ export async function adduser(req: Request, res: Response) {
         const validation_result = user_schema_partial.safeParse(req.body)
         if (!validation_result.success) {
             console.log(fromZodError(validation_result.error));
-            return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true })
+            return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true });
         }
         let user_data = { ...validation_result.data, is_admin: false }
         const hashed_password = hash_pwd(user_data.password)
-        user_data.password = hashed_password
+        user_data.password = hashed_password;
         const potential_duplicate = await prisma.user.findMany({
             where: { OR: [{ email: user_data.email }, { phone: user_data.phone }] }
         });
@@ -183,17 +183,10 @@ export async function login(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message, data: {} })
         const login_data = validation_result.data
         const targetted_users = await prisma.user.findMany({
-            where: {
-                OR: [
-                    { email: login_data.email_or_phone, },
-                    { phone: login_data.email_or_phone }
-                ]
-            }
+            where: { OR: [{ email: login_data.email_or_phone, }, { phone: login_data.email_or_phone }] }
         });
         if (!targetted_users.length || targetted_users.length > 1 || !password_is_valid(login_data.password, targetted_users[0].password)) return res.status(404).send({ status: 404, error: true, message: "Identifiants incorrects", data: {} })
         let targetted_user = targetted_users[0]
-
-
         if (!password_is_valid(login_data.password, targetted_user.password)) return res.status(400).send({ status: 400, error: true, message: "Mot de passe incorrect", data: {} })
         let { password, finance_pro_id, is_verified, ...user_data } = targetted_user;
         const token = sign_token({ ...user_data });
@@ -212,7 +205,6 @@ export async function logout(req: Request, res: Response) {
         if (!targettedUser) return res.status(404).send({ error: true, message: "User not found" });
         let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: "" } });
         return res.status(200).send({ data: updatedUser, error: false, status: 200 });
-        // return res.status(200).send({ error: false, message: "Device token supprimé", data: updatedUser });
     } catch (err) {
         throw err
     }
@@ -250,15 +242,9 @@ export async function create_admin(req: Request, res: Response) {
         const validation_result = data_schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message })
         const admin_data = { ...validation_result.data, password: hash_pwd(validation_result.data.password), role: 'admin', is_admin: true }
-        const potential_duplicate = await prisma.user.findUnique({
-            where: {
-                email: admin_data.email
-            }
-        })
+        const potential_duplicate = await prisma.user.findUnique({ where: { email: admin_data.email } });
         if (potential_duplicate) return res.status(409).send({ status: 409, error: true, message: "Email deja en cours d'utilisation" })
-        await prisma.user.create({
-            data: admin_data
-        })
+        await prisma.user.create({ data: admin_data });
         return res.status(201).send({ status: 201, error: false, message: "Nouveau compte admin crée" })
     } catch (err) {
         console.error(`Error while creating admin ${err}`)
@@ -269,11 +255,7 @@ export async function create_admin(req: Request, res: Response) {
 export async function get_orders(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User }
-        const current_user = await prisma.user.findUnique({
-            where: {
-                email: user.email as string
-            }
-        })
+        const current_user = await prisma.user.findUnique({ where: { email: user.email as string } });
         if (!current_user) return res.status(401).send({ status: 401, error: true, message: 'pas autorisé' })
         const data = await prisma.order.findMany({ where: { user: current_user } })
         return res.status(200).send({ status: 200, error: false, data: { orders: data } })
