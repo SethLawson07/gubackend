@@ -113,13 +113,7 @@ export const create_sheets = (book: Book, bet: number, date: Date): Sheet[] => {
     return Array.from({ length: 12 }, (_, index) => {
         const sheetId = geneObjectId();
         const sheet = {
-            id: sheetId,
-            createdAt: date,
-            cases: create_cases(sheetId),
-            bet: bet,
-            book: book.id,
-            status: "notopened",
-            index: index,
+            id: sheetId, createdAt: date, cases: create_cases(sheetId), bet: bet, book: book.id, status: "notopened", index: index,
         } as Sheet;
         return sheet;
     }) as Sheet[];
@@ -128,10 +122,7 @@ export const create_sheets = (book: Book, bet: number, date: Date): Sheet[] => {
 export function create_cases(sheet: string): Case[] {
     return Array.from({ length: 31 }, (_, index) => {
         const _case = {
-            id: geneObjectId(),
-            contributionStatus: "unpaid",
-            sheet: sheet,
-            index: index,
+            id: geneObjectId(), contributionStatus: "unpaid", sheet: sheet, index: index,
         } as Case;
         return _case;
     }) as Case[];
@@ -223,9 +214,7 @@ export async function update_sheets(user: User, openedat: Date, bet: number) {
                 default: break;
             }
         }
-    } else {
-        return { error: true, message: "Ouverture de feuille impossible", book: true, update_sheets: null, data: {} }
-    }
+    } else { return { error: true, message: "Ouverture de feuille impossible", book: true, update_sheets: null, data: {} }; }
     updated_sheets[sheetToOpenIndex] = sheet;
     return { error, message, updated_sheets, book: true, sheet };
 }

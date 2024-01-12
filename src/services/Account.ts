@@ -46,13 +46,7 @@ export async function create_account(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
         let a_data = validation_result.data;
         const result = await prisma.account.create({
-            data: {
-                accountNumber: a_data.a_number,
-                type: a_data.a_type,
-                amount: a_data.amount,
-                createdAt: new Date(a_data.createdAt),
-                user: a_data.customer
-            }
+            data: { accountNumber: a_data.a_number, type: a_data.a_type, amount: a_data.amount, createdAt: new Date(a_data.createdAt), user: a_data.customer }
         });
         return res.status(201).send({ status: 201, error: false, message: 'Le compte a été créé', data: result });
     } catch (err) {
@@ -78,6 +72,7 @@ export async function create_book(req: Request, res: Response) {
         if (!tUser) return res.status(404).send({ error: true, message: "User not found", data: {} });
         const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: tUser.id } });
         if (bookIsOpened) return res.status(400).send({ error: true, message: "Impossible de créer le carnet", data: {} });
+        console.log(tUser.agentId);
         const [created_book, report_bet] = await prisma.$transaction([
             prisma.book.create({ data: { bookNumber: b_data.b_number, createdAt: new Date(b_data.createdAt), userId: tUser.id, status: "opened", sheets: [] } }),
             prisma.betReport.create({ data: { goodnessbalance: 250, agentbalance: 50, createdat: b_data.createdAt, agentId: tUser.agentId, customerId: tUser.id, type: "book" } }),
