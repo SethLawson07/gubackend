@@ -46,7 +46,7 @@ export async function create_account(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
         let a_data = validation_result.data;
         const result = await prisma.account.create({
-            data: { accountNumber: a_data.a_number, type: a_data.a_type, amount: a_data.amount, createdAt: new Date(a_data.createdAt), user: a_data.customer }
+            data: { number: a_data.a_number, type: a_data.a_type, balance: a_data.amount, createdAt: new Date(a_data.createdAt), userId: a_data.customer }
         });
         return res.status(201).send({ status: 201, error: false, message: 'Le compte a été créé', data: result });
     } catch (err) {
@@ -105,12 +105,12 @@ export async function addBook(req: Request, res: Response) {
         if (bookIsOpened) return res.status(400).send({ error: true, message: "Impossible de créer le carnet", data: {} });
         const customer = await prisma.user.findUnique({ where: { id: b_data.customer } });
         if (!customer) return res.status(404).send({ error: true, message: "User not found", data: {} });
-        const account = await prisma.account.findFirst({ where: { user: customer.id } });
+        const account = await prisma.account.findFirst({ where: { userId: customer.id } });
         if (!account) return res.status(404).send({ error: true, message: "User account not found", data: {} });
-        if (account.amount < 300) return res.status(403).send({ error: true, message: "Solde Goodpay inssufisant", data: {} });
+        if (account.balance < 300) return res.status(403).send({ error: true, message: "Solde Goodpay inssufisant", data: {} });
         const [addedbook, debit] = await prisma.$transaction([
             prisma.book.create({ data: { bookNumber: "", createdAt: new Date(b_data.createdAt), userId: customer.id, status: "opened", sheets: [] } }),
-            prisma.account.update({ where: { id: account.id }, data: { amount: account.amount - 300 } }),
+            prisma.account.update({ where: { id: account.id }, data: { balance: account.balance - 300 } }),
             prisma.betReport.create({ data: { goodnessbalance: 250, agentbalance: 50, createdat: b_data.createdAt, agentId: customer.agentId, customerId: customer.id, type: "book" } }),
         ]);
         const sheets = create_sheets(addedbook, 300, validation_result.data.createdAt);
@@ -176,7 +176,7 @@ export async function get_user_account(req: Request, res: Response) {
         const userid = req.params.id;
         const targetted_user = await prisma.user.findUnique({ where: { id: userid } });
         if (!targetted_user) return res.status(404).send({ error: true, message: "User not found", data: {} });
-        const targetted_account = await prisma.account.findFirst({ where: { user: targetted_user.id, type: "tontine" } });
+        const targetted_account = await prisma.account.findFirst({ where: { userId: targetted_user.id, type: "tontine" } });
         if (!targetted_account) return res.status(404).send({ error: true, message: "Account not found", data: {} });
         return res.status(200).send({ error: false, message: "Requête aboutie", data: targetted_account })
     } catch (err) {
@@ -337,11 +337,11 @@ export async function contribute(req: Request, res: Response) {
             const customer = await prisma.user.findUnique({ where: { id: data.customer } });
             if (!customer) return res.status(404).send({ error: true, status: 404, message: "Utilisateur non trouvé", data: {} });
             targetted_user = customer;
-            const customerAccount = await prisma.account.findFirst({ where: { user: customer.id } });
+            const customerAccount = await prisma.account.findFirst({ where: { userId: customer.id } });
             if (!customerAccount) return res.status(404).send({ error: true, status: 404, message: "Compte non trouvé", data: {} });
             targetted_account = customerAccount;
         } else {
-            targetted_account = (await prisma.account.findFirst({ where: { user: user.id } }))!;
+            targetted_account = (await prisma.account.findFirst({ where: { userId: user.id } }))!;
             targetted_user = user;
         }
         const userAgent = await prisma.user.findUnique({ where: { id: targetted_user.agentId! } });
@@ -532,17 +532,17 @@ export const makeDeposit = async (req: Request, res: Response) => {
             const findUser = await prisma.user.findUnique({ where: { id: validation.data.customer } });
             if (!findUser) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouvé", data: {} });
             targetted_user = findUser;
-            const findAccount = await prisma.account.findFirst({ where: { user: findUser.id } });
+            const findAccount = await prisma.account.findFirst({ where: { userId: findUser.id } });
             if (!findAccount) return res.status(404).send({ error: true, status: 404, message: "Compte non trouvé", data: {} });
             targetted_account = findAccount;
         } else {
-            targetted_account = (await prisma.account.findFirst({ where: { user: user.id } }))!; targetted_user = user;
+            targetted_account = (await prisma.account.findFirst({ where: { userId: user.id } }))!; targetted_user = user;
         }
         const report = await prisma.report.create({ data: { type: "deposit", amount: data.amount, createdat: data.createdAt, payment: data.p_method, status: "unpaid", agentId: targetted_user.agentId!, customerId: targetted_user.id, } });
         if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });
         const [deposit, aUpdate] = await prisma.$transaction([
             prisma.deposit.create({ data: { account: targetted_account.id, amount: validation.data.amount, createdAt: validation.data.createdAt, customer: targetted_user.id, madeby: "agent", payment: validation.data.p_method, reportId: report.id } }),
-            prisma.account.update({ where: { id: targetted_account.id }, data: { amount: targetted_account.amount + data.amount } }),
+            prisma.account.update({ where: { id: targetted_account.id }, data: { balance: targetted_account.balance + data.amount } }),
         ]);
         if (!aUpdate && !deposit) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
         await prisma.report.update({ where: { id: report.id }, data: { status: "paid" } });
@@ -583,7 +583,7 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
             const findUser = await prisma.user.findUnique({ where: { id: data.customer } });
             if (!findUser) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouvé", data: {} });
             targetted_user = findUser;
-            const findAccount = await prisma.account.findFirst({ where: { user: findUser.id } });
+            const findAccount = await prisma.account.findFirst({ where: { userId: findUser.id } });
             if (!findAccount) return res.status(404).send({ error: true, status: 404, message: "Compte non trouvé", data: {} });
             targetted_account = findAccount;
             const report = await prisma.report.create({
@@ -594,7 +594,7 @@ export async function makeMobileMoneyDeposit(req: Request, res: Response) {
                 prisma.deposit.create({
                     data: { account: targetted_account.id, amount: data.amount, createdAt: todateTime(new Date(data.createdAt)), customer: targetted_user.id, madeby: "agent", payment: operatorChecker(validation_result.data.cel_phone_num), reportId: report.id }
                 }),
-                prisma.account.update({ where: { id: targetted_account.id }, data: { amount: targetted_account.amount + data.amount } }),
+                prisma.account.update({ where: { id: targetted_account.id }, data: { balance: targetted_account.balance + data.amount } }),
             ]);
             if (!aUpdate && !deposit) return res.status(400).send({ status: 400, message: "Erreur, Dépôt non éffectué", data: {} });
             await prisma.report.update({ where: { id: report.id }, data: { status: "paid" } });
@@ -703,6 +703,7 @@ export const userLastActivities = async (req: Request, res: Response) => {
     }
 }
 
+// Commissions.
 export const totalBetReport = async (req: Request, res: Response) => {
     try {
         const schema = z.object({
@@ -739,6 +740,7 @@ export const totalBetReport = async (req: Request, res: Response) => {
     }
 }
 
+// Solde d'un agent
 export const agentBalance = async (req: Request, res: Response) => {
     try {
         const schema = z.object({ startDate: z.coerce.date(), endDate: z.coerce.date(), agentId: z.string() });
@@ -753,33 +755,29 @@ export const agentBalance = async (req: Request, res: Response) => {
     }
 }
 
+// Historique de gains d'un agent
 export const agentBalanceHistory = async (req: Request, res: Response) => {
     try {
         const agentId = '64fb08833574157938d4cd70';
         const data = await prisma.betReport.aggregateRaw({
             pipeline: [
                 { $match: { 'agentId': { "$oid": `${agentId}` } } },
-                {
-                    $group: {
-                        _id: {
-                            month: { $month: '$createdat' }, // Extract the month from the createdAt field
-                            year: { $year: '$createdat' },   // Extract the year from the createdAt field
-                        },
-                        data: { $push: '$$ROOT' },  // Optionally, include the actual documents in the result
-                        count: { $sum: 1 },
-                    },
-                },
-                {
-                    $sort: {
-                        '_id.year': 1,
-                        '_id.month': 1,
-                    },
-                },
+                { $group: { _id: { month: { $month: '$createdat' }, year: { $year: '$createdat' }, }, data: { $push: '$$ROOT' }, count: { $sum: 1 }, }, },
+                { $sort: { '_id.year': 1, '_id.month': 1, }, },
             ],
         });
-
         return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
+    }
+}
 
+// Solde clients
+export const allCustomersBalance = async (req: Request, res: Response) => {
+    try {
+        const data = await prisma.account.findMany({ include: { user: true } });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err);
         return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });

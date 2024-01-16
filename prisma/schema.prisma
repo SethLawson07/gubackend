@@ -36,6 +36,7 @@ model User {
     CBetReport      BetReport[]    @relation("BRCustomer")
     ABetReport      BetReport[]    @relation("BRAgent")
     Book            Book[]
+    Account         Account[]
 }
 
 model Category {
@@ -188,12 +189,13 @@ model Service {
 }
 
 model Account {
-    id            String   @id @default(auto()) @map("_id") @db.ObjectId
-    accountNumber String
-    type          String // saving, tontine
-    user          String
-    amount        Float
-    createdAt     DateTime
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    number    String
+    type      String // saving, tontine
+    user      User     @relation(fields: [userId], references: [id])
+    userId    String   @db.ObjectId()
+    balance   Float
+    createdAt DateTime
 }
 
 type Case {
