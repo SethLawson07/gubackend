@@ -75,8 +75,40 @@ export async function adduser(req: Request, res: Response) {
         const token = sign_token(user_data)
         return res.status(201).send({ status: 201, error: false, message: 'Utilisateur créé', data: { token: token, id: createdUser.id } });
     } catch (err) {
-        console.error(`Error while registering ${err}`)
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
+        console.error(`Error while registering ${err}`);
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+    }
+}
+
+// Update user
+export async function _update(req: Request, res: Response) {
+    try {
+        const user_schema = z.object({
+            user_name: z.string().min(5, "Veuillez indiquez un nom complet").nonempty("Veuillez renseigner votre nom complet"),
+            email: z.string().email("L'adresse email est invalide"),
+            phone: z.string().min(8, "Numéro de téléphone invalide").max(8, "Numéro de téléphone invalide").nonempty("Veuillez renseigner un numéro de téléphone"),
+            password: z.string().optional(),
+            id: z.string().nonempty(),
+            agent: z.string().optional(),
+        })
+        let user_schema_partial = user_schema.partial({ password: true });
+        const validation_result = user_schema_partial.safeParse(req.body);
+        if (!validation_result.success) {
+            console.log(fromZodError(validation_result.error));
+            return res.status(400).send({ status: 400, message: fromZodError(validation_result.error).details[0].message, error: true });
+        }
+        let user_data = { ...validation_result.data };
+        const updatedUser = await prisma.user.update({
+            data: user_data.password ? {
+                user_name: user_data.user_name, phone: user_data.phone, email: user_data.email, password: hash_pwd(user_data.password!), agentId: user_data.agent == "" ? null : user_data.agent
+            } : {
+                user_name: user_data.user_name, phone: user_data.phone, email: user_data.email, agentId: user_data.agent == "" ? null : user_data.agent
+            }, where: { id: user_data.id },
+        });
+        return res.status(201).send({ status: 201, error: false, message: 'Infos utilisateur modifiés', data: { id: updatedUser.id } });
+    } catch (err) {
+        console.error(`Error while registering ${err}`);
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
     }
 }
 
@@ -84,9 +116,7 @@ export async function updateuser(req: Request, res: Response) {
     try {
         const user_schema = z.object({
             user_name: z.string().min(5, "Veuillez indiquez un nom complet").nonempty("Veuillez renseigner votre nom complet"),
-            // email: z.string().email("L'adresse email est invalide"),
             phone: z.string(),
-            // password: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
             profile_picture: z.string(),
             role: z.string().default('customer')
         })
@@ -290,7 +320,12 @@ export async function get_customer(_req: Request, res: Response) {
 
 export async function get_customers(_req: Request, res: Response) {
     try {
-        const data = await prisma.user.findMany({ where: { role: "customer" } })
+        const schema = z.object({ status: z.string().default("activated") });
+        const validation = schema.safeParse(_req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const schemaData = validation.data;
+        const status = schemaData.status == "activated" ? true : false;
+        const data = await prisma.user.findMany({ where: { role: "customer", is_verified: status } });
         return res.status(200).send({ status: 200, error: false, data: { customers: data } })
     } catch (err) {
         console.log(`Error while getting list of customers ${err}`)
@@ -328,6 +363,23 @@ export async function get_agent_customers(req: Request, res: Response) {
             , include: { Book: { where: { status: "opened", sheets: { some: { status: "opened", } } } } }
         });
         return res.status(200).send({ status: 200, error: false, data: { customers: data } });
+    } catch (err) {
+        console.log(`Error while getting list of customers ${err}`);
+        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} });
+    }
+}
+
+export async function disable_user(req: Request, res: Response) {
+    try {
+        const schema = z.object({ userid: z.string() });
+        const validation = schema.safeParse(req.params);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const user = await prisma.user.findUnique({ where: { id: validation.data.userid } });
+        if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
+        const data = await prisma.user.update({
+            where: { id: user.id }, data: { is_verified: false, agentId: null }
+        });
+        return res.status(200).send({ status: 200, error: false, data });
     } catch (err) {
         console.log(`Error while getting list of customers ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} });

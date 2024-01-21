@@ -418,8 +418,12 @@ export async function userAgentContributions(user: User) {
 }
 
 // all
-export async function allContributions(): Promise<Contribution[]> {
-    return await prisma.contribution.findMany({ include: { customer: true } });
+export async function allContributions(data: any): Promise<Contribution[]> {
+    return await prisma.contribution.findMany({
+        where:
+            data.userId == "all" ? { status: data.status, createdAt: { gte: data.startDate, lte: data.endDate, } } :
+                { userId: data.userId, status: data.status, createdAt: { gte: data.startDate, lte: data.endDate, } }, include: { customer: true }
+    });
 }
 
 const notificationdata = {

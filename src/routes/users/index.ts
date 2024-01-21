@@ -6,7 +6,7 @@ const router = Router()
 
 router.route("").get(Auth, UserIsAdmin, get_all_users);
 
-router.route("/customers").get(Auth, UserIsAdmin, get_customers);
+router.route("/customers").post(Auth, UserIsAdmin, get_customers);
 
 router.route("/agents").get(Auth, UserIsAdmin, get_agents);
 

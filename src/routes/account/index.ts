@@ -1,11 +1,13 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin, UserIsAgent, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer, UserIsCustomer, UserIsCustomerOrAdmin } from "../../utils/middlewares";
-import { addBook, agentBalance, agentBalanceHistory, cases_valiation, check_for_opened_sheet, close_sheet, contribute, contributions_agent, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, reject_contribution, report_all, target_contribution, totalBetReport, totalReport, userActivity, userContributions, userLastActivities, user_contributions, user_rejected_contributions, validate_contribution } from "../../services/Account";
+import { addBook, agentBalance, agentBalanceHistory, allAgentsBalance, allCustomersBalance, cases_valiation, check_for_opened_sheet, close_sheet, contribute, contributions_agent, create_account, create_book, get_account, get_book, get_books, get_opened_book, get_sheet, get_user_account, makeDeposit, makeMobileMoneyDeposit, open_sheet, reject_contribution, report_all, target_contribution, totalBetReport, totalReport, userActivity, userContributions, userLastActivities, user_contributions, user_has_account, user_rejected_contributions, validate_contribution } from "../../services/Account";
 
 const router = Router();
 
 // Create user account
 router.route("/create").post(Auth, UserIsAdmin, create_account);
+
+router.route("/exists/:userid").post(Auth, UserIsAdmin, user_has_account);
 
 // Create user book
 router.route("/addbook").post(Auth, UserIsAgentCustomerOrAdmin, create_book);
@@ -39,7 +41,7 @@ router.route("/validate/:id").post(Auth, UserIsAgentOrAdmin, validate_contributi
 router.route("/reject/:id").post(Auth, UserIsAgentOrAdmin, reject_contribution);
 
 // Get Contributions  | admin or Agent
-router.route("/contribution").get(Auth, UserIsAgentCustomerOrAdmin, user_contributions);
+router.route("/contribution").post(Auth, UserIsAgentCustomerOrAdmin, user_contributions);
 
 router.route("/contribution/agent").post(Auth, UserIsAgent, contributions_agent);
 
@@ -70,9 +72,13 @@ router.route("/saving").get(totalReport);
 
 router.route("/bet/report").post(totalBetReport);
 
-router.route("/agent/balance").post(agentBalance);
+router.route("/agent/balance").post(/* Auth, */ agentBalance);
 
-router.route("/agent/balance/history").post(agentBalanceHistory);
+router.route("/balance/history/:angentid").post(/* Auth, */ agentBalanceHistory);
+
+router.route("/balance/customers").get(Auth, UserIsAdmin, allCustomersBalance);
+
+router.route("/balance/agents").post(Auth, UserIsAdmin, allAgentsBalance);
 
 // Liste des activités utilisateurs (Filtrés en date)
 router.route("/activity").post(Auth, userActivity);

@@ -7,9 +7,7 @@ import { store } from "../utils/store";
 import { prisma } from "../server";
 const Agenda = require('agenda');
 import { z } from "zod";
-import { MongoClient } from "mongodb";
 const mongoose = require("mongoose");
-const ObjectId = mongoose.Types.ObjectId;
 
 export const agenda = new Agenda();
 agenda.database(process.env.DATABASE);
@@ -55,6 +53,24 @@ export async function create_account(req: Request, res: Response) {
     }
 }
 
+// Créer un compte tontine ou depot utilisateur
+export async function user_has_account(req: Request, res: Response) {
+    try {
+        const account_schema = z.object({
+            userid: z.string(),
+        });
+        let data = false;
+        const validation_result = account_schema.safeParse(req.params);
+        if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).details[0].message });
+        const account = await prisma.account.findFirst({ where: { userId: validation_result.data.userid } });
+        if (account) { data = true }
+        return res.status(201).send({ status: 201, error: false, message: 'Le compte a été créé', data });
+    } catch (err) {
+        console.error(`Error while creating account`)
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
 // Créer un carnet
 export async function create_book(req: Request, res: Response) {
     try {
@@ -72,7 +88,6 @@ export async function create_book(req: Request, res: Response) {
         if (!tUser) return res.status(404).send({ error: true, message: "User not found", data: {} });
         const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: tUser.id } });
         if (bookIsOpened) return res.status(400).send({ error: true, message: "Impossible de créer le carnet", data: {} });
-        console.log(tUser.agentId);
         const [created_book, report_bet] = await prisma.$transaction([
             prisma.book.create({ data: { bookNumber: b_data.b_number, createdAt: new Date(b_data.createdAt), userId: tUser.id, status: "opened", sheets: [] } }),
             prisma.betReport.create({ data: { goodnessbalance: 250, agentbalance: 50, createdat: b_data.createdAt, agentId: tUser.agentId, customerId: tUser.id, type: "book" } }),
@@ -483,12 +498,20 @@ export async function user_rejected_contributions(req: Request, res: Response) {
 
 // Liste des cotisations utilisateurs
 export async function user_contributions(req: Request, res: Response) {
+    const schema = z.object({
+        status: z.string().default("awaiting"),
+        startDate: z.coerce.date(),
+        endDate: z.coerce.date(),
+        userId: z.string().default("all"),
+    });
+    const validation = schema.safeParse(req.body);
+    if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
     const { user } = req.body.user as { user: User };
     let contributions: Object[];
     switch (user.role) {
         case "customer": contributions = await customerContributions(user); break;
         case "agent": contributions = await userAgentContributions(user); break;
-        case "admin": contributions = await allContributions(); break;
+        case "admin": contributions = await allContributions(validation.data); break;
         default: break;
     }
     return res.status(200).send({ error: false, message: "Requête aboutie", data: contributions! })
@@ -708,13 +731,16 @@ export const totalBetReport = async (req: Request, res: Response) => {
     try {
         const schema = z.object({
             startDate: z.coerce.date(), endDate: z.coerce.date(),
+            type: z.string().default("all"),
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
         const vdata = validation.data;
-        const reportData = await prisma.betReport.findMany({ where: { createdat: { gte: vdata.startDate, lte: vdata.endDate, } }, include: { agent: true, customer: true } });
-        const goodnessAggregate = await prisma.betReport.groupBy({ by: ["type"], _sum: { goodnessbalance: true }, where: { createdat: { gte: vdata.startDate, lte: vdata.endDate, } } });
-        const commercialAggregate = await prisma.betReport.groupBy({ by: ["type"], _sum: { agentbalance: true }, where: { createdat: { gte: vdata.startDate, lte: vdata.endDate, } } });
+        const where = vdata.type == "all" ? { type: { in: ["book", "bet"] }, createdat: { gte: vdata.startDate, lte: vdata.endDate, } }
+            : { type: vdata.type, createdat: { gte: vdata.startDate, lte: vdata.endDate, } };
+        const reportData = await prisma.betReport.findMany({ where, include: { agent: true, customer: true } });
+        const goodnessAggregate = await prisma.betReport.groupBy({ by: ["type"], _sum: { goodnessbalance: true }, where });
+        const commercialAggregate = await prisma.betReport.groupBy({ by: ["type"], _sum: { agentbalance: true }, where });
         const commAggregatedData = commercialAggregate.reduce<{ [key: string]: number; totalagent: number }>((result, item) => {
             const type = item.type + "agent";
             const amount = item._sum.agentbalance ?? 0.0;
@@ -758,12 +784,12 @@ export const agentBalance = async (req: Request, res: Response) => {
 // Historique de gains d'un agent
 export const agentBalanceHistory = async (req: Request, res: Response) => {
     try {
-        const agentId = '64fb08833574157938d4cd70';
+        const agentId = req.params.agentid;
+        if (!agentId) return res.status(400).send({ error: true, message: "Agent id is required", data: {} });
         const data = await prisma.betReport.aggregateRaw({
             pipeline: [
-                { $match: { 'agentId': { "$oid": `${agentId}` } } },
+                { $match: { 'agentId': { "$oid": `${agentId}` } } }, { $sort: { '_id.year': 1, '_id.month': 1 } },
                 { $group: { _id: { month: { $month: '$createdat' }, year: { $year: '$createdat' }, }, data: { $push: '$$ROOT' }, count: { $sum: 1 }, }, },
-                { $sort: { '_id.year': 1, '_id.month': 1, }, },
             ],
         });
         return res.status(200).send({ data: data });
@@ -778,6 +804,24 @@ export const allCustomersBalance = async (req: Request, res: Response) => {
     try {
         const data = await prisma.account.findMany({ include: { user: true } });
         return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
+    }
+}
+
+// Solde agents
+export const allAgentsBalance = async (req: Request, res: Response) => {
+    try {
+        const schema = z.object({
+            startDate: z.coerce.date(), endDate: z.coerce.date(),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) {
+            return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        }
+        const data = await prisma.betReport.groupBy({ by: ["agentId"], _sum: { agentbalance: true }, where: { createdat: { gte: validation.data.startDate, lte: validation.data.endDate, } } });
+        return res.status(200).send({ error: false, data, message: "ok" });
     } catch (err) {
         console.log(err);
         return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
