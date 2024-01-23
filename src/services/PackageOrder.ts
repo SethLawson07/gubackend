@@ -80,7 +80,7 @@ export async function package_payment_event(req: Request, res: Response) {
             return res.status(409).send()
         }
         store.push(data.cpm_trans_id)
-        if (data.cpm_error_message === "SUCCES") {
+        if (data.cpm_error_message != "SUCCES") {
             const order = await prisma.packageOrder.findFirst({ where: { transaction: order_id } });
             if (!order) return false;
             await prisma.packageOrder.update({ where: { id: order.id }, data: { status: "paid" } });
