@@ -30,6 +30,7 @@ import notification from "./routes/notification";
 import section from "./routes/section";
 import delivery from "./routes/delivery";
 import home from "./routes/home";
+import porder from "./routes/packageorder";
 import { validateContributionJobQueue } from "./queues/queues";
 
 
@@ -90,6 +91,7 @@ app.use('/push', notification);
 app.use('/section', section);
 app.use('/delivery', delivery);
 app.use('/home', home);
+app.use('/porder', porder);
 
 
 app.get("/health", (_req: Request, res: Response) => {

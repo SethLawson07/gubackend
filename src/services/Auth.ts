@@ -52,11 +52,12 @@ export async function adduser(req: Request, res: Response) {
     try {
         const user_schema = z.object({
             user_name: z.string().min(5, "Veuillez indiquez un nom complet").nonempty("Veuillez renseigner votre nom complet"),
-            email: z.string().email("L'adresse email est invalide"),
+            email: z.string().email("L'adresse email est invalide").nullable(),
             phone: z.string().min(8, "Numéro de téléphone invalide").max(8, "Numéro de téléphone invalide").nonempty("Veuillez renseigner un numéro de téléphone"),
             password: z.string().min(6, "Votre mot de passe est court").nonempty("Veuillez renseigner un mot de passe"),
             profile_picture: z.string().optional().default(""),
-            role: z.string().default('customer')
+            role: z.string().default('customer'),
+            agentId: z.string().optional(),
         })
         let user_schema_partial = user_schema.partial({ email: true });
         const validation_result = user_schema_partial.safeParse(req.body)
@@ -71,8 +72,8 @@ export async function adduser(req: Request, res: Response) {
             where: { OR: [{ email: user_data.email }, { phone: user_data.phone }] }
         });
         if (potential_duplicate.length) return res.status(409).send({ status: 409, error: true, message: "Un autre utilisateur possède les mêmes informations" })
-        const createdUser = await prisma.user.create({ data: user_data });
-        const token = sign_token(user_data)
+        const createdUser = await prisma.user.create({ data: { ...user_data, agentId: user_data.agentId == "" ? null : user_data.agentId } });
+        const token = sign_token(user_data);
         return res.status(201).send({ status: 201, error: false, message: 'Utilisateur créé', data: { token: token, id: createdUser.id } });
     } catch (err) {
         console.error(`Error while registering ${err}`);

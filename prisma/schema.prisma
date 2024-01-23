@@ -353,3 +353,15 @@ model BetReport {
     type            String // book, bet
     createdat       DateTime
 }
+
+model PackageOrder {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    transaction String   @unique
+    username    String
+    usermail    String
+    userphone   String
+    quantity    Int
+    amount      Float
+    status      String // paid, unpaid
+    createdat   DateTime
+}

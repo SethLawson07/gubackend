@@ -105,6 +105,24 @@ export async function create_book(req: Request, res: Response) {
     }
 }
 
+// Is User Book Opened ?
+export async function userBookIsOpened(req: Request, res: Response) {
+    try {
+        const schema = z.object({ customer: z.string(), });
+        const validation = schema.safeParse(req.params);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).details[0].message });
+        const user = await prisma.user.findUnique({ where: { id: validation.data.customer } });
+        if (!user) return res.status(404).send({ error: true, message: "User not found", data: {} });
+        const bookIsOpened = await prisma.book.findFirst({ where: { status: "opened", userId: user.id } });
+        if (bookIsOpened) return res.status(400).send({ error: true, message: "Impossible de créer le carnet", data: {} });
+        return res.status(201).send({ status: 201, error: false, message: 'Possible', data: {} });
+    } catch (err) {
+        console.log(err)
+        console.error(`Error while creating book`);
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} })
+    }
+}
+
 // addbook
 export async function addBook(req: Request, res: Response) {
     try {
