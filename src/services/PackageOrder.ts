@@ -58,6 +58,23 @@ export async function make_order(req: Request, res: Response) {
     }
 }
 
+
+export async function get_orders(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            status: z.string().nonempty("Veuillez indiquer le status").default("paid"),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).details[0].message, data: {} });
+        const status = validation.data.status;
+        const data = await prisma.packageOrder.findMany({ where: { status } });
+        return res.status(200).send({ error: false, message: "", data });
+    } catch (err) {
+        console.error(`Error while creating order ${err}`)
+        return res.status(500).send({ error: true, message: "error !!", data: {} });
+    }
+}
+
 export async function package_payment_event(req: Request, res: Response) {
     try {
         const order_id = req.params.tid
