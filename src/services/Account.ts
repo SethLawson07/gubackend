@@ -389,6 +389,7 @@ export async function contribute(req: Request, res: Response) {
                 data: {
                     type: "contribution", amount: data.amount, createdat: data.createdAt, payment: data.p_method, sheet: result.sheet!,
                     cases: result.cases!.map(chiffre => chiffre + 1), status: "awaiting", customerId: targetted_user.id,
+                    agentId: user.role == "agent" ? user.id : null,
                 }
             });
             if (!report) return res.status(400).send({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} });

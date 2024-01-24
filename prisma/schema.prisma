@@ -26,6 +26,7 @@ model User {
     role            String //customer,agent,delivery_man,command_handler,admin
     first_login     Boolean        @default(true)
     device_token    String         @default("")
+    location        String?
     Contribution    Contribution[]
     Delivery        Delivery[]
     Order           Order[]
