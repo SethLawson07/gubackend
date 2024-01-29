@@ -846,3 +846,28 @@ export const allAgentsBalance = async (req: Request, res: Response) => {
         return res.status(500).send({ error: true, message: "Une erreur est survenue", data: {} });
     }
 }
+
+// pay with Goodpay
+export async function pay_goodpay(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            userid: z.string().nonempty("Id utilisateur requis"),
+            amount: z.number().nonnegative("Montant invalide"),
+            litpay: z.boolean().default(false),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).details[0].message, data: {} });
+        const data = validation.data;
+        const account = await prisma.account.findFirst({ where: { userId: data.userid } });
+        if (!account) return res.status(404).send({ error: true, message: "Vous n'avez pas de compte Goodpay", data: {} });
+        const p_validation = account.balance - data.amount;
+        if (p_validation >= 0 || (p_validation < 0 && data.litpay)) {
+            await prisma.account.update({ where: { id: account.id }, data: { balance: account.balance - data.amount } });
+            return res.status(404).send({ error: false, message: "Paiement éffectué", data: {} });
+        } else { return res.status(400).send({ error: true, message: "Solde insuffisant", data: {} }); }
+    } catch (err) {
+        console.log(err);
+        console.log("Error while ... action");
+        return res.status(500).send({ error: true, message: "Une erreur s'est produite", data: {} });
+    }
+}
