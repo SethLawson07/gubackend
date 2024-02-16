@@ -9,7 +9,7 @@ const Agenda = require('agenda');
 import { z } from "zod";
 
 export const agenda = new Agenda();
-agenda.database(process.env.DATABASE_URL);
+agenda.database("mongodb+srv://admin:Admin@cluster0.wwysuvp.mongodb.net/goodness_test");
 
 // Définition de la tâche
 agenda.define('closebook', async (job: any) => {
