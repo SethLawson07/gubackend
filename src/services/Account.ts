@@ -7,10 +7,9 @@ import { store } from "../utils/store";
 import { prisma } from "../server";
 const Agenda = require('agenda');
 import { z } from "zod";
-const mongoose = require("mongoose");
 
 export const agenda = new Agenda();
-agenda.database(process.env.DATABASE);
+agenda.database(process.env.DATABASE_URL);
 
 // Définition de la tâche
 agenda.define('closebook', async (job: any) => {
