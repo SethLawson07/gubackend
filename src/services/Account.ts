@@ -261,7 +261,8 @@ export async function open_sheet(req: Request, res: Response) {
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
         if (sheets.error) return res.status(400).send({ error: true, message: sheets.message, data: {} });
         await prisma.book.update({ where: { id: book.data.id }, data: { sheets: sheets.updated_sheets } });
-        await agenda.schedule('5 minutes', 'closesheet', { book, sheet: sheets.sheet });
+        // await agenda.schedule('in 1 months, 1 days', 'closesheet', { book, sheet: sheets.sheet });
+        await agenda.schedule('in 5 minutes', 'closesheet', { book, sheet: sheets.sheet });
         await agenda.start();
         return res.status(200).send({ error: false, message: "Feuille ouverte", data: {} });
     } catch (e) {
