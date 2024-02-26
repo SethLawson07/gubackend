@@ -9,6 +9,9 @@ import { createBullBoard } from "@bull-board/api";
 import { ExpressAdapter } from "@bull-board/express";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import express, { NextFunction, Request, Response } from "express";
+import { validateContributionJobQueue } from "./queues/queues";
+import { verboseFormat } from "./utils";
+
 
 // Routes
 import auth from "./routes/auth";
@@ -21,9 +24,7 @@ import hook from "./routes/hook";
 import book from "./routes/book";
 import report from "./routes/report";
 import account from "./routes/account";
-import notification from "./routes/notification";
-import { validateContributionJobQueue } from "./queues/queues";
-import { verboseFormat } from "./utils";
+import notification from "./routes/notification";;
 
 // App PORT
 const PORT = process.env.PORT || 5000;
