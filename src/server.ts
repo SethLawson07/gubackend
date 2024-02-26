@@ -1,7 +1,6 @@
-dotenv.config();
 import cors from "cors";
 import morgan from "morgan";
-import * as dotenv from "dotenv";
+import * as dotenv from "dotenv"; dotenv.config();
 const Agenda = require('agenda');
 import swagger from "swagger-ui-express";
 import swagger_doc from "./swagger.json";
