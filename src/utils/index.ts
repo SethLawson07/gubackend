@@ -9,7 +9,8 @@ import admin from "firebase-admin";
 import serviceAccount from '../token/goodpay-86d48-c5c79b945b8f.json';
 import { MessagingPayload, TokenMessage } from "firebase-admin/lib/messaging/messaging-api";
 import dayjs from "dayjs";
-import { z } from "zod";
+
+export const verboseFormat = ':remote-addr :method :url HTTP/:http-version :status :res[content-length] - :response-time ms';
 
 const firebaseServiceAccountParams = {
     type: serviceAccount.type,
@@ -542,39 +543,39 @@ export const operatorChecker = (phone: string) => {
     return operator;
 }
 
-export const utilsTotalReport = async (type: string, agent: string[], method: string) => {
-    // {
-    //     const totalDeposit = (await prisma.deposit.aggregate({ _sum: { amount: true } }))._sum ?? 0;
-    //     const totalContribution = (await prisma.deposit.aggregate({ _sum: { amount: true } }))._sum ?? 0;
-    //     const total = totalContribution.amount! + totalDeposit.amount!;
-    // }
-    switch (type) {
-        case "contribution":
-            const contribution = await prisma.contribution.findMany({
-                where: { agent: { in: agent }, pmethod: method }
-            });
-            break;
-        case "deposit":
-            const deposit = await prisma.deposit.findMany({
-                where: { payment: method }
-            });
-        default:
-            break;
-    }
-}
+// export const utilsTotalReport = async (type: string, agent: string[], method: string) => {
+//     // {
+//     //     const totalDeposit = (await prisma.deposit.aggregate({ _sum: { amount: true } }))._sum ?? 0;
+//     //     const totalContribution = (await prisma.deposit.aggregate({ _sum: { amount: true } }))._sum ?? 0;
+//     //     const total = totalContribution.amount! + totalDeposit.amount!;
+//     // }
+//     switch (type) {
+//         case "contribution":
+//             const contribution = await prisma.contribution.findMany({
+//                 where: { agent: { in: agent }, pmethod: method }
+//             });
+//             break;
+//         case "deposit":
+//             const deposit = await prisma.deposit.findMany({
+//                 where: { payment: method }
+//             });
+//         default:
+//             break;
+//     }
+// }
 
-export const utilsNonSpecifiedReport = async (type: string, agent: string[], method: string) => {
-    switch (type) {
-        case "contribution":
-            const contribution = await prisma.contribution.findMany({
-                where: { agent: { in: agent }, pmethod: method }
-            });
-            break;
-        case "deposit":
-            const deposit = await prisma.deposit.findMany({
-                where: { payment: method }
-            });
-        default:
-            break;
-    }
-}
+// export const utilsNonSpecifiedReport = async (type: string, agent: string[], method: string) => {
+//     switch (type) {
+//         case "contribution":
+//             const contribution = await prisma.contribution.findMany({
+//                 where: { agent: { in: agent }, pmethod: method }
+//             });
+//             break;
+//         case "deposit":
+//             const deposit = await prisma.deposit.findMany({
+//                 where: { payment: method }
+//             });
+//         default:
+//             break;
+//     }
+// }
