@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin, UserIsAgentOrAdmin } from "../../utils/middlewares";
 
-import { report_all, agentBalance, allAgentsBalance, allCustomersBalance, totalBetReport } from "../../services/Report";
+import { report_all, agentBalance, allAgentsBalance, allCustomersBalance, totalBetReport, } from "../../services/Report";
 
 const router = Router();
 
