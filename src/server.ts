@@ -14,6 +14,7 @@ import { verboseFormat } from "./utils";
 
 
 // Routes
+import book from "./routes/book";
 import auth from "./routes/auth";
 import activity from "./routes/activity";
 import contribution from "./routes/contribution";
@@ -21,10 +22,9 @@ import deposit from "./routes/deposit";
 import sheet from "./routes/sheet";
 import users from "./routes/users";
 import hook from "./routes/hook";
-import book from "./routes/book";
 import report from "./routes/report";
 import account from "./routes/account";
-import notification from "./routes/notification";;
+import notification from "./routes/notification";
 
 // App PORT
 const PORT = process.env.PORT || 5000;
@@ -83,7 +83,7 @@ app.use('/push', notification);
 
 // Health
 app.get("/health", (_req: Request, res: Response) => {
-    return res.status(200).send()
+    return res.status(200).send();
 });
 
 // App listen
