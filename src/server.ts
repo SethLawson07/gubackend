@@ -14,7 +14,7 @@ import { verboseFormat } from "./utils";
 
 
 // Routes
-// import book from "./routes/book";
+import book from "./routes/books";
 import auth from "./routes/auth";
 import activity from "./routes/activity";
 import contribution from "./routes/contribution";
@@ -72,7 +72,7 @@ app.use('/docs', swagger.serve, swagger.setup(swagger_doc));
 app.use("/auth", auth);
 app.use('/account', account);
 app.use("/activity", activity);
-// app.use("/book", book);
+app.use("/book", book);
 app.use("/contribution", contribution);
 app.use("/deposit", deposit);
 app.use("/report", report);
