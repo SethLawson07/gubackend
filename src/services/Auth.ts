@@ -254,19 +254,6 @@ export async function create_admin(req: Request, res: Response) {
     }
 }
 
-export async function get_orders(req: Request, res: Response) {
-    try {
-        const { user } = req.body.user as { user: User }
-        const current_user = await prisma.user.findUnique({ where: { email: user.email as string } });
-        if (!current_user) return res.status(401).send({ status: 401, error: true, message: 'pas autorisé' })
-        const data = await prisma.order.findMany({ where: { user: current_user } })
-        return res.status(200).send({ status: 200, error: false, data: { orders: data } })
-    } catch (err) {
-        console.error(`Error while getting list of user orders ${err}`)
-        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} })
-    }
-}
-
 export async function get_all_users(_req: Request, res: Response) {
     try {
         const data = await prisma.user.findMany()

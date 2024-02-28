@@ -3,7 +3,7 @@ import * as jwt from "jsonwebtoken";
 import { prisma } from "../server";
 import * as crypto from "crypto";
 import axios from "axios";
-import { Book, Brand, Case, Contribution, Item, Product, Sheet, User } from "@prisma/client";
+import { Book, Case, Contribution, Sheet, User } from "@prisma/client";
 import { ObjectId } from "bson";
 import admin from "firebase-admin";
 import serviceAccount from '../token/goodpay-86d48-c5c79b945b8f.json';
@@ -36,6 +36,10 @@ export function hash_pwd(plain_text_password: string) {
 
 export function password_is_valid(plain_text_password: string, db_hash: string) {
     return bcrypt.compareSync(plain_text_password, db_hash);
+}
+
+export const randomUniqueInteger = () => {
+    return Math.floor(Math.random() * Math.floor(Math.random() * Date.now())) + (Date.now() * 3);
 }
 
 
@@ -92,12 +96,6 @@ export async function generate_payment_link(amount: number, user: string, order_
         return { status: true, url: response.data.payment_url };
     })
     return payment_request_response;
-}
-
-export async function create_promocode_usage(promocodes: string[], user: string) {
-    promocodes.map(async (code) => {
-        await prisma.promoCodeUsage.create({ data: { code, user } });
-    })
 }
 
 export function utilisIsInt(n: number) {
@@ -466,81 +464,26 @@ export async function sendNotificationToTopic(topic: string, title: string, body
     return result;
 }
 
-// Find products by list id ([id...])
-export const products_byids = async (content: string[]) => {
-    const result = await prisma.product.findMany({ where: { id: { in: content } } });
-    if (!result) return { error: true, message: "none", data: {} };
-    return { error: false, message: "ok!", data: result };
-}
-
-
-export const all_category_products = async (catid: string): Promise<Product[]> => {
-    let itemsResult: Item[] = [];
-    let productResult: Product[] = [];
-    let products = await prisma.product.findMany({ include: { brand_data: true } });
-    let subcategories = await prisma.subCategory.findMany();
-    subcategories = subcategories.filter((sbct) => sbct.category == catid);
-    if (catid == '') return products;
-    for (let subcat of subcategories) {
-        let items = await getItemsWithId(subcat.id);
-        if (items) itemsResult.push(...items);
-    }
-    if (itemsResult) {
-        for (let ite of itemsResult) {
-            let pdts = await getProductWithId(ite.id);
-            if (pdts) productResult.push(...pdts);
-        }
-    }
-    return productResult;
-}
-
-export const all_category_brands = async (catid: string) => {
-    let products = await all_category_products(catid);
-    let brands: string[] = [];
-    let brandData: Brand[] = [];
-    if (products) {
-        products.forEach(product => {
-            brands.push(product.brand);
-        });
-    }
-    if (brands) {
-        brandData = await prisma.brand.findMany({ where: { id: { in: brands } } })
-    }
-    return brandData;
-}
-
-const getProductWithId = async (itemId: string) => {
-    let result: Product[] = [];
-    let products = await prisma.product.findMany({ include: { brand_data: true } });
-    products.forEach((product) => {
-        if (product.item === itemId) {
-            result.push(product);
-        }
-    });
-    return result;
-}
-
-const getItemsWithId = async (subcatid: string) => {
-    let result: Item[] = [];
-    let items = await prisma.item.findMany();
-    items.forEach((item) => {
-        if (item.subcategory == subcatid) {
-            result.push(item);
-        }
-    });
-    return result!;
-}
+export const gateways: any = {
+    "moovmoney": 47,
+    "tmoney": 2,
+};
 
 export const operatorChecker = (phone: string) => {
     let operator = "moovmoney";
-    // if (phone.startsWith("228")) {
-    //     const first = phone.replace('228', "").trim().slice(0, 2);
-    //     console.log(first);
-
-    // } else { }
-    if (firsttwonumberstogocomArray.includes(phone.trim().slice(0, 2))) { operator = "tmoney"; }
-    if (firsttwonumbersmoovafricaArray.includes(phone.trim().slice(0, 2))) { operator = "moovmoney"; }
+    if (phone.startsWith("228")) {
+        const first = phone.replace('228', "").trim().slice(0, 2);
+        if (firsttwonumberstogocomArray.includes(first)) { operator = "tmoney"; }
+    } else if (firsttwonumberstogocomArray.includes(phone.trim().slice(0, 2))) {
+        operator = "tmoney";
+    }
     return operator;
+}
+
+//Check TG Phone Opérator with first Two number
+export const semoaCashPayGateway = (phone: string) => {
+    const op = operatorChecker(phone);
+    return gateways[op];
 }
 
 // export const utilsTotalReport = async (type: string, agent: string[], method: string) => {

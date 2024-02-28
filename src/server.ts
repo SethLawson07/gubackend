@@ -14,6 +14,8 @@ import { verboseFormat } from "./utils";
 
 
 // Routes
+import banner from "./routes/banner";
+import home from "./routes/home";
 import book from "./routes/books";
 import auth from "./routes/auth";
 import activity from "./routes/activity";
@@ -70,9 +72,11 @@ app.use('/docs', swagger.serve, swagger.setup(swagger_doc));
 
 // routes
 app.use("/auth", auth);
+app.use("/home", home);
 app.use('/account', account);
 app.use("/activity", activity);
 app.use("/book", book);
+app.use("/banner", banner);
 app.use("/contribution", contribution);
 app.use("/deposit", deposit);
 app.use("/report", report);

@@ -28,8 +28,6 @@ model User {
     device_token    String         @default("")
     location        String?
     Contribution    Contribution[]
-    Delivery        Delivery[]
-    Order           Order[]
     Commission      Commission[]
     Activity        Activity[]
     RepCustomer     Report[]       @relation("Customer")
@@ -38,155 +36,6 @@ model User {
     ABetReport      BetReport[]    @relation("BRAgent")
     Book            Book[]
     Account         Account[]
-}
-
-model Category {
-    id          String        @id @default(auto()) @map("_id") @db.ObjectId()
-    name        String        @unique
-    image       String
-    featured    Boolean
-    SubCategory SubCategory[]
-}
-
-model ServiceCategory {
-    id       String  @id @default(auto()) @map("_id") @db.ObjectId()
-    name     String
-    image    String
-    featured Boolean
-}
-
-model SubCategory {
-    id            String   @id @default(auto()) @map("_id") @db.ObjectId()
-    name          String
-    image         String
-    featured      Boolean
-    category_data Category @relation(fields: [category], references: [id])
-    category      String   @db.ObjectId()
-    Item          Item[]
-}
-
-model Item {
-    id               String      @id @default(auto()) @map("_id") @db.ObjectId()
-    name             String
-    image            String
-    featured         Boolean
-    schema           String
-    subcategory_data SubCategory @relation(fields: [subcategory], references: [id])
-    subcategory      String      @db.ObjectId()
-    Product          Product[]
-}
-
-model Product {
-    id              String   @id @default(auto()) @map("_id") @db.ObjectId()
-    name            String
-    description     String?
-    images          String[]
-    item            String   @db.ObjectId()
-    featured        Boolean
-    in_stock        Int
-    price           Float
-    pay_at_delivery Boolean
-    is_in_discount  Boolean
-    discount_price  Float?
-    fields          String?
-    brand           String   @db.ObjectId()
-    brand_data      Brand    @relation(fields: [brand], references: [id])
-    item_data       Item     @relation(fields: [item], references: [id])
-    delivery_price  Float    @default(0.0)
-    pay_goodpay     Boolean  @default(false)
-    Section         Section? @relation(fields: [sectionId], references: [id])
-    sectionId       String?  @db.ObjectId
-    Cart            Cart[]
-}
-
-model PromoCode {
-    id              String   @id @default(auto()) @map("_id") @db.ObjectId()
-    code            String   @unique
-    valid           Boolean
-    discount        Int
-    conditions      String[]
-    featured        Boolean
-    expiration_date String
-}
-
-model Slider {
-    id       String  @id @default(auto()) @map("_id") @db.ObjectId()
-    big_text String
-    alt_text String
-    image    String
-    featured Boolean
-}
-
-type Delivery_address {
-    name        String
-    email       String
-    phone       String
-    map_address String
-}
-
-model Cart {
-    id        String  @id @default(auto()) @map("_id") @db.ObjectId
-    product   Product @relation(fields: [productId], references: [id])
-    quantity  Int
-    productId String  @db.ObjectId()
-}
-
-model Order {
-    id               String           @id @default(auto()) @map("_id") @db.ObjectId
-    user             User             @relation(fields: [userId], references: [id])
-    amount           Float
-    remainder        Float
-    paid             Boolean
-    cart             Json
-    promocodes       String[]
-    status           String // PENDING (attente de validation), VALIDATED, CANCELED, GAINED, DELIVERED
-    delivery_type    String           @default("")
-    delivery_address Delivery_address
-    // delivery_person  Json?
-    // delivery_status  String // PENDING, RECEIVED
-    userId           String           @db.ObjectId()
-}
-
-model Delivery {
-    id               String           @id @default(auto()) @map("_id") @db.ObjectId
-    customer         Json
-    status           String // AWAITING (Aucun livreur), GAINED(Livreur choisi), PENDING(En cours de livraison) DELIVERED(Livré)
-    delivery_address Delivery_address
-    amount           Float
-    delivery_person  User?            @relation(fields: [userId], references: [id])
-    userId           String?          @db.ObjectId()
-    deliveredat      DateTime?
-}
-
-model Transaction {
-    id     String  @id @default(auto()) @map("_id") @db.ObjectId
-    user   String
-    date   String
-    amount Float
-    detail String?
-}
-
-model PromoCodeUsage {
-    id   String @id @default(auto()) @map("_id") @db.ObjectId
-    code String
-    user String
-}
-
-model Brand {
-    id       String    @id @default(auto()) @map("_id") @db.ObjectId
-    name     String    @unique
-    image    String
-    featured Boolean
-    Product  Product[]
-}
-
-model Service {
-    id            String   @id @default(auto()) @map("_id") @db.ObjectId
-    name          String
-    category      String
-    description   String
-    pictures      String[]
-    seller_number String
 }
 
 model Account {
@@ -276,15 +125,6 @@ model CarousselService {
     description String
 }
 
-model Section {
-    id          String    @id @default(auto()) @map("_id") @db.ObjectId
-    title       String
-    description String // Name == Title
-    contenttype String // product, category, promotion(promo card) // service
-    featured    Boolean
-    content     Product[]
-}
-
 model Deposit {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
     account   String
@@ -355,14 +195,11 @@ model BetReport {
     createdat       DateTime
 }
 
-model PackageOrder {
-    id          String   @id @default(auto()) @map("_id") @db.ObjectId
-    transaction String   @unique
-    username    String
-    usermail    String
-    userphone   String
-    quantity    Int
-    amount      Float
-    status      String // paid, unpaid
-    createdat   DateTime
+model Banner {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId()
+    name      String   @default("No_name")
+    image     String
+    link      String
+    createdat DateTime
+    featured  Boolean  @default(true)
 }

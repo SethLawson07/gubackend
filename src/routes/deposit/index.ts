@@ -5,7 +5,7 @@ import { makeDeposit, makeMobileMoneyDeposit } from "../../services/Deposit";
 const router = Router();
 
 // User make Deposit
-router.route("/deposit").post(Auth, UserIsAgentOrCustomer, makeDeposit);
+router.route("/make").post(Auth, UserIsAgentOrCustomer, makeDeposit);
 
 // User make Deposit with mobile money
 router.route("/deposit_event/:data").post(makeMobileMoneyDeposit);

@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { register, adduser, login, create_admin, get_orders, set_financepro_id, logout, updateUserDeviceToken, get_customer, _update, disable_user, update_password } from "../../services/Auth"
+import { register, adduser, login, create_admin, set_financepro_id, logout, updateUserDeviceToken, get_customer, _update, disable_user, update_password } from "../../services/Auth"
 import { Auth, UserIsAdmin, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin } from "../../utils/middlewares"
 
 const router = Router();
@@ -17,8 +17,6 @@ router.route("/updateuser").post(Auth, UserIsAgentCustomerOrAdmin, _update);
 router.route("/login").post(login);
 
 router.route("/create_admin").post(Auth, UserIsAdmin, create_admin);
-
-router.route("/orders").get(Auth, get_orders);
 
 router.route("/change_password").put(Auth, update_password);
 

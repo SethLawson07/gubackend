@@ -1,15 +1,16 @@
-import { payment_event, momo_payment_event, contribution_event, addbook_event } from "../../services/Hook";
+import { contribution_event, addbook_event, hookValidateOrder, hookCreateOrder } from "../../services/Hook";
 import { Router } from "express";
+import { Auth } from "../../utils/middlewares";
 
-const router = Router()
-
-router.route("/momo_event").post(momo_payment_event)
-
-router.route("/payment_event/:id").post(payment_event)
+const router = Router();
 
 router.route("/contrib_event/:data").post(contribution_event);
 
 router.route("/addbook_event/:data").post(addbook_event);
+
+router.route("/create").post(Auth, hookCreateOrder);
+
+router.route("/validate/:data").post(hookValidateOrder);
 
 
 export default router
