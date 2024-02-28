@@ -481,9 +481,8 @@ export const operatorChecker = (phone: string) => {
 }
 
 //Check TG Phone Opérator with first Two number
-export const semoaCashPayGateway = (phone: string) => {
-    const op = operatorChecker(phone);
-    return gateways[op];
+export const semoaCashPayGateway = (gateway: string) => {
+    return gateways[gateway];
 }
 
 // export const utilsTotalReport = async (type: string, agent: string[], method: string) => {

@@ -11,7 +11,7 @@ router.route("/addbook").post(Auth, UserIsAgentCustomerOrAdmin, create_book);
 router.route("/opened").post(Auth, UserIsCustomer, get_opened_book);
 
 // Is Book Opened
-router.route("isopened/:customer").get(Auth, userBookIsOpened);
+router.route("/isopened/:customer").get(Auth, userBookIsOpened);
 
 // Create book with Goodpay
 router.route("/pay_book").post(Auth, UserIsAgentOrCustomer, addBook);

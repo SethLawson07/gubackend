@@ -140,7 +140,7 @@ export async function reject_contribution(req: Request, res: Response) {
 
 
 // Liste des cotisations utilisateurs
-export async function user_rejected_contributions(req: Request, res: Response) {
+export async function agent_rejected_contributions(req: Request, res: Response) {
     const schema = z.object({ userId: z.string() });
     const validation = schema.safeParse(req.params);
     if (!validation.success) return res.status(400).send({ error: true, message: "User Id is needed", data: {} });
