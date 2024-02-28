@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import * as jwt from "jsonwebtoken";
 import { agenda, prisma } from "../server";
-import { store } from "../utils/store";
 import { create_sheets, opened_book, operatorChecker, semoaCashPayGateway, sheet_contribute, todateTime } from "../utils";
 import { Contribution, User } from "@prisma/client";
 import { mMoneyContributionJobQueue } from "../queues/queues";
@@ -42,7 +41,7 @@ export const hookCreateOrder = async (req: Request, res: Response) => {
                     "phone": `228${user.phone}`
                 },
                 "gateway_id": semoaCashPayGateway(validation.data.gateway),
-                "callback_url": `https://b156-2c0f-f0f8-82f-7300-6128-40f0-1cf1-98e5.ngrok-free.app/hook/order/validate/${data}`,
+                "callback_url": `https://goodapp-9c0o.onrender.com/hook/order/validate/${data}`,
                 "redirect_url": "https://google.com",
             })
         };
