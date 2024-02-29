@@ -48,6 +48,7 @@ export const hookCreateOrder = async (req: Request, res: Response) => {
         const response = await axios(config);
         if (!response) return res.status(400).send({ error: true, message: "...", data: {} });
         if (!(response.data.status == "success")) return res.status(400).send({ error: true, message: "Veuillez réssayer SVP !" });
+        console.log(response.data);
         return res.status(200).send({
             error: false, message: "ok", data: {
                 action: response.data["payments_method"][0].action ?? null, phone: user.phone, transaction: validation.data.type, gateway: validation.data.gateway,
