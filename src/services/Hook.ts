@@ -38,8 +38,7 @@ export const hookCreateOrder = async (req: Request, res: Response) => {
                 "client": {
                     "lastname": user.id,
                     "firstname": user.user_name,
-                    // "phone": `228${user.phone}`
-                    "phone": "22899061956"
+                    "phone": `228${user.phone}`
                 },
                 "gateway_id": semoaCashPayGateway(validation.data.gateway),
                 "callback_url": `https://goodapp-9c0o.onrender.com/hook/order/validate/${data}`,
@@ -51,7 +50,8 @@ export const hookCreateOrder = async (req: Request, res: Response) => {
         if (!(response.data.status == "success")) return res.status(400).send({ error: true, message: "Veuillez réssayer SVP !" });
         return res.status(200).send({
             error: false, message: "ok", data: {
-                action: response.data["payments_method"][0].action ?? null, phone: user.phone, transaction: validation.data.type, gateway: validation.data.gateway
+                action: response.data["payments_method"][0].action ?? null, phone: user.phone, transaction: validation.data.type, gateway: validation.data.gateway,
+                others: response.data,
             }
         });
     } catch (error) {
