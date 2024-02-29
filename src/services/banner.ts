@@ -9,8 +9,7 @@ export async function addBanner(req: Request, res: Response) {
         const schema = z.object({
             image: z.string(),
             link: z.string(),
-            createdat: z.coerce.date()
-
+            createdat: z.coerce.date(),
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
@@ -41,7 +40,6 @@ export async function updateBanner(req: Request, res: Response) {
             image: z.string(),
             link: z.string(),
             createdat: z.coerce.date()
-
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

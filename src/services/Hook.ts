@@ -38,7 +38,8 @@ export const hookCreateOrder = async (req: Request, res: Response) => {
                 "client": {
                     "lastname": user.id,
                     "firstname": user.user_name,
-                    "phone": `228${user.phone}`
+                    // "phone": `228${user.phone}`
+                    "phone": "22899061956"
                 },
                 "gateway_id": semoaCashPayGateway(validation.data.gateway),
                 "callback_url": `https://goodapp-9c0o.onrender.com/hook/order/validate/${data}`,
