@@ -55,6 +55,23 @@ type user_data = {
     profile_picture: string;
 }
 
+export type contribution_schema = {
+    customer: string,
+    amount: number,
+    p_method: string,
+    createdAt: Date,
+}
+
+export type contribution_validation_schema = {
+    customer: User,
+    targeted_contribution: Contribution,
+    user: User,
+    result: any,
+    schemadata: any,
+    validated: any,
+    book: Book,
+}
+
 export function sign_token(user: user_data) {
     return jwt.sign({ user }, JWT_TOKEN);
 }
@@ -69,33 +86,67 @@ export function verify_token(token: string) {
     }
 }
 
-export async function generate_payment_link(amount: number, user: string, order_id: string) {
-    const transaction_id = crypto.randomUUID()
-    const data = {
-        "apikey": "25443723563ef760b99c2b5.76392442",
-        "site_id": "636165",
-        "transaction_id": transaction_id,
-        "amount": amount,
-        "currency": "XOF",
-        "description": "Reglement de commande",
-        "customer_id": user,
-        "notify_url": `https://goodness-1e5ee24644b9.herokuapp.com/hook/payment_event/${order_id}`,
-        "return_url": "https://google.com",
-        "channels": "ALL",
-        "lang": "FR"
-    }
-    const payment_request_response = await axios.post(
-        "https://api-checkout.cinetpay.com/v2/payment",
-        data
-    ).then(res => {
-        if (res.status !== 200) {
-            console.log(`Error while getting payment url`);
-            return { status: false, url: "" };
-        }
-        const response = res.data as { data: { payment_url: string } };
-        return { status: true, url: response.data.payment_url };
-    })
-    return payment_request_response;
+// export async function generate_payment_link(amount: number, user: string, order_id: string) {
+//     const transaction_id = crypto.randomUUID()
+//     const data = {
+//         "apikey": "25443723563ef760b99c2b5.76392442",
+//         "site_id": "636165",
+//         "transaction_id": transaction_id,
+//         "amount": amount,
+//         "currency": "XOF",
+//         "description": "Reglement de commande",
+//         "customer_id": user,
+//         "notify_url": `https://goodness-1e5ee24644b9.herokuapp.com/hook/payment_event/${order_id}`,
+//         "return_url": "https://google.com",
+//         "channels": "ALL",
+//         "lang": "FR"
+//     }
+//     const payment_request_response = await axios.post(
+//         "https://api-checkout.cinetpay.com/v2/payment",
+//         data
+//     ).then(res => {
+//         if (res.status !== 200) {
+//             console.log(`Error while getting payment url`);
+//             return { status: false, url: "" };
+//         }
+//         const response = res.data as { data: { payment_url: string } };
+//         return { status: true, url: response.data.payment_url };
+//     })
+//     return payment_request_response;
+// }
+
+
+
+// Calculate distance between points
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) *
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance.toFixed(3);
+};
+
+
+export const userWithDistanceFilter = async (users: any[], aLng: number, aLat: number) => {
+    const userWithDistances = users.map((user) => ({
+        ...user,
+        distance: calculateDistance(
+            aLat, aLng, parseFloat(user.location.split("|")[0]), parseFloat(user.location.split("|")[1])
+        ),
+    }));
+    return userWithDistances.sort((a, b) => a.distance - b.distance);
+};
+
+export const checkDriverBalance = async (driver: any) => {
+    const account = await prisma.account.findFirst({ where: { userId: driver.id } });
+    return !!(account && account.balance > 3000);
 }
 
 export function utilisIsInt(n: number) {
@@ -128,16 +179,16 @@ export function create_cases(sheet: string): Case[] {
 }
 
 // Carnet ouvert
-export async function opened_book(user: User) {
-    const book = await prisma.book.findFirst({ where: { userId: user.id, status: "opened" } });
-    if (!book) return { error: true, message: "Pas de carnet ouvert", book: false, data: null };
+export async function opened_book(userId: string) {
+    const book = await prisma.book.findFirst({ where: { userId: userId, status: "opened" } });
+    if (!book) return { error: true, message: "Pas de carnet ouvert", book: null, data: null };
     return { error: false, message: "ok", book: true, data: book };
 }
 
 // Feuille ouverte
 export async function opened_sheet(user: User) {
-    const book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false };
+    const book = await opened_book(user.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null };
     var sheetOpened = book.data.sheets.find((st) => st.status === "opened");
     if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte", book: true };
     return { error: false, message: "", data: sheetOpened as Sheet, book: true };
@@ -145,8 +196,8 @@ export async function opened_sheet(user: User) {
 
 // Case remplie
 export async function empty_case(user: User) {
-    const book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false };
+    const book = await opened_book(user.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null };
     var lastContributedCase: Case;
     var sheetOpened = book.data.sheets.find((st) => st.status === "opened");
     if (!sheetOpened) return { error: true, message: "Aucune feuille ouverte" }
@@ -163,9 +214,9 @@ export async function empty_case(user: User) {
 
 // Feuille à ouvrir
 export async function sheet_to_open(user: User) {
-    var book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false };
-    if (!book) return { error: true, message: "Pas de carnet ouvert", book: false, data: null };
+    var book = await opened_book(user.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null };
+    if (!book) return { error: true, message: "Pas de carnet ouvert", book: null, data: null };
     var sheetToOpen: Sheet;
     const findLastClosedSheet = book.data.sheets.findLast((st) => st.status === "closed");
     if (!findLastClosedSheet) {
@@ -173,26 +224,26 @@ export async function sheet_to_open(user: User) {
     } else {
         if (findLastClosedSheet.index == 11) {
             await prisma.book.update({ where: { id: book.data.id }, data: { status: "closed" } });
-            return { error: false, message: "Fin de feuille", book: false }
+            return { error: false, message: "Fin de feuille", book: null }
         } else { sheetToOpen = book.data.sheets[findLastClosedSheet.index + 1]; }
     }
     return { error: false, message: "ok", data: sheetToOpen, book: true };
 }
 
 export async function sheet_to_close(user: User) {
-    var book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, data: null };
+    var book = await opened_book(user.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null, data: null };
     const sheetToClose = book.data.sheets.find((st) => st.status === "opened");
-    if (!sheetToClose) return { error: true, message: "Aucune feuille ouverte", book: false, data: null };
-    return { error: false, message: "ok", book: false, data: sheetToClose };
+    if (!sheetToClose) return { error: true, message: "Aucune feuille ouverte", book: null, data: null };
+    return { error: false, message: "ok", book: null, data: sheetToClose };
 }
 
 // Open sheet
 export async function update_sheets(user: User, openedat: Date, bet: number) {
     let error: boolean = false;
     let message: string = "";
-    const book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const book = await opened_book(user.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null, update_sheets: null };
     const sheets = book.data.sheets;
     const sheetToOpen = await sheet_to_open(user);
     if (sheetToOpen.error || sheetToOpen.data == null) return { error: true, message: sheetToOpen.message, book: true, update_sheets: null };
@@ -224,11 +275,11 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
     const status = pmethod === "agent" ? "awaiting" : "paid";
     let error: boolean = false;
     let message: string = "";
-    const book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const book = await opened_book(user.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null, update_sheets: null };
     const sheets = book.data.sheets;
     const openedSheet = await sheet_to_open(user);
-    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null, sheet: null };
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: null, update_sheets: null, sheet: null };
     const sheet: Sheet = openedSheet.data;
     let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
@@ -245,18 +296,18 @@ export async function sheet_contribute(userid: string, amount: number, pmethod: 
         sheet.cases[i + emptycase.index].contributionStatus = status; cases.push((emptycase.index + i));
     };
     updated_sheets[sheetIndex] = sheet;
-    return { error, message, updated_sheets, cases, sheet, sheetId: sheet.id };
+    return { error, message, updated_sheets, cases, sheet, sheetId: sheet.id, book };
 }
 
 
 // Check for empty cases
 export async function sheet_validation(userid: string, amount: number) {
     const user = (await prisma.user.findUnique({ where: { id: userid } }))!;
-    const book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const book = await opened_book(user.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null, update_sheets: null };
     const sheets = book.data.sheets;
     const openedSheet = await sheet_to_open(user);
-    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: null, update_sheets: null };
     const sheet: Sheet = openedSheet.data;
     let updated_sheets: Sheet[] = sheets;
     const emptycase: Case = (await empty_case(user)).data!;
@@ -302,11 +353,11 @@ export async function sheet_cases_validate(status: string, reference: number, sh
 export async function sheet_validate(user: User, cases: number[], status: string) {
     let error: boolean = false;
     let message: string = "";
-    const book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const book = await opened_book(user.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null, update_sheets: null };
     const sheets = book.data.sheets;
     const openedSheet = await sheet_to_open(user);
-    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: null, update_sheets: null };
     let sheet: Sheet = openedSheet.data;
     let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
@@ -317,7 +368,7 @@ export async function sheet_validate(user: User, cases: number[], status: string
         // for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = status;
     }
     updated_sheets[sheetIndex] = sheet;
-    return { error, message, updated_sheets, cases, sheet };
+    return { error, message, updated_sheets, cases, sheet, book };
 }
 
 
@@ -325,11 +376,11 @@ export async function sheet_validate(user: User, cases: number[], status: string
 export async function sheet_reject(user: User, cases: number[]) {
     let error: boolean = false;
     let message: string = "";
-    const book = await opened_book(user);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const book = await opened_book(user.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null, update_sheets: null };
     const sheets = book.data.sheets;
     const openedSheet = await sheet_to_open(user);
-    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: null, update_sheets: null };
     let sheet: Sheet = openedSheet.data;
     let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
@@ -337,7 +388,7 @@ export async function sheet_reject(user: User, cases: number[]) {
     sheet = await sheet_cases_validate("unpaid", reference, sheet, cases.length);
     // for (let i = 0; i < cases.length; i++) sheet.cases[cases[i] - 1].contributionStatus = "rejected";
     updated_sheets[sheetIndex] = sheet;
-    return { error, message, updated_sheets, cases, sheet };
+    return { error: false, message: "Rejeté", updated_sheets, cases, sheet, book };
 }
 
 // Method: Mobile money
@@ -346,11 +397,11 @@ export async function sheet_contribute_mobile(user: string, amount: number, stat
     const targeted_user = await prisma.user.findUnique({ where: { id: user } });
     let error: boolean = false;
     let message: string = "";
-    const book = await opened_book(targeted_user!);
-    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
+    const book = await opened_book(targeted_user!.id);
+    if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null, update_sheets: null };
     const sheets = book.data.sheets;
     const openedSheet = await sheet_to_open(targeted_user!);
-    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: false, update_sheets: null };
+    if (openedSheet.error || openedSheet.data == null) return { error: true, message: "Aucune feuille ouverte", book: null, update_sheets: null };
     const sheet: Sheet = openedSheet.data;
     let updated_sheets: Sheet[] = sheets;
     let sheetIndex = sheets.findIndex(e => e.id === sheet.id);
@@ -471,7 +522,8 @@ export const gateways: any = {
 
 export const operatorChecker = (phone: string) => {
     let operator = "moovmoney";
-    if (phone.startsWith("228")) {
+    console.log(phone)
+    if (phone.startsWith("+228") || phone.startsWith("228")) {
         const first = phone.replace('228', "").trim().slice(0, 2);
         if (firsttwonumberstogocomArray.includes(first)) { operator = "tmoney"; }
     } else if (firsttwonumberstogocomArray.includes(phone.trim().slice(0, 2))) {
@@ -484,40 +536,3 @@ export const operatorChecker = (phone: string) => {
 export const semoaCashPayGateway = (gateway: string) => {
     return gateways[gateway];
 }
-
-// export const utilsTotalReport = async (type: string, agent: string[], method: string) => {
-//     // {
-//     //     const totalDeposit = (await prisma.deposit.aggregate({ _sum: { amount: true } }))._sum ?? 0;
-//     //     const totalContribution = (await prisma.deposit.aggregate({ _sum: { amount: true } }))._sum ?? 0;
-//     //     const total = totalContribution.amount! + totalDeposit.amount!;
-//     // }
-//     switch (type) {
-//         case "contribution":
-//             const contribution = await prisma.contribution.findMany({
-//                 where: { agent: { in: agent }, pmethod: method }
-//             });
-//             break;
-//         case "deposit":
-//             const deposit = await prisma.deposit.findMany({
-//                 where: { payment: method }
-//             });
-//         default:
-//             break;
-//     }
-// }
-
-// export const utilsNonSpecifiedReport = async (type: string, agent: string[], method: string) => {
-//     switch (type) {
-//         case "contribution":
-//             const contribution = await prisma.contribution.findMany({
-//                 where: { agent: { in: agent }, pmethod: method }
-//             });
-//             break;
-//         case "deposit":
-//             const deposit = await prisma.deposit.findMany({
-//                 where: { payment: method }
-//             });
-//         default:
-//             break;
-//     }
-// }

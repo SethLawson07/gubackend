@@ -140,7 +140,7 @@ export async function get_opened_book(req: Request, res: Response) {
 // Close book on file
 export const forceclosebook = async (user: User) => {
     try {
-        const book = await opened_book(user);
+        const book = await opened_book(user.id);
         if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
         await prisma.book.update({ where: { id: book.data.id }, data: { status: "closed" } });
         return { error: false, message: "ok", data: {} };

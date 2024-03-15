@@ -1,14 +1,15 @@
-import { Request, Response } from "express";
+import { Request, Response, request, response } from "express";
 import { z } from "zod";
 import * as jwt from "jsonwebtoken";
 import { agenda, prisma } from "../server";
-import { create_sheets, opened_book, operatorChecker, semoaCashPayGateway, sheet_contribute, todateTime } from "../utils";
+import { contribution_schema, create_sheets, opened_book, operatorChecker, semoaCashPayGateway, sheet_contribute, todateTime } from "../utils";
 import { Contribution, User } from "@prisma/client";
 import { mMoneyContributionJobQueue } from "../queues/queues";
 import { semoaCashPayHeader } from "../utils/headers";
 import { fromZodError } from "zod-validation-error";
 import axios from "axios";
 import dayjs from "dayjs";
+import { contributionEvent } from "./Contribution";
 
 
 
@@ -38,10 +39,12 @@ export const hookCreateOrder = async (req: Request, res: Response) => {
                 "client": {
                     "lastname": user.id,
                     "firstname": user.user_name,
-                    "phone": `228${user.phone}`
+                    "phone": "+22897990733"
+                    // "phone": `228${user.phone}`
                 },
                 "gateway_id": semoaCashPayGateway(validation.data.gateway),
-                "callback_url": `https://goodapp-9c0o.onrender.com/hook/order/validate/${data}`,
+                "callback_url": `https://7829-2c0f-f0f8-67e-2b01-509e-d55e-d8ca-f15f.ngrok-free.app/hook/order/validate/${data}`,
+                // "callback_url": `https://goodapp-9c0o.onrender.com/hook/order/validate/${data}`,
                 "redirect_url": "https://google.com",
             })
         };
@@ -49,6 +52,7 @@ export const hookCreateOrder = async (req: Request, res: Response) => {
         if (!response) return res.status(400).send({ error: true, message: "...", data: {} });
         if (!(response.data.status == "success")) return res.status(400).send({ error: true, message: "Veuillez réssayer SVP !" });
         console.log(response.data);
+
         return res.status(200).send({
             error: false, message: "ok", data: {
                 action: response.data["payments_method"][0].action ?? null, phone: user.phone, transaction: validation.data.type, gateway: validation.data.gateway,
@@ -61,40 +65,12 @@ export const hookCreateOrder = async (req: Request, res: Response) => {
     }
 }
 
-const validateContribution = async (userId: string, amount: number, phone: string) => {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+const validateContribution = async (customer: string, amount: number, phone: string) => {
+    const payment_method = operatorChecker(phone);
+    const schemaData: contribution_schema = { customer, amount, p_method: payment_method, createdAt: dayjs(Date.now()).toDate() }
+    const user = await prisma.user.findUnique({ where: { id: customer } });
     if (!user) { console.log({ error: true, message: "User not found", data: {} }); return; };
-    const book = await opened_book(user);
-    if (book.error || !book.book || !book.data) { console.log({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null }); return };
-    let result = await sheet_contribute(userId, amount, "customer");
-    const userAccount = await prisma.account.findFirst({ where: { userId } });
-    if (!userAccount) { console.log(console.log({ error: true, message: "User account not found", data: {} })); return; };
-    let contribution: Contribution; // CreatedContribution
-    if (!result.error && result.cases) {
-        const report = await prisma.report.create({
-            data: {
-                type: "contribution", amount: amount, createdat: dayjs(Date.now()).format(), payment: operatorChecker(phone),
-                sheet: result.sheet!, cases: result.cases, status: "unpaid", customerId: user.id,
-            }
-        });
-        if (!report) { console.log(console.log({ error: true, message: "Oupps il s'est passé quelque chose!", data: {} })); return; };
-        contribution = await prisma.contribution.create({
-            data: {
-                account: userAccount?.id!, createdAt: dayjs(Date.now()).format(), userId: user.id!, pmethod: operatorChecker(phone), awaiting: "none",
-                status: "paid", amount: amount, cases: result.cases.map(chiffre => chiffre + 1), sheet: result.sheet!.id, reportId: report.id,
-            },
-        });
-        if (contribution) {
-            await mMoneyContributionJobQueue.add("mMoneyContribution", { customer: userId, amount: amount, result, book, report });
-            console.log({ error: false, message: "Cotisation éffectée", data: contribution! });
-            return;
-        } else { console.log({ error: true, message: "Une erreur s'est produite réessayer", data: {} }); return; }
-    } else {
-        console.log(result.message);
-        console.log("Error");
-        console.log({ error: result.error, message: result.message, data: {} });
-        return;
-    }
+    return await contributionEvent(request, response, user, schemaData, "mobilemoney");
 }
 
 const validateDeposit = async (userId: string, amount: number, phone: string) => {
@@ -155,7 +131,9 @@ export const hookValidateOrder = async (req: Request, res: Response) => {
         const tokendata = jwt.verify(token, process.env.SEMOA_API_KEY!, { algorithms: ["HS256"] }) as any;
         if (!tokendata) return res.status(403).send({ error: true, message: "You provide an invalid token", data: {} });
         console.log(tokendata);
+        console.log(transactionData);
         if (tokendata && tokendata.state == "Paid") {
+            console.log(transactionData);
             switch (transactionData.type) {
                 case "tontine": validateContribution(transactionData.userId, tokendata.amount, tokendata.client.phone); break;
                 case "saving": validateDeposit(transactionData.userId, tokendata.amount, tokendata.client.phone); break;

@@ -9,8 +9,6 @@ const router = Router();
 // Rapport Global
 router.route("/").post(Auth, UserIsAdmin, report_all);
 
-// router.route("/saving").get(totalReport);
-
 // Rapport sur les commissions
 router.route("/bet").post(Auth, UserIsAdmin, totalBetReport);
 

@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { Auth, UserIsAgent, UserIsAgentCustomerOrAdmin, UserIsAgentOrAdmin, UserIsAgentOrCustomer } from "../../utils/middlewares";
-import { agent_rejected_contributions, contribute, contributions_agent, reject_contribution, target_contribution, userContributions, user_contributions, validate_contribution } from "../../services/Contribution";
+import { contribute, contributions_agent, reject_contribution, target_contribution, userContributions, user_contributions, validate_contribution } from "../../services/Contribution";
 
 const router = Router();
 
 // Cotisations rejetées pour un utilisateur donné
-router.route("/unvalidated/:userId").post(Auth, UserIsAgentOrAdmin, agent_rejected_contributions);
+// router.route("/unvalidated/:userId").post(Auth, UserIsAgentOrAdmin, agent_rejected_contributions);
 
 // User make contribution
 router.route("/contribute").post(Auth, UserIsAgentOrCustomer, contribute);

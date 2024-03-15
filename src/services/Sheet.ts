@@ -29,7 +29,7 @@ export async function open_sheet(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send({ error: true, message: fromZodError(validation_result.error).message, data: {} });
         const user = await prisma.user.findUnique({ where: { id: validation_result.data.userId } });
         if (!user) return res.status(404).send({ error: true, message: "Utilisateur non trouvé", data: {} });
-        const book = await opened_book(user);
+        const book = await opened_book(user.id);
         if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
         const sheets = await update_sheets(user, validation_result.data.openedAt, validation_result.data.bet);
         if (sheets.error) return res.status(400).send({ error: true, message: sheets.message, data: {} });
@@ -66,7 +66,7 @@ export async function open_sheet(req: Request, res: Response) {
 export async function close_sheet(req: Request, res: Response) {
     try {
         const { user } = req.body.user as { user: User };
-        const book = await opened_book(user);
+        const book = await opened_book(user.id);
         if (book.error || !book.book || !book.data) return res.status(403).send({ error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null });
         const sheets = book.data.sheets;
         const sheetToClose = await sheet_to_close(user);
@@ -93,7 +93,7 @@ export async function close_sheet(req: Request, res: Response) {
 // Close sheet on file
 export const forceclosesheet = async (user: User) => {
     try {
-        const book = await opened_book(user);
+        const book = await opened_book(user.id);
         if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: false, update_sheets: null };
         const sheets = book.data.sheets;
         const sheetToClose = await sheet_to_close(user);

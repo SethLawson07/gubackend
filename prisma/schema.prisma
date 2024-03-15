@@ -88,7 +88,6 @@ model Contribution {
     amount       Float       @default(0.0)
     agent        String?
     admin        String?
-    account      String
     pmethod      String      @default("") // (payment method)  agent, tmoney, moovmoney
     awaiting     String      @default("") // agent, admin, none
     status       String      @default("unpaid") //paid, unpaid, awaiting, rejected

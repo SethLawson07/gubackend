@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { prisma } from "../server"
-import { sign_token, hash_pwd, password_is_valid } from "../utils"
+import { sign_token, hash_pwd, password_is_valid, userWithDistanceFilter } from "../utils"
 import { z } from "zod"
 import { fromZodError } from 'zod-validation-error';
 import { User } from "@prisma/client";
@@ -125,7 +125,8 @@ export async function updateuser(req: Request, res: Response) {
                 profile_picture: user_data.profile_picture,
                 role: user_data.role
             },
-            where: { phone: user_data.phone, }
+            where: { phone: user_data.phone, },
+            include: { agent: true }
         })
         return res.status(201).send({ status: 201, error: false, message: 'Modification réussie', data: {} })
     } catch (err) {
@@ -144,7 +145,7 @@ export async function update_password(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message })
         const { data } = validation_result
         const { user: current_user } = req.body.user as { user: User }
-        const targetted_user = await prisma.user.findUnique({ where: { phone: current_user.phone as string } });
+        const targetted_user = await prisma.user.findUnique({ where: { phone: current_user.phone as string }, include: { agent: current_user.role == "customer" ? true : false } });
         if (!targetted_user) return res.status(404).send({ status: 404, error: true, message: "Utilisateur non trouve" });
         if (!password_is_valid(data.old, targetted_user.password)) return res.status(400).send({ status: 404, error: false, message: "Mot de passe invalide" });
         await prisma.user.update({ where: { phone: targetted_user.phone as string }, data: { password: hash_pwd(data.new), first_login: false, } });
@@ -186,7 +187,7 @@ export async function login(req: Request, res: Response) {
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message, data: {} })
         const login_data = validation_result.data
         const targetted_users = await prisma.user.findMany({
-            where: { OR: [{ email: login_data.email_or_phone, }, { phone: login_data.email_or_phone }] }
+            where: { OR: [{ email: login_data.email_or_phone, }, { phone: login_data.email_or_phone }], }, include: { agent: true }
         });
         if (!targetted_users.length || targetted_users.length > 1 || !password_is_valid(login_data.password, targetted_users[0].password)) return res.status(404).send({ status: 404, error: true, message: "Identifiants incorrects", data: {} })
         let targetted_user = targetted_users[0]
@@ -215,19 +216,17 @@ export async function logout(req: Request, res: Response) {
 
 export async function updateUserDeviceToken(req: Request, res: Response) {
     try {
-        const schema = z.object({
-            device_token: z.string()
-        })
+        const schema = z.object({ device_token: z.string() });
         const { user } = req.body.user as { user: User };
         const validation_result = schema.safeParse(req.body)
         if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message, data: {} })
-        let targettedUser = await prisma.user.findUnique({ where: { id: user.id } });
+        let targettedUser = await prisma.user.findUnique({ where: { id: user.id }, include: { agent: true } });
         if (!targettedUser) return res.status(404).send({ error: true, message: "User not found" });
-        let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: validation_result.data.device_token } });
+        let updatedUser = await prisma.user.update({ where: { id: targettedUser.id }, data: { device_token: validation_result.data.device_token }, include: { agent: true } });
         const token = sign_token({ ...updatedUser });
         return res.status(200).send({ error: false, message: "Device token modifié", data: { ...updatedUser, token: token } });
     } catch (e) {
-        console.log(e)
+        console.log(e);
     }
 }
 
@@ -315,13 +314,29 @@ export async function get_deliverypersons(_req: Request, res: Response) {
 export async function get_agent_customers(req: Request, res: Response) {
     try {
         const schema = z.object({ agent: z.string() });
-        const validation = schema.safeParse({ agent: req.params.agent });
+        const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
         const data = await prisma.user.findMany({
             where: { role: "customer", agentId: validation.data.agent, is_verified: true }
             , include: { Book: { where: { status: "opened", sheets: { some: { status: "opened", } } } } }
         });
-        return res.status(200).send({ status: 200, error: false, data: { customers: data } });
+        return res.status(200).send({ error: false, message: "ok", data: { customers: data } });
+    } catch (err) {
+        console.log(`Error while getting list of customers ${err}`);
+        return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} });
+    }
+}
+
+export async function get_agent_customers_locations(req: Request, res: Response) {
+    try {
+        const schema = z.object({ agent: z.string(), lat: z.number(), lng: z.number() });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: fromZodError(validation.error).message, data: {} });
+        const data = await prisma.user.findMany({
+            where: { role: "customer", agentId: validation.data.agent, is_verified: true, location: { not: null } }
+        });
+        let users = await userWithDistanceFilter(data, validation.data.lng, validation.data.lat);
+        return res.status(200).send({ status: 200, error: false, data: { customers: users } });
     } catch (err) {
         console.log(`Error while getting list of customers ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "erreur s'est produite", data: {} });
