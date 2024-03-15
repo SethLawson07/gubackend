@@ -5,11 +5,7 @@ const Agenda = require('agenda');
 import swagger from "swagger-ui-express";
 import swagger_doc from "./swagger.json";
 import { PrismaClient } from "@prisma/client";
-import { createBullBoard } from "@bull-board/api";
-import { ExpressAdapter } from "@bull-board/express";
-import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import express, { NextFunction, Request, Response } from "express";
-import { validateContributionJobQueue } from "./queues/queues";
 import { verboseFormat } from "./utils";
 
 
@@ -35,17 +31,17 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 
 // BullBoard
-const serverAdapter = new ExpressAdapter();
-serverAdapter.setBasePath('/admin/queues');
+// const serverAdapter = new ExpressAdapter();
+// serverAdapter.setBasePath('/admin/queues');
 
 // BullMQ Admin
-const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
-    queues: [
-        new BullMQAdapter(validateContributionJobQueue),
-    ],
-    serverAdapter: serverAdapter,
-});
-app.use('/admin/queues', serverAdapter.getRouter());
+// const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
+//     queues: [
+//         new BullMQAdapter(validateContributionJobQueue),
+//     ],
+//     serverAdapter: serverAdapter,
+// });
+// app.use('/admin/queues', serverAdapter.getRouter());
 
 //
 export const prisma = new PrismaClient();

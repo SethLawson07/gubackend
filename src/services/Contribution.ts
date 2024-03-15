@@ -2,11 +2,10 @@ import { Request, Response } from "express";
 import { prisma } from "../server";
 import { fromZodError } from "zod-validation-error";
 import { z } from "zod";
-import { Account, Contribution, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { allContributions, contribution_schema, contribution_validation_schema, customerContributions, sendPushNotification, sheet_contribute, sheet_reject, sheet_validate, userAgentContributions } from "../utils";
 import { forceclosebook } from "./Book";
 import { forceclosesheet } from "./Sheet";
-import { validateContributionJobQueue } from "../queues/queues";
 
 // Cotiser
 export async function contribute(req: Request, res: Response) {
