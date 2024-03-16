@@ -1,7 +1,7 @@
 import cors from "cors";
 import morgan from "morgan";
 import * as dotenv from "dotenv"; dotenv.config();
-const Agenda = require('agenda');
+import Agenda, { Job, JobAttributesData } from 'agenda';
 import swagger from "swagger-ui-express";
 import swagger_doc from "./swagger.json";
 import { PrismaClient } from "@prisma/client";
@@ -35,7 +35,7 @@ export const prisma = new PrismaClient();
 
 // Agenda
 export const agenda = new Agenda();
-agenda.database(process.env.DATABASE);
+agenda.database(process.env.DATABASE!);
 
 // Middlewares
 app.use(cors());
