@@ -30,19 +30,6 @@ const PORT = process.env.PORT || 5000;
 // Server
 const app = express();
 
-// BullBoard
-// const serverAdapter = new ExpressAdapter();
-// serverAdapter.setBasePath('/admin/queues');
-
-// BullMQ Admin
-// const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
-//     queues: [
-//         new BullMQAdapter(validateContributionJobQueue),
-//     ],
-//     serverAdapter: serverAdapter,
-// });
-// app.use('/admin/queues', serverAdapter.getRouter());
-
 //
 export const prisma = new PrismaClient();
 
@@ -90,7 +77,6 @@ app.get("/health", (_req: Request, res: Response) => {
 app.listen(PORT, async () => {
     try {
         await prisma.$connect();
-        await agenda.every('10 seconds', 'checkserver', {});
         agenda.start();
         console.info("Connected to database");
         console.info(`App listening on ${PORT}`);
