@@ -36,7 +36,6 @@ export async function open_sheet(req: Request, res: Response) {
         await prisma.book.update({ where: { id: book.data.id }, data: { sheets: sheets.updated_sheets } });
         // await agenda.schedule('in 1 months, 1 days', 'closesheet', { book, sheet: sheets.sheet });
         await agenda.schedule('in 31 days', 'closesheet', { book: book.data, sheet: sheets.sheet });
-        await agenda.start();
         return res.status(200).send({ error: false, message: "Feuille ouverte", data: {} });
     } catch (e) {
         console.log(e);

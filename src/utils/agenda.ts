@@ -1,5 +1,6 @@
 import { Book, Sheet, User } from "@prisma/client";
 import { agenda, prisma } from "../server";
+import axios from "axios";
 
 
 // Définition de la tâche
@@ -18,3 +19,10 @@ agenda.define('closesheet', async (job: any) => {
     updated_sheets[sheetIndex] = sheet;
     await prisma.book.update({ where: { id: book.id }, data: { sheets: updated_sheets } });
 });
+
+// Appel récurent pour éviter la pause du serveur (gratuit)
+// A enlever après
+agenda.define('checkserver', async (job: any) => {
+    let config = { method: 'GET', url: 'https://goodapp.onrender.com/health', };
+    await axios(config);
+}); 

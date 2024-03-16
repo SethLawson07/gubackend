@@ -4,9 +4,6 @@ import { contribute, contributions_agent, reject_contribution, target_contributi
 
 const router = Router();
 
-// Cotisations rejetées pour un utilisateur donné
-// router.route("/unvalidated/:userId").post(Auth, UserIsAgentOrAdmin, agent_rejected_contributions);
-
 // User make contribution
 router.route("/contribute").post(Auth, UserIsAgentOrCustomer, contribute);
 

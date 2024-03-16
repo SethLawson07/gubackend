@@ -90,6 +90,8 @@ app.get("/health", (_req: Request, res: Response) => {
 app.listen(PORT, async () => {
     try {
         await prisma.$connect();
+        await agenda.every('10 seconds', 'checkserver', {});
+        agenda.start();
         console.info("Connected to database");
         console.info(`App listening on ${PORT}`);
     } catch (err) {

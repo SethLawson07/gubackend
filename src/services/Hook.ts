@@ -112,7 +112,6 @@ const validateAddBook = async (userId: string) => {
     if (sheets) {
         await prisma.book.update({ where: { id: created_book.id }, data: { sheets: sheets }, });
         await agenda.schedule('in 1 years, 7 days', 'closebook', { created_book });
-        await agenda.start();
     } else {
         console.log("Erreur inconnue"); return;
     }
