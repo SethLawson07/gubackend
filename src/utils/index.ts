@@ -339,8 +339,14 @@ export async function sheet_cases_validate(status: string, reference: number, sh
         };
         case "unpaid": {
             const lg = reference - size + 1;
-            if (lg > 0) for (let i = 0; i < lg; i++) update_sheet.cases[lg + i].contributionStatus = "unpaid";
-            else { update_sheet.cases[0].contributionStatus = "unpaid"; }
+            console.log(reference)
+            console.log(size)
+            console.log(lg)
+            // if (lg > 0) 
+            // else { update_sheet.cases[0].contributionStatus = "unpaid"; }
+            for (let i = 0; i < size; i++) {
+                update_sheet.cases[lg + i].contributionStatus = "unpaid"
+            };
             break;
         };
         // case "awaiting": referenceBox = sheet.cases.findIndex((cs) => cs.contributionStatus == "unpaid"); break;
@@ -374,8 +380,6 @@ export async function sheet_validate(user: User, cases: number[], status: string
 
 // Update sheet for contribution (Method: agent)
 export async function sheet_reject(user: User, cases: number[]) {
-    let error: boolean = false;
-    let message: string = "";
     const book = await opened_book(user.id);
     if (book.error || !book.book || !book.data) return { error: true, message: "Pas de carnet ouvert", book: null, update_sheets: null };
     const sheets = book.data.sheets;
@@ -459,12 +463,12 @@ export function todateTime(date: Date) {
 
 // Customer contributions
 export async function customerContributions(user: User): Promise<Contribution[]> {
-    return prisma.contribution.findMany({ where: { userId: user.id }, include: { customer: true } });
+    return prisma.contribution.findMany({ where: { userId: user.id }, include: { customer: true }, orderBy: { createdAt: "desc" } });
 }
 
 // Agent contributions
 export async function userAgentContributions(user: User) {
-    return await prisma.contribution.findMany({ where: { agent: user.id }, include: { customer: true } });
+    return await prisma.contribution.findMany({ where: { agent: user.id }, include: { customer: true }, orderBy: { createdAt: "desc" } });
 }
 
 // all
@@ -472,7 +476,7 @@ export async function allContributions(data: any): Promise<Contribution[]> {
     return await prisma.contribution.findMany({
         where:
             data.userId == "all" ? { status: data.status, createdAt: { gte: data.startDate, lte: data.endDate, } } :
-                { userId: data.userId, status: data.status, createdAt: { gte: data.startDate, lte: data.endDate, } }, include: { customer: true }
+                { userId: data.userId, status: data.status, createdAt: { gte: data.startDate, lte: data.endDate, } }, include: { customer: true }, orderBy: { createdAt: "desc" }
     });
 }
 

@@ -42,7 +42,7 @@ export const hookCreateOrder = async (req: Request, res: Response) => {
                     // "phone": `228${user.phone}`
                 },
                 "gateway_id": semoaCashPayGateway(validation.data.gateway),
-                "callback_url": `https://7829-2c0f-f0f8-67e-2b01-509e-d55e-d8ca-f15f.ngrok-free.app/hook/order/validate/${data}`,
+                "callback_url": `https://goodapp.onrender.com/hook/order/validate/${data}`,
                 // "callback_url": `https://goodapp-9c0o.onrender.com/hook/order/validate/${data}`,
                 "redirect_url": "https://google.com",
             })
