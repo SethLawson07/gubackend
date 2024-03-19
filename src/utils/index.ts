@@ -473,6 +473,7 @@ export async function userAgentContributions(user: User) {
 
 // all
 export async function allContributions(data: any): Promise<Contribution[]> {
+    console.log(data);
     return await prisma.contribution.findMany({
         where:
             data.userId == "all" ? { status: data.status, createdAt: { gte: data.startDate, lte: data.endDate, } } :

@@ -195,12 +195,10 @@ export const contributionEvent = async (
                     const cases = (result.cases as number[]).map(chiffre => chiffre + 1);
                     if (cases.includes(1)) {
                         prisma.account.update({ where: { id: user_acount.id }, data: { balance: (balance - result.sheet.bet!) } });
-                    }
-                    else {
-                        await prisma.account.update({ where: { id: user_acount.id }, data: { balance } });
-                    }
+                    } else { await prisma.account.update({ where: { id: user_acount.id }, data: { balance } }); }
                     await prisma.book.update({ where: { id: result.book.data.id }, data: { sheets: result.updated_sheets! } });
                     await prisma.report.update({ where: { id: report.id }, data: { status: "paid" } });
+                    await prisma.contribution.update({ where: { id: contribution.id }, data: { status: "paid" } });
                 default:
                     break;
             }
