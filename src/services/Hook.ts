@@ -145,11 +145,25 @@ export const hookValidateOrder = async (req: Request, res: Response) => {
     }
 }
 
-
-
-// const useraccount = await prisma.account.findFirst({ where: { userId: userData.userId } });
-// if (!useraccount) return res.status(404).send({ error: true, message: "User Account not found", data: {} });
-// let updated = await prisma.account.update({ where: { id: useraccount.id }, data: { balance: useraccount.balance + tokendata.amount } });
-// await prisma.transaction.create({ data: { title: "Rechargement", amount: tokendata.amount.toString(), user: userData.userId, createdat: dayjs(Date.now()).format(), description: "Rechargement de compte" } });
-// await supabase.from("account").upsert({ 'balance': updated.balance, id: useraccount.id }).eq("id", useraccount.id);
-// return res.status(200).send({ error: false, message: "ok", data: updated });
+export const payWithGoodpay = async (req: Request, res: Response) => {
+    try {
+        const schema = z.object({
+            userId: z.string(),
+            amount: z.number(),
+            date: z.coerce.date(),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ error: true, message: "Schema incorrect", data: {} });
+        var targetted_user = await prisma.user.findUnique({ where: { id: validation.data.userId } });
+        if (!targetted_user || !targetted_user.is_verified) return res.status(403).send({ error: true, message: "User not verified", data: {} });
+        const account = await prisma.account.findFirst({ where: { userId: validation.data.userId } });
+        if (!account) return res.status(404).send({ error: true, message: "User Account not found", data: {} });
+        if (account.balance < validation.data.amount) return res.status(403).send({ error: true, message: "Insufficient balance", data: {} });
+        var updated = await prisma.account.update({ where: { id: account.id }, data: { balance: account.balance - validation.data.amount } });
+        if (!updated) return res.status(501).send({ error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(200).send({ error: false, message: `Transaction réussie. Nouveau solde: ${updated.balance}`, data: {} });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ error: true, message: "Un erreur s'est produite", data: {} });
+    }
+}
