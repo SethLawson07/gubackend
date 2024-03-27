@@ -8,7 +8,7 @@ router.route("/order/create").post(Auth, hookCreateOrder);
 
 router.route("/order/validate/:data").post(hookValidateOrder);
 
-router.route("/order/pay").post(Auth, payWithGoodpay);
+router.route("/order/pay").post(/*Auth,*/ payWithGoodpay);
 
 
 export default router
