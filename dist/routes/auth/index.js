@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const Auth_1 = require("../../services/Auth");
+const middlewares_1 = require("../../utils/middlewares");
+const router = (0, express_1.Router)();
+router.route("/register").post(Auth_1.register);
+router.route("/user/:userid").get(Auth_1.get_customer);
+router.route("/adduser").post(middlewares_1.Auth, middlewares_1.UserIsAgentOrAdmin, Auth_1.adduser);
+router.route("/disable/:userid").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, Auth_1.disable_user);
+router.route("/updateuser").post(middlewares_1.Auth, middlewares_1.UserIsAgentCustomerOrAdmin, Auth_1._update);
+router.route("/login").post(Auth_1.login);
+router.route("/create_admin").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, Auth_1.create_admin);
+router.route("/change_password").put(middlewares_1.Auth, Auth_1.update_password);
+router.route("/set_id").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, Auth_1.set_financepro_id);
+router.route("/logout").post(middlewares_1.Auth, Auth_1.logout);
+router.route("/settoken").post(middlewares_1.Auth, Auth_1.updateUserDeviceToken);
+exports.default = router;

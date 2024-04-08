@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Auth_1 = require("../../services/Auth");
+const middlewares_1 = require("../../utils/middlewares");
+const express_1 = require("express");
+const router = (0, express_1.Router)();
+router.route("").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, Auth_1.get_all_users);
+router.route("/customers").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, Auth_1.get_customers);
+router.route("/agents").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, Auth_1.get_agents);
+router.route("/deliverypersons").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, Auth_1.get_deliverypersons);
+router.route("/agent/customers").post(middlewares_1.Auth, middlewares_1.UserIsAgentOrAdmin, Auth_1.get_agent_customers);
+router.route("/location/customers").post(middlewares_1.Auth, middlewares_1.UserIsAgentOrAdmin, Auth_1.get_agent_customers_locations);
+exports.default = router;

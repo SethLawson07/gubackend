@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Hook_1 = require("../../services/Hook");
+const express_1 = require("express");
+const middlewares_1 = require("../../utils/middlewares");
+const router = (0, express_1.Router)();
+router.route("/order/create").post(middlewares_1.Auth, Hook_1.hookCreateOrder);
+router.route("/order/validate/:data").post(Hook_1.hookValidateOrder);
+router.route("/order/pay").post(/*Auth,*/ Hook_1.payWithGoodpay);
+exports.default = router;

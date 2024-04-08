@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const middlewares_1 = require("../../utils/middlewares");
+const typeservice_1 = require("../../services/ecommerce/typeservice");
+const router = (0, express_1.Router)();
+router.route("/add").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, typeservice_1.addTypeService);
+router.route("/all").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, typeservice_1.all);
+router.route("/active").get(typeservice_1.active);
+router.route("/update/:id").put(middlewares_1.Auth, middlewares_1.UserIsAdmin, typeservice_1.updateTypeService);
+router.route("/delete/:id").delete(middlewares_1.Auth, middlewares_1.UserIsAdmin, typeservice_1.deleteTypeService);
+exports.default = router;
