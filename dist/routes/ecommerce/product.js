@@ -9,6 +9,7 @@ router.route("/all").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, product_
 router.route("/active").get(product_1.active);
 router.route("/item/:slugitem").get(product_1.allproductsbyitem);
 router.route("/:slugproduct").get(product_1.product);
+router.route("/test/oklm").get(product_1.oklm);
 router.route("/update/:id").put(middlewares_1.Auth, middlewares_1.UserIsAdmin, product_1.updateProduct);
 router.route("/delete/:id").delete(middlewares_1.Auth, middlewares_1.UserIsAdmin, product_1.deleteProduct);
 exports.default = router;
