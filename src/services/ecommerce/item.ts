@@ -11,17 +11,18 @@ export async function addItem(req: Request, res: Response) {
         const schema = z.object({
             title: z.string(),
             image: z.string(),
+            slugitem: z.string(),
             subCategoryId: z.string(),
             featured: z.boolean().optional()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
 
-        const slug = slugify(validation.data.title, { lower: true });
+        // const slugitem = slugify(validation.data.title, { lower: true });
 
-        const dataWithSlug = { ...validation.data, slug };
+        // const dataWithSlug = { ...validation.data, slugitem };
 
-        const savedItem = await prisma.item.create({ data: dataWithSlug });
+        const savedItem = await prisma.item.create({ data: validation.data  });
         return res.status(200).send({ status: 200, error: false, message: "ok", data: savedItem });
     } catch (err) {
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });

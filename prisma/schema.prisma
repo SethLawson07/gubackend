@@ -231,7 +231,7 @@ model Item {
     image         String
     subcategory   SubCategory @relation(fields: [subCategoryId], references: [id])
     featured      Boolean     @default(false)
-    slug          String      @unique
+    slugitem      String      @unique
     createdat     DateTime    @default(now())
     subCategoryId String      @db.ObjectId
     Product       Product[]
@@ -251,16 +251,17 @@ model Product {
     title         String
     price         String
     qte           Int
-    discount      Boolean        @default(false)
-    discountprice String
+    discount      Boolean?        @default(false)
+    discountprice String? @default("")
     goodpay       Boolean        @default(false)
     goodpayprice  String
     brand         String?
     description   String
+    spec          String
     keywords      String
     images        String[]
     item          Item           @relation(fields: [itemId], references: [id])
-    slug          String
+    slugproduct   String         @unique
     featured      Boolean        @default(false)
     createdat     DateTime       @default(now())
     itemId        String         @db.ObjectId

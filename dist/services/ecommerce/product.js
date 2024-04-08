@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.updateProduct = exports.active = exports.all = exports.addProduct = void 0;
+exports.deleteProduct = exports.updateProduct = exports.product = exports.allproductsbyitem = exports.active = exports.all = exports.addProduct = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
@@ -20,26 +20,28 @@ function addProduct(req, res) {
                 title: zod_1.z.string(),
                 price: zod_1.z.string(),
                 qte: zod_1.z.number(),
-                discount: zod_1.z.boolean(),
-                discountprice: zod_1.z.string(),
+                discount: zod_1.z.boolean().optional(),
+                discountprice: zod_1.z.string().optional().default(""),
                 goodpay: zod_1.z.boolean(),
                 goodpayprice: zod_1.z.string(),
                 brand: zod_1.z.string().optional(),
                 description: zod_1.z.string(),
+                spec: zod_1.z.string(),
                 keywords: zod_1.z.string(),
-                image: zod_1.z.array(zod_1.z.string()),
+                images: zod_1.z.array(zod_1.z.string()),
                 itemId: zod_1.z.string(),
-                slug: zod_1.z.string(),
-                featured: zod_1.z.boolean().optional()
+                featured: zod_1.z.boolean().optional(),
+                slugproduct: zod_1.z.string()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
                 return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
             const savedProduct = yield server_1.prisma.product.create({ data: validation.data });
+            // const savedProduct = await prisma.product.create({ data: validation.data });
             return res.status(200).send({ status: 200, error: false, message: "ok", data: savedProduct });
         }
         catch (err) {
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -47,8 +49,8 @@ exports.addProduct = addProduct;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const all = yield server_1.prisma.product.findMany();
-            return res.status(200).send({ error: false, message: "ok", data: all });
+            const products = yield server_1.prisma.product.findMany();
+            return res.status(200).send({ error: false, message: "ok", data: products });
         }
         catch (err) {
             console.error(` ${err}`);
@@ -70,6 +72,35 @@ function active(req, res) {
     });
 }
 exports.active = active;
+function allproductsbyitem(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            let slugitem = req.params.slugitem;
+            const item = yield server_1.prisma.item.findUnique({ where: { slugitem: slugitem } });
+            const all = yield server_1.prisma.product.findMany({ where: { itemId: item === null || item === void 0 ? void 0 : item.id, featured: true } });
+            return res.status(200).send({ error: false, message: "ok", data: all });
+        }
+        catch (err) {
+            console.error(` ${err}`);
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        }
+    });
+}
+exports.allproductsbyitem = allproductsbyitem;
+function product(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            let slugproduct = req.params.slugproduct;
+            const product = yield server_1.prisma.product.findUnique({ where: { slugproduct: slugproduct } });
+            return res.status(200).send({ error: false, message: "ok", data: product });
+        }
+        catch (err) {
+            console.error(` ${err}`);
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        }
+    });
+}
+exports.product = product;
 function updateProduct(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
