@@ -34,7 +34,7 @@ export async function all(req: Request, res: Response) {
 
 export async function active(req: Request, res: Response) {
     try {
-        const active = await prisma.category.findMany({where:{featured:true}});
+        const active = await prisma.category.findMany({where:{featured:true},include:{SubCategory:{include:{Item:true}}}});
         return res.status(200).send({ error: false, message: "ok", data: active });
     } catch (err) {
         console.error(` ${err}`);
