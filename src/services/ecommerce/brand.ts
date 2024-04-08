@@ -4,6 +4,7 @@ import { fromZodError } from "zod-validation-error";
 import { prisma } from "../../server";
 
 
+
 export async function addBrand(req: Request, res: Response) {
     try {
         const schema = z.object({
