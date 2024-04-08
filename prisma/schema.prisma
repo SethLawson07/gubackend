@@ -230,8 +230,8 @@ model Item {
     title         String
     image         String
     subcategory   SubCategory @relation(fields: [subCategoryId], references: [id])
-    slug          String
     featured      Boolean     @default(false)
+    slug          String      @unique
     createdat     DateTime    @default(now())
     subCategoryId String      @db.ObjectId
     Product       Product[]
