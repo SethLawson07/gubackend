@@ -29,6 +29,7 @@ function addProduct(req, res) {
                 keywords: zod_1.z.string(),
                 image: zod_1.z.array(zod_1.z.string()),
                 itemId: zod_1.z.string(),
+                slug: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);

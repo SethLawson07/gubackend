@@ -20,6 +20,7 @@ function addItem(req, res) {
                 title: zod_1.z.string(),
                 image: zod_1.z.string(),
                 subCategoryId: zod_1.z.string(),
+                slug: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);
