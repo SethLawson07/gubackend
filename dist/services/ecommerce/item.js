@@ -8,11 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteItem = exports.updateItem = exports.active = exports.all = exports.addItem = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
+const slugify_1 = __importDefault(require("slugify"));
 function addItem(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -20,13 +24,14 @@ function addItem(req, res) {
                 title: zod_1.z.string(),
                 image: zod_1.z.string(),
                 subCategoryId: zod_1.z.string(),
-                slug: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
                 return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
-            const savedItem = yield server_1.prisma.item.create({ data: validation.data });
+            const slug = (0, slugify_1.default)(validation.data.title, { lower: true });
+            const dataWithSlug = Object.assign(Object.assign({}, validation.data), { slug });
+            const savedItem = yield server_1.prisma.item.create({ data: dataWithSlug });
             return res.status(200).send({ status: 200, error: false, message: "ok", data: savedItem });
         }
         catch (err) {
