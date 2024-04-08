@@ -19,6 +19,7 @@ export async function addProduct(req: Request, res: Response) {
             keywords: z.string(),
             image: z.array(z.string()),
             itemId: z.string(),
+            slug:z.string(),
             featured:z.boolean().optional()
 
         });

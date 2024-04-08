@@ -10,6 +10,7 @@ export async function addItem(req: Request, res: Response) {
             title: z.string(),
             image: z.string(),
             subCategoryId:z.string(),
+            slug:z.string(),
             featured:z.boolean().optional()
 
         });
