@@ -2,12 +2,12 @@
   "name": "goodnessunit",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"tsc --watch\" \"nodemon dist/server.js\" ",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "concurrently \"tsc --watch\" \"nodemon dist/server.js --trace-warnings\" "
   },
   "postinstall": "echo hello world",
   "keywords": [],

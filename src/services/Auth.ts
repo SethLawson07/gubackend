@@ -241,7 +241,8 @@ export async function create_admin(req: Request, res: Response) {
             profile_picture: z.string(),
         });
         const validation_result = data_schema.safeParse(req.body)
-        if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message })
+        // if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).details[0].message })
+            if (!validation_result.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation_result.error).message })
         const admin_data = { ...validation_result.data, password: hash_pwd(validation_result.data.password), role: 'admin', is_admin: true }
         const potential_duplicate = await prisma.user.findUnique({ where: { email: admin_data.email } });
         if (potential_duplicate) return res.status(409).send({ status: 409, error: true, message: "Email deja en cours d'utilisation" })

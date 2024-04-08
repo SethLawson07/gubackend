@@ -9,6 +9,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { verboseFormat } from "./utils";
 
 
+
 // Routes
 import banner from "./routes/banner";
 import home from "./routes/home";
@@ -23,6 +24,20 @@ import hook from "./routes/hook";
 import report from "./routes/report";
 import account from "./routes/account";
 import notification from "./routes/notification";
+
+//RoutesE-COMMERCE
+import brand from "./routes/ecommerce/brand";
+import category from "./routes/ecommerce/category";
+import collection from "./routes/ecommerce/collection";
+import item from "./routes/ecommerce/item";
+import orderproduct from "./routes/ecommerce/orderproduct";
+import orderservice from "./routes/ecommerce/orderservice";
+import product from "./routes/ecommerce/product";
+import promocode from "./routes/ecommerce/promocode";
+import section from "./routes/ecommerce/section";
+import service from "./routes/ecommerce/service";
+import subcategory from "./routes/ecommerce/subcategory";
+import typeservice from "./routes/ecommerce/typeservice";
 
 // App PORT
 const PORT = process.env.PORT || 5000;
@@ -67,6 +82,20 @@ app.use("/sheet", sheet);
 app.use("/hook", hook);
 app.use("/users", users);
 app.use('/push', notification);
+
+//routes E-COMMERCE
+app.use('/brand', brand);
+app.use('/category', category);
+app.use('/collection', collection);
+app.use('/item', item);
+app.use('/orderproduct', orderproduct);
+app.use('/orderservice', orderservice);
+app.use('/product', product);
+app.use('/section', promocode);
+app.use('/service', service);
+app.use('/subcategory', subcategory);
+app.use('/typeservice', typeservice);
+
 
 // Health
 app.get("/health", (_req: Request, res: Response) => {
