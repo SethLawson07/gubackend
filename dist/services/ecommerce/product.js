@@ -112,16 +112,17 @@ exports.all = all;
 function active(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const products = yield server_1.prisma.product.findMany({
-                include: {
-                    productVariant: true
-                    // item: {
-                    //     include: {
-                    //         itemVariant: true
-                    //     }
-                    // }
-                }
-            });
+            const products = yield server_1.prisma.product.findMany();
+            // const products = await prisma.product.findMany({
+            //     include: {
+            //         productVariant: true
+            //         // item: {
+            //         //     include: {
+            //         //         itemVariant: true
+            //         //     }
+            //         // }
+            //     }
+            // });
             return res.status(200).send({ error: false, message: "ok", data: products });
         }
         catch (err) {
