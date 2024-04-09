@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const middlewares_1 = require("../../utils/middlewares");
+const slider_1 = require("../../services/ecommerce/slider");
+const router = (0, express_1.Router)();
+router.route("/add").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, slider_1.addSlider);
+router.route("/all").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, slider_1.all);
+router.route("/active").get(slider_1.active);
+router.route("/position/:position").get(slider_1.slider);
+router.route("/update/:id").put(middlewares_1.Auth, middlewares_1.UserIsAdmin, slider_1.updateSlider);
+router.route("/delete/:id").delete(middlewares_1.Auth, middlewares_1.UserIsAdmin, slider_1.deleteSlider);
+exports.default = router;

@@ -334,6 +334,10 @@ model Variant {
 
 model Slider {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    file String
+    type String //video or image
+    link String
+    position String 
     featured  Boolean  @default(true)
     createdat DateTime @default(now())
 }

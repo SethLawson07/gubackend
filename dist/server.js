@@ -72,6 +72,7 @@ const promocode_1 = __importDefault(require("./routes/ecommerce/promocode"));
 const service_1 = __importDefault(require("./routes/ecommerce/service"));
 const subcategory_1 = __importDefault(require("./routes/ecommerce/subcategory"));
 const typeservice_1 = __importDefault(require("./routes/ecommerce/typeservice"));
+const slider_1 = __importDefault(require("./routes/ecommerce/slider"));
 // App PORT
 const PORT = process.env.PORT || 5000;
 // Server
@@ -125,6 +126,7 @@ app.use('/section', promocode_1.default);
 app.use('/service', service_1.default);
 app.use('/subcategory', subcategory_1.default);
 app.use('/typeservice', typeservice_1.default);
+app.use('/slider', slider_1.default);
 // Health
 app.get("/health", (_req, res) => {
     return res.status(200).send();

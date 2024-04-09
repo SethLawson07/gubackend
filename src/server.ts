@@ -38,6 +38,7 @@ import section from "./routes/ecommerce/section";
 import service from "./routes/ecommerce/service";
 import subcategory from "./routes/ecommerce/subcategory";
 import typeservice from "./routes/ecommerce/typeservice";
+import slider from "./routes/ecommerce/slider";
 
 // App PORT
 const PORT = process.env.PORT || 5000;
@@ -95,6 +96,7 @@ app.use('/section', promocode);
 app.use('/service', service);
 app.use('/subcategory', subcategory);
 app.use('/typeservice', typeservice);
+app.use('/slider', slider);
 
 
 // Health
