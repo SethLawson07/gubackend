@@ -83,40 +83,18 @@ export async function all(req: Request, res: Response) {
 // }
 
 
-// export async function active(req: Request, res: Response) {
-//   try {
-//       const products = await prisma.product.findMany({
-//           include: {
-//               productVariant: true,
-//               item: {
-//                   include: {
-//                       itemVariant: true
-//                   }
-//               }
-//           }
-//       });
-
-//       return res.status(200).send({ error: false, message: "ok", data: products });
-//   } catch (err) {
-//       console.error(` ${err}`);
-//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
-//   }
-// }
-
-
 export async function active(req: Request, res: Response) {
   try {
-    const products = await prisma.product.findMany();
-      // const products = await prisma.product.findMany({
-      //     include: {
-      //         productVariant: true
-      //         // item: {
-      //         //     include: {
-      //         //         itemVariant: true
-      //         //     }
-      //         // }
-      //     }
-      // });
+      const products = await prisma.product.findMany({
+          include: {
+              productVariant: true,
+              item: {
+                  include: {
+                      itemVariant: true
+                  }
+              }
+          }
+      });
 
       return res.status(200).send({ error: false, message: "ok", data: products });
   } catch (err) {
@@ -124,6 +102,28 @@ export async function active(req: Request, res: Response) {
       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
   }
 }
+
+
+// export async function active(req: Request, res: Response) {
+//   try {
+//     const products = await prisma.product.findMany();
+//       // const products = await prisma.product.findMany({
+//       //     include: {
+//       //         productVariant: true
+//       //         // item: {
+//       //         //     include: {
+//       //         //         itemVariant: true
+//       //         //     }
+//       //         // }
+//       //     }
+//       // });
+
+//       return res.status(200).send({ error: false, message: "ok", data: products });
+//   } catch (err) {
+//       console.error(` ${err}`);
+//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
+//   }
+// }
 
 
 
