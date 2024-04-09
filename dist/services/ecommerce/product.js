@@ -53,7 +53,7 @@ function all(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -61,12 +61,21 @@ exports.all = all;
 function active(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const products = yield server_1.prisma.product.findMany({ include: { productVariant: true, item: { include: { itemVariant: true } } } });
+            const products = yield server_1.prisma.product.findMany({
+                include: {
+                    productVariant: true,
+                    item: {
+                        include: {
+                            itemVariant: true
+                        }
+                    }
+                }
+            });
             return res.status(200).send({ error: false, message: "ok", data: products });
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -81,7 +90,7 @@ function allproductsbyitem(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -95,7 +104,7 @@ function product(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -280,7 +289,7 @@ function oklm(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -309,7 +318,7 @@ function updateProduct(req, res) {
             return res.status(200).send({ status: 200, error: false, message: "ok", data: savedProduct });
         }
         catch (err) {
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -323,7 +332,7 @@ function deleteProduct(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }

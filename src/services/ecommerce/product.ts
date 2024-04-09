@@ -43,21 +43,30 @@ export async function all(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "ok", data: products });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
 export async function active(req: Request, res: Response) {
-    try {
-
-      const products = await prisma.product.findMany({include:{productVariant:true,item:{include:{itemVariant:true}}}});
+  try {
+      const products = await prisma.product.findMany({
+          include: {
+              productVariant: true,
+              item: {
+                  include: {
+                      itemVariant: true
+                  }
+              }
+          }
+      });
 
       return res.status(200).send({ error: false, message: "ok", data: products });
-    } catch (err) {
-        console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
-    }
+  } catch (err) {
+      console.error(` ${err}`);
+      return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
+  }
 }
+
 
 
 
@@ -69,7 +78,7 @@ export async function allproductsbyitem(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "ok", data: all });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
@@ -80,7 +89,7 @@ export async function product(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "ok", data: product });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
@@ -263,7 +272,7 @@ export async function oklm(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "okokok", data:products});
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
@@ -289,7 +298,7 @@ export async function updateProduct(req: Request, res: Response) {
         const savedProduct = await prisma.product.update({ where: { id: id, }, data: validation.data, })
         return res.status(200).send({ status: 200, error: false, message: "ok", data: savedProduct });
     } catch (err) {
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
@@ -302,6 +311,6 @@ export async function deleteProduct(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "ok", data: product });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
