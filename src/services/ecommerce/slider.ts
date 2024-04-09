@@ -18,7 +18,7 @@ export async function addSlider(req: Request, res: Response) {
         const savedSlider = await prisma.slider.create({ data: validation.data });
         return res.status(200).send({ status: 200, error: false, message: "ok", data: savedSlider });
     } catch (err) {
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
@@ -30,7 +30,7 @@ export async function all(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "ok", data: all });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
@@ -40,7 +40,7 @@ export async function active(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "ok", data: active });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
@@ -51,7 +51,7 @@ export async function slider(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "ok", data: slider });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
@@ -71,7 +71,7 @@ export async function updateSlider(req: Request, res: Response) {
         const savedSlider = await prisma.slider.update({ where: { id: id, }, data: validation.data, })
         return res.status(200).send({ status: 200, error: false, message: "ok", data: savedSlider });
     } catch (err) {
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 
@@ -84,6 +84,6 @@ export async function deleteSlider(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "ok", data: slider });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }

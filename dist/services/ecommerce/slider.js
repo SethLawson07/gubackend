@@ -30,7 +30,7 @@ function addSlider(req, res) {
             return res.status(200).send({ status: 200, error: false, message: "ok", data: savedSlider });
         }
         catch (err) {
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -43,7 +43,7 @@ function all(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -56,7 +56,7 @@ function active(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -70,7 +70,7 @@ function slider(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -93,7 +93,7 @@ function updateSlider(req, res) {
             return res.status(200).send({ status: 200, error: false, message: "ok", data: savedSlider });
         }
         catch (err) {
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
@@ -107,7 +107,7 @@ function deleteSlider(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
