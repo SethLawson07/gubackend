@@ -63,10 +63,25 @@ function active(req, res) {
         try {
             const products = yield server_1.prisma.product.findMany({
                 include: {
-                    productVariant: true,
+                    productVariant: {
+                        select: {
+                            id: true,
+                            color: true,
+                            image: true,
+                            size: true,
+                            featured: true,
+                            createdat: true
+                        }
+                    },
                     item: {
                         include: {
-                            itemVariant: true
+                            itemVariant: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    value: true
+                                }
+                            }
                         }
                     }
                 }
@@ -80,6 +95,24 @@ function active(req, res) {
     });
 }
 exports.active = active;
+// export async function active(req: Request, res: Response) {
+//   try {
+//       const products = await prisma.product.findMany({
+//           include: {
+//               productVariant: true,
+//               item: {
+//                   include: {
+//                       itemVariant: true
+//                   }
+//               }
+//           }
+//       });
+//       return res.status(200).send({ error: false, message: "ok", data: products });
+//   } catch (err) {
+//       console.error(` ${err}`);
+//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
+//   }
+// }
 function allproductsbyitem(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
