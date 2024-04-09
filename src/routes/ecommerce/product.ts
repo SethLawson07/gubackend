@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin } from "../../utils/middlewares";
 import { addProduct ,all,active, updateProduct, deleteProduct, product, allproductsbyitem, oklm} from "../../services/ecommerce/product";
+import { addItemVariant, addProductVariant } from "../../services/ecommerce/variant";
 
 const router = Router();
 

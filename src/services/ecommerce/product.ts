@@ -2,13 +2,13 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { prisma } from "../../server";
-import slugify from "slugify";
+import { Product } from "@prisma/client";
 
 
 export async function addProduct(req: Request, res: Response) {
     try {
         const schema = z.object({
-            title: z.string(),
+            name: z.string(),
             price:z.string(),
             qte: z.number(),
             discount: z.boolean().optional(),
@@ -18,7 +18,7 @@ export async function addProduct(req: Request, res: Response) {
             brand: z.string().optional(),
             description: z.string(),
             spec: z.string(),
-            keywords: z.string(),
+            tag: z.array(z.string()),
             images: z.array(z.string()),
             itemId: z.string(),
             featured:z.boolean().optional(),
@@ -29,7 +29,6 @@ export async function addProduct(req: Request, res: Response) {
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
      
         const savedProduct = await prisma.product.create({ data: validation.data  });
-        // const savedProduct = await prisma.product.create({ data: validation.data });
         return res.status(200).send({ status: 200, error: false, message: "ok", data: savedProduct });
     } catch (err) {
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
@@ -50,8 +49,10 @@ export async function all(req: Request, res: Response) {
 
 export async function active(req: Request, res: Response) {
     try {
-        const active = await prisma.product.findMany({where:{featured:true}});
-        return res.status(200).send({ error: false, message: "ok", data: active });
+
+      const products = await prisma.product.findMany({include:{productVariant:true,item:{include:{itemVariant:true}}}});
+
+      return res.status(200).send({ error: false, message: "ok", data: products });
     } catch (err) {
         console.error(` ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });

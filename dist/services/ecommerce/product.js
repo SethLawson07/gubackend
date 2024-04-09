@@ -17,7 +17,7 @@ function addProduct(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const schema = zod_1.z.object({
-                title: zod_1.z.string(),
+                name: zod_1.z.string(),
                 price: zod_1.z.string(),
                 qte: zod_1.z.number(),
                 discount: zod_1.z.boolean().optional(),
@@ -27,7 +27,7 @@ function addProduct(req, res) {
                 brand: zod_1.z.string().optional(),
                 description: zod_1.z.string(),
                 spec: zod_1.z.string(),
-                keywords: zod_1.z.string(),
+                tag: zod_1.z.array(zod_1.z.string()),
                 images: zod_1.z.array(zod_1.z.string()),
                 itemId: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional(),
@@ -37,7 +37,6 @@ function addProduct(req, res) {
             if (!validation.success)
                 return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
             const savedProduct = yield server_1.prisma.product.create({ data: validation.data });
-            // const savedProduct = await prisma.product.create({ data: validation.data });
             return res.status(200).send({ status: 200, error: false, message: "ok", data: savedProduct });
         }
         catch (err) {
@@ -62,8 +61,8 @@ exports.all = all;
 function active(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const active = yield server_1.prisma.product.findMany({ where: { featured: true } });
-            return res.status(200).send({ error: false, message: "ok", data: active });
+            const products = yield server_1.prisma.product.findMany({ include: { productVariant: true, item: { include: { itemVariant: true } } } });
+            return res.status(200).send({ error: false, message: "ok", data: products });
         }
         catch (err) {
             console.error(` ${err}`);
