@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const middlewares_1 = require("../../utils/middlewares");
+const FIlter_1 = require("../../services/ecommerce/FIlter");
+const router = (0, express_1.Router)();
+router.route("/add").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, FIlter_1.addFilter);
+router.route("/item/:id").get(FIlter_1.allByItem);
+router.route("/update/:id").put(middlewares_1.Auth, middlewares_1.UserIsAdmin, FIlter_1.updateFilter);
+exports.default = router;

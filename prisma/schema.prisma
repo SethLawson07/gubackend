@@ -226,17 +226,18 @@ model SubCategory {
 }
 
 model Item {
-    id            String          @id @default(auto()) @map("_id") @db.ObjectId
+    id            String        @id @default(auto()) @map("_id") @db.ObjectId
     title         String
     image         String
-    subcategory   SubCategory     @relation(fields: [subCategoryId], references: [id])
-    featured      Boolean         @default(false)
-    slugitem      String          @unique
-    createdat     DateTime        @default(now())
-    subCategoryId String          @db.ObjectId
+    subcategory   SubCategory   @relation(fields: [subCategoryId], references: [id])
+    featured      Boolean       @default(false)
+    slugitem      String        @unique
+    createdat     DateTime      @default(now())
+    subCategoryId String        @db.ObjectId
     Product       Product[]
     // Variant       Variant[]
-    itemVariant ItemVariant[]
+    itemVariant   ItemVariant[]
+    Filters        Filters[]
 }
 
 model Brand {
@@ -248,29 +249,40 @@ model Brand {
 }
 
 model Product {
-    id               String             @id @default(auto()) @map("_id") @db.ObjectId
-    name             String
-    price            String
-    qte              Int
-    discount         Boolean            @default(false)
-    discountprice    String?            @default("0")
-    new              Boolean            @default(true)
-    rating           String             @default("4")
-    goodpay          Boolean            @default(false)
-    goodpayprice     String
-    brand            String?
-    description      String
-    spec             String
-    tag              String[]
-    category         String[]           @default([""])
-    images           String[]
-    item             Item               @relation(fields: [itemId], references: [id])
-    slugproduct      String             @unique
-    featured         Boolean            @default(false)
-    createdat        DateTime           @default(now())
-    itemId           String             @db.ObjectId
-    Order            OrderProduct[]
+    id             String           @id @default(auto()) @map("_id") @db.ObjectId
+    name           String
+    price          String
+    qte            Int
+    discount       Boolean          @default(false)
+    discountprice  String?          @default("0")
+    new            Boolean          @default(true)
+    rating         String           @default("4")
+    goodpay        Boolean          @default(false)
+    goodpayprice   String
+    brand          String?
+    description    String
+    spec           String
+    tag            String[]
+    // category       String[]         @default([""])
+    images         String[]
+    imageAlt String @default("")
+    item           Item             @relation(fields: [itemId], references: [id])
+    slugproduct    String           @unique
+    featured       Boolean          @default(false)
+    createdat      DateTime         @default(now())
+    itemId         String           @db.ObjectId
+    Order          OrderProduct[]
     productVariant ProductVariant[]
+}
+
+model Filters {
+    id      String @id @default(auto()) @map("_id") @db.ObjectId
+    title   String
+    name    String
+    item    Item   @relation(fields: [itemId], references: [id])
+    options Json[]
+    custom Boolean 
+    itemId String @db.ObjectId
 }
 
 model ProductVariant {

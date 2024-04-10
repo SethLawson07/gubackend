@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin } from "../../utils/middlewares";
-import { addProduct ,all,active, updateProduct, deleteProduct, product, allproductsbyitem, oklm} from "../../services/ecommerce/product";
+import { addProduct ,all, updateProduct, deleteProduct, product, allproductsbyitem, oklm} from "../../services/ecommerce/product";
 import { addItemVariant, addProductVariant } from "../../services/ecommerce/variant";
 
 const router = Router();
@@ -9,7 +9,7 @@ router.route("/add").post(Auth, UserIsAdmin, addProduct);
 
 router.route("/all").get(Auth, UserIsAdmin,all);
 
-router.route("/active").get(active);
+// router.route("/active/:id").get(active);
 
 router.route("/item/:slugitem").get(allproductsbyitem);
 

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.updateProduct = exports.oklm = exports.product = exports.allproductsbyitem = exports.active = exports.all = exports.addProduct = void 0;
+exports.deleteProduct = exports.updateProduct = exports.oklm = exports.product = exports.allproductsbyitem = exports.productByItem = exports.all = exports.addProduct = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
@@ -91,18 +91,11 @@ exports.all = all;
 //       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
 //   }
 // }
-function active(req, res) {
+function productByItem(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const products = yield server_1.prisma.product.findMany({
-                include: {
-                    productVariant: true,
-                    item: {
-                        include: {
-                            itemVariant: true
-                        }
-                    }
-                }
+            let itemId = req.params.id;
+            const products = yield server_1.prisma.product.findMany({ where: { itemId: itemId }
             });
             return res.status(200).send({ error: false, message: "ok", data: products });
         }
@@ -112,7 +105,7 @@ function active(req, res) {
         }
     });
 }
-exports.active = active;
+exports.productByItem = productByItem;
 // export async function active(req: Request, res: Response) {
 //   try {
 //     const products = await prisma.product.findMany();

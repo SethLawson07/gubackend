@@ -6,7 +6,7 @@ const product_1 = require("../../services/ecommerce/product");
 const router = (0, express_1.Router)();
 router.route("/add").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, product_1.addProduct);
 router.route("/all").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, product_1.all);
-router.route("/active").get(product_1.active);
+// router.route("/active/:id").get(active);
 router.route("/item/:slugitem").get(product_1.allproductsbyitem);
 router.route("/:slugproduct").get(product_1.product);
 router.route("/test/oklm").get(product_1.oklm);

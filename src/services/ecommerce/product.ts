@@ -83,17 +83,10 @@ export async function all(req: Request, res: Response) {
 // }
 
 
-export async function active(req: Request, res: Response) {
+export async function productByItem(req: Request, res: Response) {
   try {
-      const products = await prisma.product.findMany({
-          include: {
-              productVariant: true,
-              item: {
-                  include: {
-                      itemVariant: true
-                  }
-              }
-          }
+    let itemId = req.params.id
+      const products = await prisma.product.findMany({where:{itemId:itemId}
       });
 
       return res.status(200).send({ error: false, message: "ok", data: products });
