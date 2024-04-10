@@ -62,7 +62,7 @@ export async function allByItem(req: Request, res: Response) {
         return res.status(200).send({ error: false, message: "ok", data: all });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " +err, data: {} });
     }
 }
 
