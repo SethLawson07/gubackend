@@ -124,9 +124,11 @@ export async function productByItem(req: Request, res: Response) {
 export async function allproductsbyitem(req: Request, res: Response) {
     try {
         let slugitem = req.params.slugitem
-        const item = await prisma.item.findUnique({where:{slugitem:slugitem}})        
+        
+        const item = await prisma.item.findUnique({where:{slugitem:slugitem}}) 
         const all = await prisma.product.findMany({where:{itemId:item?.id,featured:true}});
-        return res.status(200).send({ error: false, message: "ok", data: all });
+        return res.status(200).send({ error: false, message: "ok", data: item!==null ? all : {} });
+
     } catch (err) {
         console.error(` ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });

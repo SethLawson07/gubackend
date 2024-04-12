@@ -57,9 +57,10 @@ export async function updateFilter(req: Request, res: Response) {
 
 export async function allByItem(req: Request, res: Response) {
     try {
-        let slugitem = req.params.id
-        const all = await prisma.filters.findMany({where:{itemId:slugitem}});
-        return res.status(200).send({ error: false, message: "ok", data: all });
+        let slugitem = req.params.slugitem
+        const item = await prisma.item.findUnique({where:{slugitem:slugitem}}) 
+        const all = await prisma.filters.findMany({where:{itemId:item?.id}});
+        return res.status(200).send({ error: false, message: "ok", data: item!==null ? all : {} });
     } catch (err) {
         console.error(` ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " +err, data: {} });

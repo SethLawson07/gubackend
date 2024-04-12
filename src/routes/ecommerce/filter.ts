@@ -6,7 +6,7 @@ const router = Router();
 
 router.route("/add").post(Auth, UserIsAdmin, addFilter);
 
-router.route("/item/:id").get(allByItem);
+router.route("/item/:slugitem").get(allByItem);
 
 router.route("/update/:id").put(Auth, UserIsAdmin, updateFilter);
 

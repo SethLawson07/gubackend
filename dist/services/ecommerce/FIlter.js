@@ -65,9 +65,10 @@ exports.updateFilter = updateFilter;
 function allByItem(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let slugitem = req.params.id;
-            const all = yield server_1.prisma.filters.findMany({ where: { itemId: slugitem } });
-            return res.status(200).send({ error: false, message: "ok", data: all });
+            let slugitem = req.params.slugitem;
+            const item = yield server_1.prisma.item.findUnique({ where: { slugitem: slugitem } });
+            const all = yield server_1.prisma.filters.findMany({ where: { itemId: item === null || item === void 0 ? void 0 : item.id } });
+            return res.status(200).send({ error: false, message: "ok", data: item !== null ? all : {} });
         }
         catch (err) {
             console.error(` ${err}`);
