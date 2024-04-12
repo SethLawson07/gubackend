@@ -68,7 +68,7 @@ function allByItem(req, res) {
             let slugitem = req.params.slugitem;
             const item = yield server_1.prisma.item.findUnique({ where: { slugitem: slugitem } });
             const all = yield server_1.prisma.filters.findMany({ where: { itemId: item === null || item === void 0 ? void 0 : item.id } });
-            return res.status(200).send({ error: false, message: "ok", data: item !== null ? all : {} });
+            return res.status(200).send({ error: false, message: "ok", data: item !== null ? all : [] });
         }
         catch (err) {
             console.error(` ${err}`);
