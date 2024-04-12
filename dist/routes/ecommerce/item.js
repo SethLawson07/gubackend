@@ -8,7 +8,7 @@ const router = (0, express_1.Router)();
 router.route("/add").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, item_1.addItem);
 router.route("/all").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, item_1.all);
 router.route("/active").get(item_1.active);
-router.route("/product/:id").get(product_1.productByItem);
+router.route("/product/:slugitem").get(product_1.productsByItem);
 router.route("/update/:id").put(middlewares_1.Auth, middlewares_1.UserIsAdmin, item_1.updateItem);
 router.route("/delete/:id").delete(middlewares_1.Auth, middlewares_1.UserIsAdmin, item_1.deleteItem);
 exports.default = router;

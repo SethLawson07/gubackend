@@ -83,18 +83,18 @@ export async function all(req: Request, res: Response) {
 // }
 
 
-export async function productByItem(req: Request, res: Response) {
-  try {
-    let itemId = req.params.id
-      const products = await prisma.product.findMany({where:{itemId:itemId}
-      });
+// export async function productByItem(req: Request, res: Response) {
+//   try {
+//     let itemId = req.params.id
+//       const products = await prisma.product.findMany({where:{itemId:itemId}
+//       });
 
-      return res.status(200).send({ error: false, message: "ok", data: products });
-  } catch (err) {
-      console.error(` ${err}`);
-      return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
-  }
-}
+//       return res.status(200).send({ error: false, message: "ok", data: products });
+//   } catch (err) {
+//       console.error(` ${err}`);
+//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
+//   }
+// }
 
 
 // export async function active(req: Request, res: Response) {
@@ -121,7 +121,7 @@ export async function productByItem(req: Request, res: Response) {
 
 
 
-export async function allproductsbyitem(req: Request, res: Response) {
+export async function productsByItem(req: Request, res: Response) {
     try {
         let slugitem = req.params.slugitem
         

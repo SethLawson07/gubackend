@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.updateProduct = exports.oklm = exports.product = exports.allproductsbyitem = exports.productByItem = exports.all = exports.addProduct = void 0;
+exports.deleteProduct = exports.updateProduct = exports.oklm = exports.product = exports.productsByItem = exports.all = exports.addProduct = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
@@ -91,21 +91,17 @@ exports.all = all;
 //       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
 //   }
 // }
-function productByItem(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            let itemId = req.params.id;
-            const products = yield server_1.prisma.product.findMany({ where: { itemId: itemId }
-            });
-            return res.status(200).send({ error: false, message: "ok", data: products });
-        }
-        catch (err) {
-            console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
-        }
-    });
-}
-exports.productByItem = productByItem;
+// export async function productByItem(req: Request, res: Response) {
+//   try {
+//     let itemId = req.params.id
+//       const products = await prisma.product.findMany({where:{itemId:itemId}
+//       });
+//       return res.status(200).send({ error: false, message: "ok", data: products });
+//   } catch (err) {
+//       console.error(` ${err}`);
+//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
+//   }
+// }
 // export async function active(req: Request, res: Response) {
 //   try {
 //     const products = await prisma.product.findMany();
@@ -125,7 +121,7 @@ exports.productByItem = productByItem;
 //       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
 //   }
 // }
-function allproductsbyitem(req, res) {
+function productsByItem(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let slugitem = req.params.slugitem;
@@ -139,7 +135,7 @@ function allproductsbyitem(req, res) {
         }
     });
 }
-exports.allproductsbyitem = allproductsbyitem;
+exports.productsByItem = productsByItem;
 function product(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
