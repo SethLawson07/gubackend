@@ -237,7 +237,7 @@ model Item {
     Product       Product[]
     // Variant       Variant[]
     itemVariant   ItemVariant[]
-    Filters        Filters[]
+    Filters       Filters[]
 }
 
 model Brand {
@@ -251,21 +251,20 @@ model Brand {
 model Product {
     id             String           @id @default(auto()) @map("_id") @db.ObjectId
     name           String
+    qte Int
     price          String
-    qte            Int
-    discount       Boolean          @default(false)
-    discountprice  String?          @default("0")
-    new            Boolean          @default(true)
+    oldPrice       String?          @default("")
+    discount       String?          @default("")
     rating         String           @default("4")
-    goodpay        Boolean          @default(false)
-    goodpayprice   String
-    brand          String?
+    goodpay        String?          @default("")
+    color          String[]         @default([])
+    size           String[]         @default([])
+    prices         String[]         @default([])
+    brand          String?          @default("")
     description    String
     spec           String
     tag            String[]
-    // category       String[]         @default([""])
     images         String[]
-    imageAlt String @default("")
     item           Item             @relation(fields: [itemId], references: [id])
     slugproduct    String           @unique
     featured       Boolean          @default(false)
@@ -276,13 +275,13 @@ model Product {
 }
 
 model Filters {
-    id      String @id @default(auto()) @map("_id") @db.ObjectId
+    id      String  @id @default(auto()) @map("_id") @db.ObjectId
     title   String
     name    String
-    item    Item   @relation(fields: [itemId], references: [id])
+    item    Item    @relation(fields: [itemId], references: [id])
     options Json[]
-    custom Boolean 
-    itemId String @db.ObjectId
+    custom  Boolean
+    itemId  String  @db.ObjectId
 }
 
 model ProductVariant {

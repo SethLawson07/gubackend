@@ -4,17 +4,21 @@ import { fromZodError } from "zod-validation-error";
 import { prisma } from "../../server";
 import { Product } from "@prisma/client";
 
-
+ 
+ 
+  
 export async function addProduct(req: Request, res: Response) {
     try {
         const schema = z.object({
             name: z.string(),
-            price:z.string(),
             qte: z.number(),
-            discount: z.boolean().optional(),
-            discountprice: z.string().optional().default(""),
-            goodpay: z.boolean(),
-            goodpayprice: z.string(),
+            price:z.string(),
+            oldprice:z.string().optional(),
+            discount: z.string().optional(),
+            goodpay: z.string().optional(),
+            color: z.array(z.string()).optional(),
+            size: z.array(z.string()).optional(),
+            prices: z.array(z.string()).optional(),
             brand: z.string().optional(),
             description: z.string(),
             spec: z.string(),
@@ -47,79 +51,6 @@ export async function all(req: Request, res: Response) {
     }
 }
 
-// export async function active(req: Request, res: Response) {
-//   try {
-//       const products = await prisma.product.findMany({
-//           include: {
-//               productVariant: {
-//                   select: {
-//                       id: true,
-//                       color: true,
-//                       image: true,
-//                       size: true,
-//                       featured: true,
-//                       createdat: true
-//                   }
-//               },
-//               item: {
-//                   include: {
-//                       itemVariant: {
-//                           select: {
-//                               id: true,
-//                               title: true,
-//                               value: true
-//                           }
-//                       }
-//                   }
-//               }
-//           }
-//       });
-
-//       return res.status(200).send({ error: false, message: "ok", data: products });
-//   } catch (err) {
-//       console.error(` ${err}`);
-//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
-//   }
-// }
-
-
-// export async function productByItem(req: Request, res: Response) {
-//   try {
-//     let itemId = req.params.id
-//       const products = await prisma.product.findMany({where:{itemId:itemId}
-//       });
-
-//       return res.status(200).send({ error: false, message: "ok", data: products });
-//   } catch (err) {
-//       console.error(` ${err}`);
-//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
-//   }
-// }
-
-
-// export async function active(req: Request, res: Response) {
-//   try {
-//     const products = await prisma.product.findMany();
-//       // const products = await prisma.product.findMany({
-//       //     include: {
-//       //         productVariant: true
-//       //         // item: {
-//       //         //     include: {
-//       //         //         itemVariant: true
-//       //         //     }
-//       //         // }
-//       //     }
-//       // });
-
-//       return res.status(200).send({ error: false, message: "ok", data: products });
-//   } catch (err) {
-//       console.error(` ${err}`);
-//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
-//   }
-// }
-
-
-
 
 export async function productsByItem(req: Request, res: Response) {
     try {
@@ -144,6 +75,17 @@ export async function product(req: Request, res: Response) {
         console.error(` ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
+}
+
+
+export async function products(req: Request, res: Response) {
+  try {
+      const categories = await prisma.category.findMany({include:{SubCategory:{include:{Item:{include:{Product:true}}}}}})
+      return res.status(200).send({ error: false, message: "ok", data: categories });
+  } catch (err) {
+      console.error(` ${err}`);
+      return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
+  }
 }
 
 export async function oklm(req: Request, res: Response) {
@@ -335,15 +277,15 @@ export async function updateProduct(req: Request, res: Response) {
         const schema = z.object({
             title: z.string(),
             qte: z.number(),
-            discount: z.boolean(),
-            discountprice: z.string(),
-            goodpay: z.boolean(),
-            goodpayprice: z.string(),
-            brand: z.string(),
-            description: z.string(),
-            keywords: z.string(),
-            image: z.string(),
-            itemId: z.string(),
+            discount: z.string(),
+            // discountprice: z.string(),
+            // goodpay: z.boolean(),
+            // goodpayprice: z.string(),
+            // brand: z.string(),
+            // description: z.string(),
+            // keywords: z.string(),
+            // image: z.string(),
+            // itemId: z.string(),
            
         });
         const validation = schema.safeParse(req.body);

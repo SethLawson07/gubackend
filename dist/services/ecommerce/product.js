@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.updateProduct = exports.oklm = exports.product = exports.productsByItem = exports.all = exports.addProduct = void 0;
+exports.deleteProduct = exports.updateProduct = exports.oklm = exports.products = exports.product = exports.productsByItem = exports.all = exports.addProduct = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
@@ -18,12 +18,14 @@ function addProduct(req, res) {
         try {
             const schema = zod_1.z.object({
                 name: zod_1.z.string(),
-                price: zod_1.z.string(),
                 qte: zod_1.z.number(),
-                discount: zod_1.z.boolean().optional(),
-                discountprice: zod_1.z.string().optional().default(""),
-                goodpay: zod_1.z.boolean(),
-                goodpayprice: zod_1.z.string(),
+                price: zod_1.z.string(),
+                oldprice: zod_1.z.string().optional(),
+                discount: zod_1.z.string().optional(),
+                goodpay: zod_1.z.string().optional(),
+                color: zod_1.z.array(zod_1.z.string()).optional(),
+                size: zod_1.z.array(zod_1.z.string()).optional(),
+                prices: zod_1.z.array(zod_1.z.string()).optional(),
                 brand: zod_1.z.string().optional(),
                 description: zod_1.z.string(),
                 spec: zod_1.z.string(),
@@ -58,69 +60,6 @@ function all(req, res) {
     });
 }
 exports.all = all;
-// export async function active(req: Request, res: Response) {
-//   try {
-//       const products = await prisma.product.findMany({
-//           include: {
-//               productVariant: {
-//                   select: {
-//                       id: true,
-//                       color: true,
-//                       image: true,
-//                       size: true,
-//                       featured: true,
-//                       createdat: true
-//                   }
-//               },
-//               item: {
-//                   include: {
-//                       itemVariant: {
-//                           select: {
-//                               id: true,
-//                               title: true,
-//                               value: true
-//                           }
-//                       }
-//                   }
-//               }
-//           }
-//       });
-//       return res.status(200).send({ error: false, message: "ok", data: products });
-//   } catch (err) {
-//       console.error(` ${err}`);
-//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
-//   }
-// }
-// export async function productByItem(req: Request, res: Response) {
-//   try {
-//     let itemId = req.params.id
-//       const products = await prisma.product.findMany({where:{itemId:itemId}
-//       });
-//       return res.status(200).send({ error: false, message: "ok", data: products });
-//   } catch (err) {
-//       console.error(` ${err}`);
-//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
-//   }
-// }
-// export async function active(req: Request, res: Response) {
-//   try {
-//     const products = await prisma.product.findMany();
-//       // const products = await prisma.product.findMany({
-//       //     include: {
-//       //         productVariant: true
-//       //         // item: {
-//       //         //     include: {
-//       //         //         itemVariant: true
-//       //         //     }
-//       //         // }
-//       //     }
-//       // });
-//       return res.status(200).send({ error: false, message: "ok", data: products });
-//   } catch (err) {
-//       console.error(` ${err}`);
-//       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
-//   }
-// }
 function productsByItem(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -150,6 +89,19 @@ function product(req, res) {
     });
 }
 exports.product = product;
+function products(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const categories = yield server_1.prisma.category.findMany({ include: { SubCategory: { include: { Item: { include: { Product: true } } } } } });
+            return res.status(200).send({ error: false, message: "ok", data: categories });
+        }
+        catch (err) {
+            console.error(` ${err}`);
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
+        }
+    });
+}
+exports.products = products;
 function oklm(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -342,15 +294,15 @@ function updateProduct(req, res) {
             const schema = zod_1.z.object({
                 title: zod_1.z.string(),
                 qte: zod_1.z.number(),
-                discount: zod_1.z.boolean(),
-                discountprice: zod_1.z.string(),
-                goodpay: zod_1.z.boolean(),
-                goodpayprice: zod_1.z.string(),
-                brand: zod_1.z.string(),
-                description: zod_1.z.string(),
-                keywords: zod_1.z.string(),
-                image: zod_1.z.string(),
-                itemId: zod_1.z.string(),
+                discount: zod_1.z.string(),
+                // discountprice: z.string(),
+                // goodpay: z.boolean(),
+                // goodpayprice: z.string(),
+                // brand: z.string(),
+                // description: z.string(),
+                // keywords: z.string(),
+                // image: z.string(),
+                // itemId: z.string(),
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
