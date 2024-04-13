@@ -4,7 +4,7 @@
     "price":"500.000",
     "oldPrice":"800.000",
     "discount":"300.000",
-    "goodpayprice":"400.000",
+    "goodpay":"400.000",
     "color":["white","red","black"],
     "size":[],
     "prices":[],
@@ -17,5 +17,3 @@
     "slugproduct":"macbookpro4500",
     "itemId":"6615112861459f2b3bf34097"
   }
-
-  
