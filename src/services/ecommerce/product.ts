@@ -13,7 +13,7 @@ export async function addProduct(req: Request, res: Response) {
             name: z.string(),
             qte: z.number(),
             price:z.string(),
-            oldprice:z.string().optional(),
+            oldPrice:z.string().optional(),
             discount: z.string().optional(),
             goodpay: z.string().optional(),
             color: z.array(z.string()).optional(),

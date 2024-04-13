@@ -20,7 +20,7 @@ function addProduct(req, res) {
                 name: zod_1.z.string(),
                 qte: zod_1.z.number(),
                 price: zod_1.z.string(),
-                oldprice: zod_1.z.string().optional(),
+                oldPrice: zod_1.z.string().optional(),
                 discount: zod_1.z.string().optional(),
                 goodpay: zod_1.z.string().optional(),
                 color: zod_1.z.array(zod_1.z.string()).optional(),
