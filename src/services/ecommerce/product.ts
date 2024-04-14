@@ -80,8 +80,8 @@ export async function product(req: Request, res: Response) {
 
 export async function products(req: Request, res: Response) {
   try {
-      // const categories = await prisma.category.findMany({include:{SubCategory:{include:{Item:{include:{Product:true}}}}}})
-      const categories = await prisma.subCategory.findMany({include:{Item:{include:{Product:true}}}})
+      const categories = await prisma.category.findMany({include:{SubCategory:{include:{Item:{include:{Product:true}}}}}})
+      // const categories = await prisma.subCategory.findMany({include:{Item:{include:{Product:true}}}})
 
       return res.status(200).send({ error: false, message: "ok", data: categories });
   } catch (err) {

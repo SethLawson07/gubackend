@@ -92,8 +92,8 @@ exports.product = product;
 function products(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // const categories = await prisma.category.findMany({include:{SubCategory:{include:{Item:{include:{Product:true}}}}}})
-            const categories = yield server_1.prisma.subCategory.findMany({ include: { Item: { include: { Product: true } } } });
+            const categories = yield server_1.prisma.category.findMany({ include: { SubCategory: { include: { Item: { include: { Product: true } } } } } });
+            // const categories = await prisma.subCategory.findMany({include:{Item:{include:{Product:true}}}})
             return res.status(200).send({ error: false, message: "ok", data: categories });
         }
         catch (err) {
