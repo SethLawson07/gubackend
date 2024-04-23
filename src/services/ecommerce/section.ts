@@ -9,7 +9,7 @@ export async function addSection(req: Request, res: Response) {
         const schema = z.object({
             title: z.string(),
             slugsection:z.string(),
-            area:z.number().min(1).max(3)
+            areaId:z.string()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
@@ -20,7 +20,20 @@ export async function addSection(req: Request, res: Response) {
     }
 }
 
+export async function addArea(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            title: z.string()
 
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
+        const savedArea = await prisma.area.create({ data: validation.data });
+        return res.status(200).send({ status: 200, error: false, message: "ok", data: savedArea });
+    } catch (err) {
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+    }
+}
 
 export async function all(req: Request, res: Response) {
     try {
@@ -48,6 +61,7 @@ export async function updateSection(req: Request, res: Response) {
         let id = req.params.id
         const schema = z.object({
             image: z.string(),
+            areaId:z.string()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

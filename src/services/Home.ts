@@ -10,22 +10,22 @@ export async function siteHome(req: Request, res: Response) {
         take: 15, // Limiter les résultats à 15 produits
       });
   
-      const sectionOne = await prisma.product.findMany({ where: { sectionArea: 1 } });
-      const sectionTwo = await prisma.product.findMany({ where: { sectionArea: 2 } });
+      const areaOne = await prisma.area.findMany({ where: { title: "one" },include:{Section:{include:{Product:true}}} });
+      const areaTwo = await prisma.area.findMany({ where: { title: "two" },include:{Section:{include:{Product:true}}} });
       const services = await prisma.service.findMany({ where: { featured: true }, include: { TypeService: true } });
-      const sectionThree = await prisma.typeService.findMany({ where: { sectionArea: 3 } });
+      const areaThree = await prisma.area.findMany({ where: { title: "three" },include:{Section:{include:{Product:true}}} });
       const categories = await prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
   
       const responseData = {
-        "Derniers produits": latestProducts,
-        "Section un": sectionOne,
-        "Section deux": sectionTwo,
+        "Latest": latestProducts,
+        "AreaOne": areaOne,
+        "AreaTwo": areaTwo,
         "Services": services,
-        "Section trois": sectionThree,
+        "AreaThree": areaThree,
         "Catégories": categories,
       };
   
-      return res.status(200).send({ error: false, message: "ok", data: [responseData] });
+      return res.status(200).send({ error: false, message: "ok", data: responseData });
     } catch (err) {
       console.error(`${err}`);
       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });

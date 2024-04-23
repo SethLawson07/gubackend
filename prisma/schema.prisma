@@ -272,7 +272,8 @@ model Product {
     itemId         String           @db.ObjectId
     Order          OrderProduct[]
     productVariant ProductVariant[]
-    sectionArea    Int?
+    section        Section          @relation(fields: [sectionId], references: [id])
+    sectionId      String           @default("nop") @db.ObjectId
 }
 
 model Filters {
@@ -330,13 +331,24 @@ model OrderService {
     userId        String   @db.ObjectId()
 }
 
+model Area {
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    title     String
+    featured  Boolean   @default(true)
+    createdat DateTime  @default(now())
+    Section   Section[]
+}
+
 model Section {
-    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    id          String        @id @default(auto()) @map("_id") @db.ObjectId
     title       String
     slugsection String
-    area        Int
-    featured    Boolean  @default(true)
-    createdat   DateTime @default(now())
+    area        Area          @relation(fields: [areaId], references: [id])
+    featured    Boolean       @default(true)
+    createdat   DateTime      @default(now())
+    areaId      String        @db.ObjectId
+    Product     Product[]
+    TypeService TypeService[]
 }
 
 model Service {
@@ -349,17 +361,18 @@ model Service {
 }
 
 model TypeService {
-    id          String   @id @default(auto()) @map("_id") @db.ObjectId
-    title       String
-    image       String[]
-    price       String
-    description String
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId
+    title           String
+    image           String[]
+    price           String
+    description     String
     slugtypeservice String
-    sectionArea Int?
-    service     Service  @relation(fields: [serviceId], references: [id])
-    featured    Boolean  @default(true)
-    createdat   DateTime @default(now())
-    serviceId   String   @db.ObjectId
+    section         Section  @relation(fields: [sectionId], references: [id])
+    service         Service  @relation(fields: [serviceId], references: [id])
+    featured        Boolean  @default(true)
+    createdat       DateTime @default(now())
+    serviceId       String   @db.ObjectId
+    sectionId       String   @db.ObjectId @default("nop")
 }
 
 model Slider {

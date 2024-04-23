@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSection = exports.updateSection = exports.active = exports.all = exports.addSection = void 0;
+exports.deleteSection = exports.updateSection = exports.active = exports.all = exports.addArea = exports.addSection = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
@@ -19,7 +19,7 @@ function addSection(req, res) {
             const schema = zod_1.z.object({
                 title: zod_1.z.string(),
                 slugsection: zod_1.z.string(),
-                area: zod_1.z.number().min(1).max(3)
+                areaId: zod_1.z.string()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
@@ -33,6 +33,24 @@ function addSection(req, res) {
     });
 }
 exports.addSection = addSection;
+function addArea(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const schema = zod_1.z.object({
+                title: zod_1.z.string()
+            });
+            const validation = schema.safeParse(req.body);
+            if (!validation.success)
+                return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
+            const savedArea = yield server_1.prisma.area.create({ data: validation.data });
+            return res.status(200).send({ status: 200, error: false, message: "ok", data: savedArea });
+        }
+        catch (err) {
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        }
+    });
+}
+exports.addArea = addArea;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -65,6 +83,7 @@ function updateSection(req, res) {
             let id = req.params.id;
             const schema = zod_1.z.object({
                 image: zod_1.z.string(),
+                areaId: zod_1.z.string()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)

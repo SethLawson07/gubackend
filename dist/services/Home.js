@@ -19,20 +19,20 @@ function siteHome(req, res) {
                 orderBy: { createdat: 'desc' },
                 take: 15, // Limiter les résultats à 15 produits
             });
-            const sectionOne = yield server_1.prisma.product.findMany({ where: { sectionArea: 1 } });
-            const sectionTwo = yield server_1.prisma.product.findMany({ where: { sectionArea: 2 } });
+            const areaOne = yield server_1.prisma.area.findMany({ where: { title: "one" }, include: { Section: { include: { Product: true } } } });
+            const areaTwo = yield server_1.prisma.area.findMany({ where: { title: "two" }, include: { Section: { include: { Product: true } } } });
             const services = yield server_1.prisma.service.findMany({ where: { featured: true }, include: { TypeService: true } });
-            const sectionThree = yield server_1.prisma.typeService.findMany({ where: { sectionArea: 3 } });
+            const areaThree = yield server_1.prisma.area.findMany({ where: { title: "three" }, include: { Section: { include: { Product: true } } } });
             const categories = yield server_1.prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
             const responseData = {
-                "Derniers produits": latestProducts,
-                "Section un": sectionOne,
-                "Section deux": sectionTwo,
+                "Latest": latestProducts,
+                "AreaOne": areaOne,
+                "AreaTwo": areaTwo,
                 "Services": services,
-                "Section trois": sectionThree,
+                "AreaThree": areaThree,
                 "Catégories": categories,
             };
-            return res.status(200).send({ error: false, message: "ok", data: [responseData] });
+            return res.status(200).send({ error: false, message: "ok", data: responseData });
         }
         catch (err) {
             console.error(`${err}`);
