@@ -251,7 +251,7 @@ model Brand {
 model Product {
     id             String           @id @default(auto()) @map("_id") @db.ObjectId
     name           String
-    qte Int
+    qte            Int
     price          String
     oldPrice       String?          @default("")
     discount       String?          @default("")
@@ -272,6 +272,7 @@ model Product {
     itemId         String           @db.ObjectId
     Order          OrderProduct[]
     productVariant ProductVariant[]
+    sectionArea    Int?
 }
 
 model Filters {
@@ -322,52 +323,44 @@ model OrderProduct {
 model OrderService {
     id            String   @id @default(auto()) @map("_id") @db.ObjectId
     user          User     @relation(fields: [userId], references: [id])
-    service       Service  @relation(fields: [serviceId], references: [id])
     paymentstatus Boolean
     delivery      Boolean  @default(false)
     featured      Boolean  @default(true)
     createdat     DateTime @default(now())
-    serviceId     String   @db.ObjectId
     userId        String   @db.ObjectId()
 }
 
 model Section {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    title     String
-    featured  Boolean  @default(true)
-    createdat DateTime @default(now())
-}
-
-model TypeService {
-    id        String    @id @default(auto()) @map("_id") @db.ObjectId
-    title     String
-    image     String
-    featured  Boolean   @default(true)
-    createdat DateTime  @default(now())
-    Service   Service[]
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    slugsection String
+    area        Int
+    featured    Boolean  @default(true)
+    createdat   DateTime @default(now())
 }
 
 model Service {
-    id            String         @id @default(auto()) @map("_id") @db.ObjectId
-    title         String
-    image         String
-    price         String
-    typeservice   TypeService    @relation(fields: [typeServiceId], references: [id])
-    featured      Boolean        @default(true)
-    createdat     DateTime       @default(now())
-    typeServiceId String         @db.ObjectId
-    OrderService  OrderService[]
+    id          String        @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    image       String
+    featured    Boolean       @default(true)
+    createdat   DateTime      @default(now())
+    TypeService TypeService[]
 }
 
-// model Variant {
-//     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-//     title     String
-//     value     String
-//     item      Item     @relation(fields: [itemId], references: [id])
-//     featured  Boolean  @default(true)
-//     createdat DateTime @default(now())
-//     itemId    String   @db.ObjectId
-// }
+model TypeService {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    image       String[]
+    price       String
+    description String
+    slugtypeservice String
+    sectionArea Int?
+    service     Service  @relation(fields: [serviceId], references: [id])
+    featured    Boolean  @default(true)
+    createdat   DateTime @default(now())
+    serviceId   String   @db.ObjectId
+}
 
 model Slider {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId

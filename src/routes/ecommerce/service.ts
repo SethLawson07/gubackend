@@ -4,9 +4,9 @@ import { addService,all,active, updateService, deleteService } from "../../servi
 
 const router = Router();
 
-router.route("/add").post(Auth, UserIsAdmin, addService);
+router.route("/").post(Auth, UserIsAdmin, addService);
 
-router.route("/all").get(Auth, UserIsAdmin,all);
+router.route("/").get(Auth, UserIsAdmin,all);
 
 router.route("/active").get(active);
 

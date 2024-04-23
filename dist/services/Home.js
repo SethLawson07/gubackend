@@ -9,9 +9,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.adminHome = exports.agentHome = exports.customerHome = void 0;
+exports.adminHome = exports.agentHome = exports.customerHome = exports.siteHome = void 0;
 const utils_1 = require("../utils");
 const server_1 = require("../server");
+function siteHome(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const latestProducts = yield server_1.prisma.product.findMany({
+                orderBy: { createdat: 'desc' },
+                take: 15, // Limiter les résultats à 15 produits
+            });
+            const sectionOne = yield server_1.prisma.product.findMany({ where: { sectionArea: 1 } });
+            const sectionTwo = yield server_1.prisma.product.findMany({ where: { sectionArea: 2 } });
+            const services = yield server_1.prisma.service.findMany({ where: { featured: true }, include: { TypeService: true } });
+            const sectionThree = yield server_1.prisma.typeService.findMany({ where: { sectionArea: 3 } });
+            const categories = yield server_1.prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
+            const responseData = {
+                "Derniers produits": latestProducts,
+                "Section un": sectionOne,
+                "Section deux": sectionTwo,
+                "Services": services,
+                "Section trois": sectionThree,
+                "Catégories": categories,
+            };
+            return res.status(200).send({ error: false, message: "ok", data: [responseData] });
+        }
+        catch (err) {
+            console.error(`${err}`);
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
+        }
+    });
+}
+exports.siteHome = siteHome;
 const customerHome = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { user } = req.body.user;

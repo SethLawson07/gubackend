@@ -18,6 +18,8 @@ function addSection(req, res) {
         try {
             const schema = zod_1.z.object({
                 title: zod_1.z.string(),
+                slugsection: zod_1.z.string(),
+                area: zod_1.z.number().min(1).max(3)
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)

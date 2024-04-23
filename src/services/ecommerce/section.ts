@@ -8,6 +8,8 @@ export async function addSection(req: Request, res: Response) {
     try {
         const schema = z.object({
             title: z.string(),
+            slugsection:z.string(),
+            area:z.number().min(1).max(3)
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

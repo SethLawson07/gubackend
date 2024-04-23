@@ -9,8 +9,6 @@ export async function addService(req: Request, res: Response) {
         const schema = z.object({
             title: z.string(),
             image: z.string(),
-            price: z.string(),
-            typeServiceId: z.string(),
             featured:z.boolean().optional()
         });
         const validation = schema.safeParse(req.body);
@@ -49,8 +47,9 @@ export async function updateService(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
+            title: z.string(),
             image: z.string(),
-            link: z.string(),
+            featured:z.boolean().optional()     
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

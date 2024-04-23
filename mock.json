@@ -17,3 +17,43 @@
     "slugproduct":"macbookpro4500",
     "itemId":"6615112861459f2b3bf34097"
   }
+
+  {
+    "name":"Macbook mini",
+    "qte":5,
+    "price":"400.000",
+    "oldPrice":"700.000",
+    "discount":"200.000",
+    "goodpay":"200.000",
+    "color":["white","red","black"],
+    "size":[],
+    "prices":[],
+    "brand":"Mac",
+    "description":"des lorem ipsum description lorem ipsum description",
+    "spec":"spec lorem ipsum spec lorem ipsum description",
+    "images":["https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bWFjYm9va3xlbnwwfHwwfHx8MA%3D%3D","https://images.unsplash.com/photo-1491472253230-a044054ca35f?q=80&w=1484&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D","https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFjYm9va3xlbnwwfHwwfHx8MA%3D%3D"],
+    "tag":["apple","macbook","pro"],
+    "featured":true,
+    "slugproduct":"macbookmini1205",
+    "itemId":"6615112861459f2b3bf34097"
+  }
+
+  {
+    "name":"Ananas, Un Carton",
+    "qte":5,
+    "price":"4.000",
+    "oldPrice":"7.000",
+    "discount":"2.000",
+    "goodpay":"2.000",
+    "color":[],
+    "size":[],
+    "prices":[],
+    "brand":"",
+    "description":"des lorem ipsum description lorem ipsum description",
+    "spec":"spec lorem ipsum spec lorem ipsum description",
+    "images":["https://res.cloudinary.com/do7y1l2dd/image/upload/v1713208352/Goodness/ibl8bpmsput9to5nzqpt.webp","https://res.cloudinary.com/do7y1l2dd/image/upload/v1713208352/Goodness/kxmjmfoqk9gjopfhnl2c.jpg"],
+    "tag":["Ananas","Agri"],
+    "featured":true,
+    "slugproduct":"ananas7253",
+    "itemId":"661d7b1577c27278de80a932"
+  }

@@ -8,7 +8,11 @@ export async function addTypeService(req: Request, res: Response) {
     try {
         const schema = z.object({
             title: z.string(),
-            image: z.string(),
+            image: z.array(z.string()),
+            price:z.string(),
+            description:z.string(),
+            serviceId:z.string(),
+            slugtypeservice:z.string(),
             featured:z.boolean().optional()
         });
         const validation = schema.safeParse(req.body);
@@ -47,8 +51,15 @@ export async function updateTypeService(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
-            image: z.string(),
-            link: z.string(),
+            title: z.string().optional(),
+            image: z.array(z.string()).optional(),
+            price:z.string().optional(),
+            description:z.string().optional(),
+            serviceId:z.string().optional(),
+            featured:z.boolean().optional(),
+            sectionArea:z.number().optional()
+
+
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

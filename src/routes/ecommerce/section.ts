@@ -4,9 +4,9 @@ import { addSection,all,active, updateSection, deleteSection } from "../../servi
 
 const router = Router();
 
-router.route("/add").post(Auth, UserIsAdmin, addSection);
+router.route("/").post(Auth, UserIsAdmin, addSection);
 
-router.route("/all").get(Auth, UserIsAdmin,all);
+router.route("/").get(Auth, UserIsAdmin,all);
 
 router.route("/active").get(active);
 

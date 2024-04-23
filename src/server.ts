@@ -93,7 +93,7 @@ app.use('/item', item);
 app.use('/orderproduct', orderproduct);
 app.use('/orderservice', orderservice);
 app.use('/product', product);
-app.use('/section', promocode);
+app.use('/section', section);
 app.use('/service', service);
 app.use('/subcategory', subcategory);
 app.use('/typeservice', typeservice);

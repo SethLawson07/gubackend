@@ -77,7 +77,20 @@ export async function product(req: Request, res: Response) {
     }
 }
 
-
+export async function latest(req: Request, res: Response) {
+    try {
+      const products = await prisma.product.findMany({
+        orderBy: { createdat: 'desc' }, // Trier par date de création décroissante
+        take: 15, // Limiter les résultats à 15 produits
+      });
+  
+      return res.status(200).send({ error: false, message: "ok", data: products });
+    } catch (err) {
+      console.error(`${err}`);
+      return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
+    }
+  }
+  
 
 export async function topProducts(req: Request, res: Response) {
   try {
@@ -114,9 +127,10 @@ export async function updateProduct(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
-            title: z.string(),
-            qte: z.number(),
-            discount: z.string(),
+            title: z.string().optional(),
+            qte: z.number().optional(),
+            discount: z.string().optional(),
+            sectionArea:z.number().min(1).max(2).optional()
             // discountprice: z.string(),
             // goodpay: z.boolean(),
             // goodpayprice: z.string(),

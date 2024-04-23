@@ -4,9 +4,9 @@ import { addTypeService,all,active, updateTypeService, deleteTypeService } from 
 
 const router = Router();
 
-router.route("/add").post(Auth, UserIsAdmin, addTypeService);
+router.route("/").post(Auth, UserIsAdmin, addTypeService);
 
-router.route("/all").get(Auth, UserIsAdmin,all);
+router.route("/").get(Auth, UserIsAdmin,all);
 
 router.route("/active").get(active);
 

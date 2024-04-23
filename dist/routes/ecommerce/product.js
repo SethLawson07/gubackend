@@ -10,6 +10,7 @@ router.route("/all").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, product_
 // router.route("/item/:slugitem").get(allproductsbyitem);
 // router.route("/:slugproduct").get(product);
 router.route("/").get(product_1.products);
+router.route("/latest").get(product_1.latest);
 router.route("/top").get(product_1.topProducts);
 router.route("/update/:id").put(middlewares_1.Auth, middlewares_1.UserIsAdmin, product_1.updateProduct);
 router.route("/delete/:id").delete(middlewares_1.Auth, middlewares_1.UserIsAdmin, product_1.deleteProduct);
