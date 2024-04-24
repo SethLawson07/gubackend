@@ -25,7 +25,7 @@ export async function siteHome(req: Request, res: Response) {
         "Catégories": categories,
       };
   
-      return res.status(200).send({ error: false, message: "ok", data: responseData });
+      return res.status(200).send({ error: false, message: "ok", data: [responseData] });
     } catch (err) {
       console.error(`${err}`);
       return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });

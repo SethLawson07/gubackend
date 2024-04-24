@@ -32,7 +32,7 @@ function siteHome(req, res) {
                 "AreaThree": areaThree,
                 "Catégories": categories,
             };
-            return res.status(200).send({ error: false, message: "ok", data: responseData });
+            return res.status(200).send({ error: false, message: "ok", data: [responseData] });
         }
         catch (err) {
             console.error(`${err}`);
