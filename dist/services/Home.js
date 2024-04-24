@@ -23,7 +23,8 @@ function siteHome(req, res) {
             const areaTwo = yield server_1.prisma.area.findMany({ where: { title: "two" }, include: { Section: { include: { Product: true } } } });
             const services = yield server_1.prisma.service.findMany({ where: { featured: true }, include: { TypeService: true } });
             const areaThree = yield server_1.prisma.area.findMany({ where: { title: "three" }, include: { Section: { include: { TypeService: true } } } });
-            const categories = yield server_1.prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
+            // const categories = await prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
+            const categories = yield server_1.prisma.category.findMany({ include: { SubCategory: { include: { Item: { include: { Product: true } } } } } });
             const responseData = {
                 "latest": latestProducts,
                 "areaOne": areaOne,
