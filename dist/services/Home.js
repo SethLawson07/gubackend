@@ -25,12 +25,12 @@ function siteHome(req, res) {
             const areaThree = yield server_1.prisma.area.findMany({ where: { title: "three" }, include: { Section: { include: { Product: true } } } });
             const categories = yield server_1.prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
             const responseData = {
-                "Latest": latestProducts,
-                "AreaOne": areaOne,
-                "AreaTwo": areaTwo,
-                "Services": services,
-                "AreaThree": areaThree,
-                "Catégories": categories,
+                "latest": latestProducts,
+                "areaOne": areaOne,
+                "areaTwo": areaTwo,
+                "services": services,
+                "areaThree": areaThree,
+                "categories": categories,
             };
             return res.status(200).send({ error: false, message: "ok", data: [responseData] });
         }

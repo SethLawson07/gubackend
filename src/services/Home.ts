@@ -17,12 +17,12 @@ export async function siteHome(req: Request, res: Response) {
       const categories = await prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
   
       const responseData = {
-        "Latest": latestProducts,
-        "AreaOne": areaOne,
-        "AreaTwo": areaTwo,
-        "Services": services,
-        "AreaThree": areaThree,
-        "Catégories": categories,
+        "latest": latestProducts,
+        "areaOne": areaOne,
+        "areaTwo": areaTwo,
+        "services": services,
+        "areaThree": areaThree,
+        "categories": categories,
       };
   
       return res.status(200).send({ error: false, message: "ok", data: [responseData] });
