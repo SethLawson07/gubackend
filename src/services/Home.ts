@@ -13,7 +13,7 @@ export async function siteHome(req: Request, res: Response) {
       const areaOne = await prisma.area.findMany({ where: { title: "one" },include:{Section:{include:{Product:true}}} });
       const areaTwo = await prisma.area.findMany({ where: { title: "two" },include:{Section:{include:{Product:true}}} });
       const services = await prisma.service.findMany({ where: { featured: true }, include: { TypeService: true } });
-      const areaThree = await prisma.area.findMany({ where: { title: "three" },include:{Section:{include:{Product:true}}} });
+      const areaThree = await prisma.area.findMany({ where: { title: "three" },include:{Section:{include:{TypeService:true}}} });
       const categories = await prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
   
       const responseData = {
