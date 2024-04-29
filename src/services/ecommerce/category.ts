@@ -47,8 +47,7 @@ export async function updateCategory(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
-            image: z.string(),
-            link: z.string(),
+            title: z.string()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

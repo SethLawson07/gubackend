@@ -49,7 +49,7 @@ exports.all = all;
 function active(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const active = yield server_1.prisma.service.findMany({ where: { featured: true } });
+            const active = yield server_1.prisma.service.findMany({ where: { featured: true }, include: { TypeService: true } });
             return res.status(200).send({ error: false, message: "ok", data: active });
         }
         catch (err) {
