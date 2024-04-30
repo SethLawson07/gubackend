@@ -211,6 +211,7 @@ model Category {
     image       String
     featured    Boolean       @default(false)
     createdat   DateTime      @default(now())
+    c String
     SubCategory SubCategory[]
 }
 
@@ -357,6 +358,7 @@ model Service {
     image       String
     featured    Boolean       @default(true)
     createdat   DateTime      @default(now())
+    slugservice String
     TypeService TypeService[]
 }
 

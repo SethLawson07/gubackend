@@ -19,6 +19,7 @@ function addCategory(req, res) {
             const schema = zod_1.z.object({
                 title: zod_1.z.string(),
                 image: zod_1.z.string(),
+                slugcategory: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);

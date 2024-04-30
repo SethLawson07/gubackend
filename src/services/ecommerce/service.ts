@@ -9,6 +9,7 @@ export async function addService(req: Request, res: Response) {
         const schema = z.object({
             title: z.string(),
             image: z.string(),
+            slugservice: z.string(),
             featured:z.boolean().optional()
         });
         const validation = schema.safeParse(req.body);
