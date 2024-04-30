@@ -211,7 +211,7 @@ model Category {
     image       String
     featured    Boolean       @default(false)
     createdat   DateTime      @default(now())
-    c String
+    slugcategory String
     SubCategory SubCategory[]
 }
 
