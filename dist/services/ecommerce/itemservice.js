@@ -18,7 +18,7 @@ function addItemService(req, res) {
         try {
             const schema = zod_1.z.object({
                 title: zod_1.z.string(),
-                images: zod_1.z.array(zod_1.z.string()),
+                image: zod_1.z.array(zod_1.z.string()),
                 price: zod_1.z.string(),
                 description: zod_1.z.string(),
                 typeServiceId: zod_1.z.string(),
@@ -69,7 +69,7 @@ function updateItemService(req, res) {
             let id = req.params.id;
             const schema = zod_1.z.object({
                 title: zod_1.z.string().optional(),
-                images: zod_1.z.array(zod_1.z.string()).optional(),
+                image: zod_1.z.array(zod_1.z.string()).optional(),
                 price: zod_1.z.string().optional(),
                 description: zod_1.z.string().optional(),
                 serviceId: zod_1.z.string().optional(),

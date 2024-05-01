@@ -377,7 +377,7 @@ model TypeService {
 model ItemService {
     id              String      @id @default(auto()) @map("_id") @db.ObjectId
     title           String
-    images          String[]
+    image          String[]
     price           String
     description     String
     slugitemservice String

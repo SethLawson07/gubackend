@@ -8,7 +8,7 @@ export async function addItemService(req: Request, res: Response) {
     try {
         const schema = z.object({
             title: z.string(),
-            images: z.array(z.string()),
+            image: z.array(z.string()),
             price:z.string(),
             description:z.string(),
             typeServiceId:z.string(),
@@ -52,7 +52,7 @@ export async function updateItemService(req: Request, res: Response) {
         let id = req.params.id
         const schema = z.object({
             title: z.string().optional(),
-            images: z.array(z.string()).optional(),
+            image: z.array(z.string()).optional(),
             price:z.string().optional(),
             description:z.string().optional(),
             serviceId:z.string().optional(),

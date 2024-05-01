@@ -55,7 +55,7 @@ function active(req, res) {
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
