@@ -47,6 +47,7 @@ export async function active(req: Request, res: Response) {
 }
 
 
+
 export async function updateItemService(req: Request, res: Response) {
     try {
         let id = req.params.id
