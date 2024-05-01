@@ -35,7 +35,7 @@ export async function all(req: Request, res: Response) {
 
 export async function active(req: Request, res: Response) {
     try {
-        const active = await prisma.service.findMany({where:{featured:true},include:{TypeService:{include:{ItemService:true}}}});
+        const active = await prisma.service.findMany({where:{featured:true},include:{TypeService:{include:{ItemService:true,_count:false,service:false}}}});
         return res.status(200).send({ error: false, message: "ok", data: active });
     } catch (err) {
         console.error(` ${err}`);

@@ -21,7 +21,7 @@ function siteHome(req, res) {
             });
             const areaOne = yield server_1.prisma.area.findMany({ where: { title: "one" }, include: { Section: { include: { Product: true } } } });
             const areaTwo = yield server_1.prisma.area.findMany({ where: { title: "two" }, include: { Section: { include: { Product: true } } } });
-            const services = yield server_1.prisma.service.findMany({ where: { featured: true }, include: { TypeService: { include: { ItemService: true } } } });
+            const services = yield server_1.prisma.service.findMany({ where: { featured: true }, include: { TypeService: { include: { ItemService: true, _count: false, service: false } } } });
             const areaThree = yield server_1.prisma.area.findMany({ where: { title: "three" }, include: { Section: { include: { ItemService: true } } } });
             // const categories = await prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
             const categories = yield server_1.prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: { include: { Product: true } } } } } });

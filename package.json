@@ -32,6 +32,7 @@
     "mongodb": "^5.5.0",
     "mongoose": "^8.0.4",
     "morgan": "^1.10.0",
+    "prisma": "^5.13.0",
     "prisma-slug": "^1.0.0-beta.1",
     "slugify": "^1.6.6",
     "swagger-ui-express": "^4.6.2",
