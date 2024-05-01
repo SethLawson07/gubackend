@@ -18,12 +18,10 @@ function addTypeService(req, res) {
         try {
             const schema = zod_1.z.object({
                 title: zod_1.z.string(),
-                image: zod_1.z.array(zod_1.z.string()),
-                price: zod_1.z.string(),
-                description: zod_1.z.string(),
-                serviceId: zod_1.z.string(),
+                image: zod_1.z.string(),
                 slugtypeservice: zod_1.z.string(),
-                featured: zod_1.z.boolean().optional()
+                featured: zod_1.z.boolean().optional(),
+                serviceId: zod_1.z.string(),
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
@@ -68,13 +66,9 @@ function updateTypeService(req, res) {
         try {
             let id = req.params.id;
             const schema = zod_1.z.object({
-                title: zod_1.z.string().optional(),
-                image: zod_1.z.array(zod_1.z.string()).optional(),
-                price: zod_1.z.string().optional(),
-                description: zod_1.z.string().optional(),
-                serviceId: zod_1.z.string().optional(),
-                featured: zod_1.z.boolean().optional(),
-                sectionArea: zod_1.z.number().optional()
+                title: zod_1.z.string(),
+                image: zod_1.z.string(),
+                featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
@@ -92,8 +86,8 @@ function deleteTypeService(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let id = req.params.id;
-            const category = yield server_1.prisma.typeService.delete({ where: { id: id } });
-            return res.status(200).send({ error: false, message: "ok", data: category });
+            const typeService = yield server_1.prisma.typeService.delete({ where: { id: id } });
+            return res.status(200).send({ error: false, message: "ok", data: typeService });
         }
         catch (err) {
             console.error(` ${err}`);

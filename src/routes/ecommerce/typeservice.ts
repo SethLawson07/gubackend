@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin } from "../../utils/middlewares";
-import { addTypeService,all,active, updateTypeService, deleteTypeService } from "../../services/ecommerce/typeservice";
+import { active, addTypeService, all, deleteTypeService, updateTypeService } from "../../services/ecommerce/typeservice";
 
 const router = Router();
 

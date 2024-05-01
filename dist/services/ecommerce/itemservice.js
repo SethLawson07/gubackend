@@ -9,35 +9,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteService = exports.updateService = exports.active = exports.all = exports.addService = void 0;
+exports.deleteItemService = exports.updateItemService = exports.active = exports.all = exports.addItemService = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
-function addService(req, res) {
+function addItemService(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const schema = zod_1.z.object({
                 title: zod_1.z.string(),
-                image: zod_1.z.string(),
-                slugservice: zod_1.z.string(),
+                images: zod_1.z.array(zod_1.z.string()),
+                price: zod_1.z.string(),
+                description: zod_1.z.string(),
+                typeServiceId: zod_1.z.string(),
+                slugitemservice: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
                 return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
-            const savedService = yield server_1.prisma.service.create({ data: validation.data });
-            return res.status(200).send({ status: 200, error: false, message: "ok", data: savedService });
+            const savedItemService = yield server_1.prisma.itemService.create({ data: validation.data });
+            return res.status(200).send({ status: 200, error: false, message: "ok", data: savedItemService });
         }
         catch (err) {
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
-exports.addService = addService;
+exports.addItemService = addItemService;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const all = yield server_1.prisma.service.findMany();
+            const all = yield server_1.prisma.itemService.findMany();
             return res.status(200).send({ error: false, message: "ok", data: all });
         }
         catch (err) {
@@ -50,7 +53,7 @@ exports.all = all;
 function active(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const active = yield server_1.prisma.service.findMany({ where: { featured: true }, include: { TypeService: { include: { ItemService: true } } } });
+            const active = yield server_1.prisma.itemService.findMany({ where: { featured: true } });
             return res.status(200).send({ error: false, message: "ok", data: active });
         }
         catch (err) {
@@ -60,33 +63,37 @@ function active(req, res) {
     });
 }
 exports.active = active;
-function updateService(req, res) {
+function updateItemService(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let id = req.params.id;
             const schema = zod_1.z.object({
-                title: zod_1.z.string(),
-                image: zod_1.z.string(),
-                featured: zod_1.z.boolean().optional()
+                title: zod_1.z.string().optional(),
+                images: zod_1.z.array(zod_1.z.string()).optional(),
+                price: zod_1.z.string().optional(),
+                description: zod_1.z.string().optional(),
+                serviceId: zod_1.z.string().optional(),
+                featured: zod_1.z.boolean().optional(),
+                sectionArea: zod_1.z.number().optional()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
                 return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
-            const savedService = yield server_1.prisma.service.update({ where: { id: id, }, data: validation.data, });
-            return res.status(200).send({ status: 200, error: false, message: "ok", data: savedService });
+            const savedItemService = yield server_1.prisma.itemService.update({ where: { id: id, }, data: validation.data, });
+            return res.status(200).send({ status: 200, error: false, message: "ok", data: savedItemService });
         }
         catch (err) {
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
         }
     });
 }
-exports.updateService = updateService;
-function deleteService(req, res) {
+exports.updateItemService = updateItemService;
+function deleteItemService(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let id = req.params.id;
-            const service = yield server_1.prisma.service.delete({ where: { id: id } });
-            return res.status(200).send({ error: false, message: "ok", data: service });
+            const category = yield server_1.prisma.itemService.delete({ where: { id: id } });
+            return res.status(200).send({ error: false, message: "ok", data: category });
         }
         catch (err) {
             console.error(` ${err}`);
@@ -94,4 +101,4 @@ function deleteService(req, res) {
         }
     });
 }
-exports.deleteService = deleteService;
+exports.deleteItemService = deleteItemService;

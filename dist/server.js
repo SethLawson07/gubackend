@@ -72,6 +72,7 @@ const section_1 = __importDefault(require("./routes/ecommerce/section"));
 const service_1 = __importDefault(require("./routes/ecommerce/service"));
 const subcategory_1 = __importDefault(require("./routes/ecommerce/subcategory"));
 const typeservice_1 = __importDefault(require("./routes/ecommerce/typeservice"));
+const itemservice_1 = __importDefault(require("./routes/ecommerce/itemservice"));
 const slider_1 = __importDefault(require("./routes/ecommerce/slider"));
 const filter_1 = __importDefault(require("./routes/ecommerce/filter"));
 // App PORT
@@ -127,6 +128,7 @@ app.use('/section', section_1.default);
 app.use('/service', service_1.default);
 app.use('/subcategory', subcategory_1.default);
 app.use('/typeservice', typeservice_1.default);
+app.use('/itemservice', itemservice_1.default);
 app.use('/slider', slider_1.default);
 app.use('/filter', filter_1.default);
 // Health

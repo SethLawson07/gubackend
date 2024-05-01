@@ -8,12 +8,10 @@ export async function addTypeService(req: Request, res: Response) {
     try {
         const schema = z.object({
             title: z.string(),
-            image: z.array(z.string()),
-            price:z.string(),
-            description:z.string(),
-            serviceId:z.string(),
-            slugtypeservice:z.string(),
-            featured:z.boolean().optional()
+            image: z.string(),
+            slugtypeservice: z.string(),
+            featured:z.boolean().optional(),
+            serviceId: z.string(),
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
@@ -51,15 +49,9 @@ export async function updateTypeService(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
-            title: z.string().optional(),
-            image: z.array(z.string()).optional(),
-            price:z.string().optional(),
-            description:z.string().optional(),
-            serviceId:z.string().optional(),
-            featured:z.boolean().optional(),
-            sectionArea:z.number().optional()
-
-
+            title: z.string(),
+            image: z.string(),
+            featured:z.boolean().optional()     
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
@@ -75,8 +67,8 @@ export async function updateTypeService(req: Request, res: Response) {
 export async function deleteTypeService(req: Request, res: Response) {
     try {
         let id = req.params.id
-        const category = await prisma.typeService.delete({ where: { id: id } });
-        return res.status(200).send({ error: false, message: "ok", data: category });
+        const typeService = await prisma.typeService.delete({ where: { id: id } });
+        return res.status(200).send({ error: false, message: "ok", data: typeService });
     } catch (err) {
         console.error(` ${err}`);
         return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });

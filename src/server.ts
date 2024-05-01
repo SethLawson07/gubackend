@@ -38,6 +38,7 @@ import section from "./routes/ecommerce/section";
 import service from "./routes/ecommerce/service";
 import subcategory from "./routes/ecommerce/subcategory";
 import typeservice from "./routes/ecommerce/typeservice";
+import itemservice from "./routes/ecommerce/itemservice";
 import slider from "./routes/ecommerce/slider";
 import filter from "./routes/ecommerce/filter";
 
@@ -97,6 +98,7 @@ app.use('/section', section);
 app.use('/service', service);
 app.use('/subcategory', subcategory);
 app.use('/typeservice', typeservice);
+app.use('/itemservice', itemservice);
 app.use('/slider', slider);
 app.use('/filter', filter);
 
