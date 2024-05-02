@@ -227,18 +227,18 @@ model SubCategory {
 }
 
 model Item {
-    id            String        @id @default(auto()) @map("_id") @db.ObjectId
+    id            String      @id @default(auto()) @map("_id") @db.ObjectId
     title         String
     image         String
-    subcategory   SubCategory   @relation(fields: [subCategoryId], references: [id])
-    featured      Boolean       @default(false)
-    slugitem      String        @unique
-    createdat     DateTime      @default(now())
-    subCategoryId String        @db.ObjectId
+    subcategory   SubCategory @relation(fields: [subCategoryId], references: [id])
+    featured      Boolean     @default(false)
+    slugitem      String      @unique
+    createdat     DateTime    @default(now())
+    subCategoryId String      @db.ObjectId
     Product       Product[]
     // Variant       Variant[]
-    itemVariant   ItemVariant[]
     Filters       Filters[]
+    Variant       Variant[]
 }
 
 model Brand {
@@ -260,6 +260,7 @@ model Product {
     goodpay        String?          @default("")
     color          String[]         @default([])
     size           String[]         @default([])
+    weight         String[]         @default([])
     prices         String[]         @default([])
     brand          String?          @default("")
     description    String
@@ -272,9 +273,10 @@ model Product {
     createdat      DateTime         @default(now())
     itemId         String           @db.ObjectId
     Order          OrderProduct[]
-    productVariant ProductVariant[]
+    // productVariant ProductVariant[]
     section        Section          @relation(fields: [sectionId], references: [id])
     sectionId      String           @default("nop") @db.ObjectId
+    ProductVariant ProductVariant[]
 }
 
 model Filters {
@@ -287,25 +289,34 @@ model Filters {
     itemId  String  @db.ObjectId
 }
 
-model ProductVariant {
+// model ProductVariant {
+//     id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//     color     String
+//     image     String?
+//     size      Json
+//     product   Product  @relation(fields: [productId], references: [id])
+//     featured  Boolean  @default(false)
+//     createdat DateTime @default(now())
+//     productId String   @db.ObjectId
+// }
+
+model Variant {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    color     String
-    image     String
-    size      Json
-    product   Product  @relation(fields: [productId], references: [id])
+    title     String[]
     featured  Boolean  @default(false)
     createdat DateTime @default(now())
-    productId String   @db.ObjectId
+    item      Item     @relation(fields: [itemId], references: [id])
+    itemId    String   @db.ObjectId
 }
 
-model ItemVariant {
+model ProductVariant {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    title     String
-    value     String[] @default([])
-    item      Item     @relation(fields: [itemId], references: [id])
-    featured  Boolean  @default(false)
+    title     String[]
+    value     String[]
+    product   Product  @relation(fields: [productId], references: [id])
+    productId String   @db.ObjectId
+    featured  Boolean  @default(true)
     createdat DateTime @default(now())
-    itemId    String   @db.ObjectId
 }
 
 model OrderProduct {

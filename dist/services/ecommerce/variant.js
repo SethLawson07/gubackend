@@ -9,21 +9,52 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateItemVariant = exports.addItemVariant = exports.addProductVariant = void 0;
+exports.deleteVariant = exports.updateVariant = exports.addProductVariant = exports.variantByItem = exports.addVariant = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
+function addVariant(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const schema = zod_1.z.object({
+                title: zod_1.z.array(zod_1.z.string()),
+                itemId: zod_1.z.string(),
+                featured: zod_1.z.boolean().optional()
+            });
+            const validation = schema.safeParse(req.body);
+            if (!validation.success)
+                return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
+            const savedVariant = yield server_1.prisma.variant.create({ data: validation.data });
+            return res.status(200).send({ status: 200, error: false, message: "ok", data: savedVariant });
+        }
+        catch (err) {
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        }
+    });
+}
+exports.addVariant = addVariant;
+function variantByItem(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            let id = req.params.id;
+            const variants = yield server_1.prisma.variant.findFirst({ where: { itemId: id } });
+            return res.status(200).send({ error: false, message: "ok", data: variants });
+        }
+        catch (err) {
+            console.error(` ${err}`);
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
+        }
+    });
+}
+exports.variantByItem = variantByItem;
 function addProductVariant(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const schema = zod_1.z.object({
-                color: zod_1.z.string(),
-                image: zod_1.z.string(),
-                size: zod_1.z.object({
-                    name: zod_1.z.string(),
-                    stock: zod_1.z.number()
-                }),
+                title: zod_1.z.array(zod_1.z.string()),
+                value: zod_1.z.array(zod_1.z.string()),
                 productId: zod_1.z.string(),
+                featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
@@ -37,53 +68,36 @@ function addProductVariant(req, res) {
     });
 }
 exports.addProductVariant = addProductVariant;
-function addItemVariant(req, res) {
+function updateVariant(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            let id = req.params.id;
             const schema = zod_1.z.object({
-                title: zod_1.z.string(),
-                itemId: zod_1.z.string(),
+                title: zod_1.z.array(zod_1.z.string()),
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
                 return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
-            const savedVariant = yield server_1.prisma.itemVariant.create({ data: validation.data });
+            const savedVariant = yield server_1.prisma.variant.update({ where: { id: id, }, data: validation.data, });
             return res.status(200).send({ status: 200, error: false, message: "ok", data: savedVariant });
         }
         catch (err) {
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite " + err, data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
         }
     });
 }
-exports.addItemVariant = addItemVariant;
-function updateItemVariant(req, res) {
+exports.updateVariant = updateVariant;
+function deleteVariant(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const variantId = req.params.variantId;
-            const newValue = req.body.value; // Nouvelle valeur à ajouter
-            // Récupérer le variant existant depuis la base de données
-            const existingVariant = yield server_1.prisma.itemVariant.findUnique({ where: { id: variantId } });
-            if (!existingVariant)
-                return res.status(404).send({ status: 404, error: true, message: "Variant not found", data: {} });
-            // Mettre à jour le tableau de valeurs avec la nouvelle valeur
-            const updatedValues = [...existingVariant.value, newValue];
-            // Valider les nouvelles valeurs
-            const schema = zod_1.z.object({
-                value: zod_1.z.array(zod_1.z.string()),
-            });
-            const validation = schema.safeParse({ value: updatedValues });
-            if (!validation.success)
-                return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
-            // Mettre à jour le variant avec la nouvelle valeur
-            const updatedVariant = yield server_1.prisma.itemVariant.update({
-                where: { id: variantId },
-                data: { value: updatedValues }
-            });
-            return res.status(200).send({ status: 200, error: false, message: "Variant updated successfully", data: updatedVariant });
+            let id = req.params.id;
+            const variant = yield server_1.prisma.variant.delete({ where: { id: id } });
+            return res.status(200).send({ error: false, message: "ok", data: variant });
         }
         catch (err) {
-            return res.status(500).send({ status: 500, error: true, message: "An error occurred: " + err, data: {} });
+            console.error(` ${err}`);
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
         }
     });
 }
-exports.updateItemVariant = updateItemVariant;
+exports.deleteVariant = deleteVariant;

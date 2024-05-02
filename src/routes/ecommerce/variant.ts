@@ -1,15 +1,19 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin } from "../../utils/middlewares";
-import { addItemVariant, addProductVariant, updateItemVariant } from "../../services/ecommerce/variant";
+import { addProductVariant, addVariant, updateVariant, variantByItem } from "../../services/ecommerce/variant";
 
 const router = Router();
 
 
-router.route("/item/add").post(Auth, UserIsAdmin, addItemVariant);
+router.route("/").post(Auth, UserIsAdmin, addVariant);
 
-router.route("/:variantId").put(Auth, UserIsAdmin, updateItemVariant);
+router.route("/productvariant").post(Auth, UserIsAdmin, addProductVariant);
 
-router.route("/product/add").post(Auth, UserIsAdmin, addProductVariant);
+router.route("/:id").get(Auth, UserIsAdmin, variantByItem);
+
+
+
+// router.route("/product/add").post(Auth, UserIsAdmin, addProductVariant);
 
 
 
