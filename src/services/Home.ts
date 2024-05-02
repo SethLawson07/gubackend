@@ -19,6 +19,7 @@ export async function siteHome(req: Request, res: Response) {
 
       
       const responseData = {
+      
         "latest": latestProducts,
         "areaOne": areaOne,
         "areaTwo": areaTwo,
