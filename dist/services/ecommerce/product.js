@@ -50,7 +50,7 @@ exports.addProduct = addProduct;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const products = yield server_1.prisma.product.findMany();
+            const products = yield server_1.prisma.product.findMany({ orderBy: { createdat: 'desc' } });
             return res.status(200).send({ error: false, message: "ok", data: products });
         }
         catch (err) {
@@ -144,7 +144,9 @@ function updateProduct(req, res) {
                 title: zod_1.z.string().optional(),
                 qte: zod_1.z.number().optional(),
                 discount: zod_1.z.string().optional(),
-                sectionArea: zod_1.z.number().min(1).max(2).optional()
+                sectionArea: zod_1.z.number().min(1).max(2).optional(),
+                itemId: zod_1.z.string(),
+                featured: zod_1.z.boolean()
                 // discountprice: z.string(),
                 // goodpay: z.boolean(),
                 // goodpayprice: z.string(),

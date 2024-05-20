@@ -54,7 +54,7 @@ exports.addArea = addArea;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const all = yield server_1.prisma.section.findMany();
+            const all = yield server_1.prisma.section.findMany({ orderBy: { createdat: 'desc' } });
             return res.status(200).send({ error: false, message: "ok", data: all });
         }
         catch (err) {

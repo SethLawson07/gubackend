@@ -43,7 +43,7 @@ export async function addProduct(req: Request, res: Response) {
 
 export async function all(req: Request, res: Response) {
     try {
-        const products = await prisma.product.findMany();
+        const products = await prisma.product.findMany({orderBy:{createdat:'desc'}});
         return res.status(200).send({ error: false, message: "ok", data: products });
     } catch (err) {
         console.error(` ${err}`);
@@ -130,7 +130,10 @@ export async function updateProduct(req: Request, res: Response) {
             title: z.string().optional(),
             qte: z.number().optional(),
             discount: z.string().optional(),
-            sectionArea:z.number().min(1).max(2).optional()
+            sectionArea:z.number().min(1).max(2).optional(),
+            itemId:z.string(),
+            featured:z.boolean()
+
             // discountprice: z.string(),
             // goodpay: z.boolean(),
             // goodpayprice: z.string(),

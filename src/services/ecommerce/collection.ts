@@ -57,7 +57,8 @@ export async function updateCollection(req: Request, res: Response) {
             long: z.string(),
             day: z.string(),
             starttime: z.string(),
-            endtime:z.string()
+            endtime:z.string(),            featured:z.boolean()
+
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

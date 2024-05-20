@@ -25,7 +25,7 @@ export async function addCategory(req: Request, res: Response) {
 
 export async function all(req: Request, res: Response) {
     try {
-        const all = await prisma.category.findMany();
+        const all = await prisma.category.findMany({orderBy:{createdat:'desc'}});
         return res.status(200).send({ error: false, message: "ok", data: all });
     } catch (err) {
         console.error(` ${err}`);
@@ -48,7 +48,9 @@ export async function updateCategory(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
-            title: z.string()
+            title: z.string(),
+            featured:z.boolean()
+
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

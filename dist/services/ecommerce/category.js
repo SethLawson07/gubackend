@@ -37,7 +37,7 @@ exports.addCategory = addCategory;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const all = yield server_1.prisma.category.findMany();
+            const all = yield server_1.prisma.category.findMany({ orderBy: { createdat: 'desc' } });
             return res.status(200).send({ error: false, message: "ok", data: all });
         }
         catch (err) {
@@ -65,7 +65,8 @@ function updateCategory(req, res) {
         try {
             let id = req.params.id;
             const schema = zod_1.z.object({
-                title: zod_1.z.string()
+                title: zod_1.z.string(),
+                featured: zod_1.z.boolean()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)

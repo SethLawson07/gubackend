@@ -37,7 +37,7 @@ exports.addSubCategory = addSubCategory;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const all = yield server_1.prisma.subCategory.findMany();
+            const all = yield server_1.prisma.subCategory.findMany({ orderBy: { createdat: 'desc' } });
             return res.status(200).send({ error: false, message: "ok", data: all });
         }
         catch (err) {
@@ -66,7 +66,8 @@ function updateSubCategory(req, res) {
             let id = req.params.id;
             const schema = zod_1.z.object({
                 image: zod_1.z.string(),
-                link: zod_1.z.string(),
+                categoryId: zod_1.z.string(),
+                featured: zod_1.z.boolean()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)

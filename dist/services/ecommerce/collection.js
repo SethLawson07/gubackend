@@ -74,7 +74,7 @@ function updateCollection(req, res) {
                 long: zod_1.z.string(),
                 day: zod_1.z.string(),
                 starttime: zod_1.z.string(),
-                endtime: zod_1.z.string()
+                endtime: zod_1.z.string(), featured: zod_1.z.boolean()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
