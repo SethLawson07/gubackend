@@ -59,7 +59,7 @@ export async function updateItem(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
-            image: z.string(),
+            title: z.string(),
             subCategoryId: z.string(),
             featured:z.boolean()
 

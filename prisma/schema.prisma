@@ -264,8 +264,7 @@ model Product {
     prices         String[]         @default([])
     brand          String?          @default("")
     description    String
-    spec           String
-    tag            String[]
+    tag            String?
     images         String[]
     item           Item             @relation(fields: [itemId], references: [id])
     slugproduct    String           @unique
@@ -415,7 +414,7 @@ model PromoCode {
     id                 String   @id @default(auto()) @map("_id") @db.ObjectId
     name               String
     discountpercentage String
-    Expirationdate     DateTime @default(now())
+    expirationdate     DateTime @default(now())
     featured           Boolean  @default(true)
     createdat          DateTime @default(now())
 }

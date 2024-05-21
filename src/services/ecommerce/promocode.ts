@@ -9,7 +9,8 @@ export async function addPromoCode(req: Request, res: Response) {
         const schema = z.object({
             name: z.string(),
             discountpercentage: z.string(),
-            Expirationdate:z.coerce.date()
+            expirationdate:z.coerce.date(),
+            featured:z.boolean()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
@@ -49,7 +50,8 @@ export async function updatePromoCode(req: Request, res: Response) {
         const schema = z.object({
             name: z.string(),
             discountpercentage: z.string(),
-            Expirationdate:z.coerce.date()
+            expirationdate:z.coerce.date(),
+            featured:z.boolean()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

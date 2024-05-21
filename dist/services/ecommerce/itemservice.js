@@ -40,7 +40,7 @@ exports.addItemService = addItemService;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const all = yield server_1.prisma.itemService.findMany();
+            const all = yield server_1.prisma.itemService.findMany({ orderBy: { createdat: 'desc' } });
             return res.status(200).send({ error: false, message: "ok", data: all });
         }
         catch (err) {
@@ -72,7 +72,7 @@ function updateItemService(req, res) {
                 image: zod_1.z.array(zod_1.z.string()).optional(),
                 price: zod_1.z.string().optional(),
                 description: zod_1.z.string().optional(),
-                serviceId: zod_1.z.string().optional(),
+                typeServiceId: zod_1.z.string().optional(),
                 featured: zod_1.z.boolean().optional(),
                 sectionArea: zod_1.z.number().optional()
             });

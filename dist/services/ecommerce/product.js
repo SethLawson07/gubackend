@@ -28,8 +28,7 @@ function addProduct(req, res) {
                 prices: zod_1.z.array(zod_1.z.string()).optional(),
                 brand: zod_1.z.string().optional(),
                 description: zod_1.z.string(),
-                spec: zod_1.z.string(),
-                tag: zod_1.z.array(zod_1.z.string()),
+                tag: zod_1.z.string().optional(),
                 images: zod_1.z.array(zod_1.z.string()),
                 itemId: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional(),
@@ -141,20 +140,18 @@ function updateProduct(req, res) {
         try {
             let id = req.params.id;
             const schema = zod_1.z.object({
-                title: zod_1.z.string().optional(),
+                name: zod_1.z.string().optional(),
                 qte: zod_1.z.number().optional(),
+                price: zod_1.z.string(),
+                oldPrice: zod_1.z.string().optional(),
                 discount: zod_1.z.string().optional(),
+                goodpay: zod_1.z.string().optional(),
+                tag: zod_1.z.string().optional(),
                 sectionArea: zod_1.z.number().min(1).max(2).optional(),
                 itemId: zod_1.z.string(),
-                featured: zod_1.z.boolean()
-                // discountprice: z.string(),
-                // goodpay: z.boolean(),
-                // goodpayprice: z.string(),
-                // brand: z.string(),
-                // description: z.string(),
-                // keywords: z.string(),
-                // image: z.string(),
-                // itemId: z.string(),
+                brand: zod_1.z.string().optional(),
+                description: zod_1.z.string(),
+                featured: zod_1.z.boolean(),
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)

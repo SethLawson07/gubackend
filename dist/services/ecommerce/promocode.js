@@ -19,7 +19,8 @@ function addPromoCode(req, res) {
             const schema = zod_1.z.object({
                 name: zod_1.z.string(),
                 discountpercentage: zod_1.z.string(),
-                Expirationdate: zod_1.z.coerce.date()
+                expirationdate: zod_1.z.coerce.date(),
+                featured: zod_1.z.boolean()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
@@ -66,7 +67,8 @@ function updatePromoCode(req, res) {
             const schema = zod_1.z.object({
                 name: zod_1.z.string(),
                 discountpercentage: zod_1.z.string(),
-                Expirationdate: zod_1.z.coerce.date()
+                expirationdate: zod_1.z.coerce.date(),
+                featured: zod_1.z.boolean()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)

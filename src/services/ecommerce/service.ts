@@ -25,7 +25,7 @@ export async function addService(req: Request, res: Response) {
 
 export async function all(req: Request, res: Response) {
     try {
-        const all = await prisma.service.findMany();
+        const all = await prisma.service.findMany({orderBy:{createdat:'desc'}});
         return res.status(200).send({ error: false, message: "ok", data: all });
     } catch (err) {
         console.error(` ${err}`);

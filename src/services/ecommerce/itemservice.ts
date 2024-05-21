@@ -28,7 +28,7 @@ export async function addItemService(req: Request, res: Response) {
 
 export async function all(req: Request, res: Response) {
     try {
-        const all = await prisma.itemService.findMany();
+        const all = await prisma.itemService.findMany({orderBy:{createdat:'desc'}});
         return res.status(200).send({ error: false, message: "ok", data: all });
     } catch (err) {
         console.error(` ${err}`);
@@ -56,7 +56,7 @@ export async function updateItemService(req: Request, res: Response) {
             image: z.array(z.string()).optional(),
             price:z.string().optional(),
             description:z.string().optional(),
-            serviceId:z.string().optional(),
+            typeServiceId:z.string().optional(),
             featured:z.boolean().optional(),
             sectionArea:z.number().optional()
 

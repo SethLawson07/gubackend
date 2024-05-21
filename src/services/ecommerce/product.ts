@@ -21,8 +21,7 @@ export async function addProduct(req: Request, res: Response) {
             prices: z.array(z.string()).optional(),
             brand: z.string().optional(),
             description: z.string(),
-            spec: z.string(),
-            tag: z.array(z.string()),
+            tag: z.string().optional(),
             images: z.array(z.string()),
             itemId: z.string(),
             featured:z.boolean().optional(),
@@ -127,21 +126,19 @@ export async function updateProduct(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
-            title: z.string().optional(),
+            name: z.string().optional(),
             qte: z.number().optional(),
+            price:z.string(),
+            oldPrice:z.string().optional(),
             discount: z.string().optional(),
+            goodpay: z.string().optional(),
+            tag: z.string().optional(),
             sectionArea:z.number().min(1).max(2).optional(),
             itemId:z.string(),
-            featured:z.boolean()
+            brand: z.string().optional(),
+            description: z.string(),
+            featured:z.boolean(),
 
-            // discountprice: z.string(),
-            // goodpay: z.boolean(),
-            // goodpayprice: z.string(),
-            // brand: z.string(),
-            // description: z.string(),
-            // keywords: z.string(),
-            // image: z.string(),
-            // itemId: z.string(),
            
         });
         const validation = schema.safeParse(req.body);
