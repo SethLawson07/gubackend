@@ -68,6 +68,7 @@ const item_1 = __importDefault(require("./routes/ecommerce/item"));
 const orderproduct_1 = __importDefault(require("./routes/ecommerce/orderproduct"));
 const orderservice_1 = __importDefault(require("./routes/ecommerce/orderservice"));
 const product_1 = __importDefault(require("./routes/ecommerce/product"));
+const promocode_1 = __importDefault(require("./routes/ecommerce/promocode"));
 const section_1 = __importDefault(require("./routes/ecommerce/section"));
 const service_1 = __importDefault(require("./routes/ecommerce/service"));
 const subcategory_1 = __importDefault(require("./routes/ecommerce/subcategory"));
@@ -131,6 +132,7 @@ app.use('/typeservice', typeservice_1.default);
 app.use('/itemservice', itemservice_1.default);
 app.use('/slider', slider_1.default);
 app.use('/variant', variant_1.default);
+app.use('/promocode', promocode_1.default);
 // Health
 app.get("/health", (_req, res) => {
     return res.status(200).send();

@@ -101,6 +101,7 @@ app.use('/typeservice', typeservice);
 app.use('/itemservice', itemservice);
 app.use('/slider', slider);
 app.use('/variant', variant);
+app.use('/promocode', promocode);
 
 
 

@@ -63,8 +63,8 @@ function updateBrand(req, res) {
         try {
             let id = req.params.id;
             const schema = zod_1.z.object({
-                image: zod_1.z.string(),
-                link: zod_1.z.string(),
+                title: zod_1.z.string(),
+                featured: zod_1.z.boolean(),
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)

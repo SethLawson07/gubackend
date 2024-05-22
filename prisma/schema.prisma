@@ -288,16 +288,6 @@ model Filters {
     itemId  String  @db.ObjectId
 }
 
-// model ProductVariant {
-//     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-//     color     String
-//     image     String?
-//     size      Json
-//     product   Product  @relation(fields: [productId], references: [id])
-//     featured  Boolean  @default(false)
-//     createdat DateTime @default(now())
-//     productId String   @db.ObjectId
-// }
 
 model Variant {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -311,7 +301,7 @@ model Variant {
 model ProductVariant {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
     title     String[]
-    value     String[]
+    value     String[] 
     product   Product  @relation(fields: [productId], references: [id])
     productId String   @db.ObjectId
     featured  Boolean  @default(true)

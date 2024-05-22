@@ -45,6 +45,16 @@ export async function all(req: Request, res: Response) {
     }
 }
 
+export async function allArea(req: Request, res: Response) {
+    try {
+        const all = await prisma.area.findMany({orderBy:{createdat:'desc'}});
+        return res.status(200).send({ error: false, message: "ok", data: all });
+    } catch (err) {
+        console.error(` ${err}`);
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+    }
+}
+
 export async function active(req: Request, res: Response) {
     try {
         const active = await prisma.section.findMany({where:{featured:true}});

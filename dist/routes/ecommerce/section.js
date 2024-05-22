@@ -7,6 +7,7 @@ const router = (0, express_1.Router)();
 router.route("/").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, section_1.addSection);
 router.route("/area").post(middlewares_1.Auth, middlewares_1.UserIsAdmin, section_1.addArea);
 router.route("/").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, section_1.all);
+router.route("/area").get(middlewares_1.Auth, middlewares_1.UserIsAdmin, section_1.allArea);
 router.route("/active").get(section_1.active);
 router.route("/update/:id").put(middlewares_1.Auth, middlewares_1.UserIsAdmin, section_1.updateSection);
 router.route("/delete/:id").delete(middlewares_1.Auth, middlewares_1.UserIsAdmin, section_1.deleteSection);

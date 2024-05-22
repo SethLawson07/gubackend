@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSection = exports.updateSection = exports.active = exports.all = exports.addArea = exports.addSection = void 0;
+exports.deleteSection = exports.updateSection = exports.active = exports.allArea = exports.all = exports.addArea = exports.addSection = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
@@ -64,6 +64,19 @@ function all(req, res) {
     });
 }
 exports.all = all;
+function allArea(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const all = yield server_1.prisma.area.findMany({ orderBy: { createdat: 'desc' } });
+            return res.status(200).send({ error: false, message: "ok", data: all });
+        }
+        catch (err) {
+            console.error(` ${err}`);
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        }
+    });
+}
+exports.allArea = allArea;
 function active(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
