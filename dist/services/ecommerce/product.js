@@ -16,23 +16,47 @@ const server_1 = require("../../server");
 function addProduct(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            // const schema = z.object({
+            //     name: z.string(),
+            //     qte: z.number(),
+            //     price:z.string(),
+            //     discount: z.string().optional(),
+            //     goodpay: z.string().optional(),
+            //     brand: z.string().optional(),
+            //     description: z.string(),
+            //     tag: z.string().optional(),
+            //     images: z.array(z.string()),
+            //     itemId: z.string(),
+            //     featured:z.boolean().optional(),
+            //     slugproduct:z.string(),
+            //     staticVariant: z.array(
+            //         z.object({
+            //             size: z.string().optional(), 
+            //             color: z.string().optional(), 
+            //             price: z.string().optional()  
+            //         })
+            //     ).optional(),
+            //     dynamicVariant: z.record(z.unknown()).optional()
+            // });
             const schema = zod_1.z.object({
                 name: zod_1.z.string(),
                 qte: zod_1.z.number(),
                 price: zod_1.z.string(),
-                oldPrice: zod_1.z.string().optional(),
                 discount: zod_1.z.string().optional(),
                 goodpay: zod_1.z.string().optional(),
-                color: zod_1.z.array(zod_1.z.string()).optional(),
-                size: zod_1.z.array(zod_1.z.string()).optional(),
-                prices: zod_1.z.array(zod_1.z.string()).optional(),
                 brand: zod_1.z.string().optional(),
                 description: zod_1.z.string(),
                 tag: zod_1.z.string().optional(),
                 images: zod_1.z.array(zod_1.z.string()),
                 itemId: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional(),
-                slugproduct: zod_1.z.string()
+                slugproduct: zod_1.z.string(),
+                staticVariant: zod_1.z.array(zod_1.z.object({
+                    size: zod_1.z.string().optional(),
+                    color: zod_1.z.string().optional(),
+                    price: zod_1.z.string().optional()
+                })).default([]),
+                dynamicVariant: zod_1.z.record(zod_1.z.any()).optional()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
@@ -142,8 +166,7 @@ function updateProduct(req, res) {
             const schema = zod_1.z.object({
                 name: zod_1.z.string().optional(),
                 qte: zod_1.z.number().optional(),
-                price: zod_1.z.string(),
-                oldPrice: zod_1.z.string().optional(),
+                price: zod_1.z.string().optional(),
                 discount: zod_1.z.string().optional(),
                 goodpay: zod_1.z.string().optional(),
                 tag: zod_1.z.string().optional(),

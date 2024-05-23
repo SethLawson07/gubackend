@@ -17,15 +17,20 @@ function addSlider(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const schema = zod_1.z.object({
+                title: zod_1.z.string(),
                 file: zod_1.z.string(),
-                type: zod_1.z.string(),
                 link: zod_1.z.string(),
                 position: zod_1.z.string(),
+                description: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
                 return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
+            const slider = yield server_1.prisma.slider.findFirst({ where: { position: validation.data.position, featured: true } });
+            if (slider) {
+                yield server_1.prisma.slider.update({ where: { id: slider.id }, data: { featured: false } });
+            }
             const savedSlider = yield server_1.prisma.slider.create({ data: validation.data });
             return res.status(200).send({ status: 200, error: false, message: "ok", data: savedSlider });
         }
@@ -38,7 +43,7 @@ exports.addSlider = addSlider;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const all = yield server_1.prisma.slider.findMany({ orderBy: { createdat: 'desc' } });
+            const all = yield server_1.prisma.slider.findMany({ orderBy: { createdat: 'desc' }, where: { featured: true } });
             return res.status(200).send({ error: false, message: "ok", data: all });
         }
         catch (err) {
@@ -80,10 +85,11 @@ function updateSlider(req, res) {
         try {
             let id = req.params.id;
             const schema = zod_1.z.object({
+                title: zod_1.z.string(),
                 file: zod_1.z.string(),
-                type: zod_1.z.string(),
                 link: zod_1.z.string(),
                 position: zod_1.z.string(),
+                description: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);

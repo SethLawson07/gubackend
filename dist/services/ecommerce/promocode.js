@@ -29,7 +29,7 @@ function addPromoCode(req, res) {
             return res.status(200).send({ status: 200, error: false, message: "ok", data: savedPromoCode });
         }
         catch (err) {
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite op " + err, data: {} });
         }
     });
 }
@@ -37,12 +37,12 @@ exports.addPromoCode = addPromoCode;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const all = yield server_1.prisma.promoCode.findMany();
+            const all = yield server_1.prisma.promoCode.findMany({ orderBy: { createdat: 'desc' } });
             return res.status(200).send({ error: false, message: "ok", data: all });
         }
         catch (err) {
             console.error(` ${err}`);
-            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite os " + err, data: {} });
         }
     });
 }

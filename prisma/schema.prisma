@@ -395,9 +395,7 @@ model Slider {
     id          String   @id @default(auto()) @map("_id") @db.ObjectId
     title       String
     file        String
-    type        String //video or image
     link        String
-    area        String
     position    String
     description String
     featured    Boolean  @default(true)

@@ -17,7 +17,7 @@ export async function addPromoCode(req: Request, res: Response) {
         const savedPromoCode = await prisma.promoCode.create({ data: validation.data });
         return res.status(200).send({ status: 200, error: false, message: "ok", data: savedPromoCode });
     } catch (err) {
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite op "+err, data: {} });
     }
 }
 
@@ -25,11 +25,11 @@ export async function addPromoCode(req: Request, res: Response) {
 
 export async function all(req: Request, res: Response) {
     try {
-        const all = await prisma.promoCode.findMany();
+        const all = await prisma.promoCode.findMany({orderBy:{createdat:'desc'}});
         return res.status(200).send({ error: false, message: "ok", data: all });
     } catch (err) {
         console.error(` ${err}`);
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite os "+err, data: {} });
     }
 }
 

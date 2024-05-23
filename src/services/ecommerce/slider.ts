@@ -9,15 +9,17 @@ export async function addSlider(req: Request, res: Response) {
         const schema = z.object({
             title: z.string(),
             file: z.string(),
-            type: z.string(),
             link: z.string(),
-            area: z.string(),
             position: z.string(),
             description: z.string(),
             featured:z.boolean().optional()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
+        const slider = await prisma.slider.findFirst({where:{position:validation.data.position,featured:true}})
+        if(slider){
+             await prisma.slider.update({where:{id:slider.id},data:{featured:false}})
+        }       
         const savedSlider = await prisma.slider.create({ data: validation.data });
         return res.status(200).send({ status: 200, error: false, message: "ok", data: savedSlider });
     } catch (err) {
@@ -29,7 +31,7 @@ export async function addSlider(req: Request, res: Response) {
 
 export async function all(req: Request, res: Response) {
     try {
-        const all = await prisma.slider.findMany({orderBy:{createdat:'desc'}});
+        const all = await prisma.slider.findMany({orderBy:{createdat:'desc'},where:{featured:true}});
         return res.status(200).send({ error: false, message: "ok", data: all });
     } catch (err) {
         console.error(` ${err}`);
@@ -65,9 +67,7 @@ export async function updateSlider(req: Request, res: Response) {
         const schema = z.object({
             title: z.string(),
             file: z.string(),
-            type: z.string(),
             link: z.string(),
-            area: z.string(),
             position: z.string(),
             description: z.string(),
             featured:z.boolean().optional()
