@@ -17,7 +17,7 @@ export async function addPromoCode(req: Request, res: Response) {
         const savedPromoCode = await prisma.promoCode.create({ data: validation.data });
         return res.status(200).send({ status: 200, error: false, message: "ok", data: savedPromoCode });
     } catch (err) {
-        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite", data: {} });
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite "+err, data: {} });
     }
 }
 

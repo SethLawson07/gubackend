@@ -9,7 +9,8 @@ export async function addSection(req: Request, res: Response) {
         const schema = z.object({
             title: z.string(),
             slugsection:z.string(),
-            areaId:z.string()
+            areaId:z.string(),
+            featured:z.boolean()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
@@ -70,8 +71,9 @@ export async function updateSection(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
-            image: z.string(),
-            areaId:z.string()
+            title: z.string(),
+            areaId:z.string(),
+            featured:z.boolean()
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });

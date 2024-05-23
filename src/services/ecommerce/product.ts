@@ -9,25 +9,52 @@ import { Product } from "@prisma/client";
   
 export async function addProduct(req: Request, res: Response) {
     try {
+        // const schema = z.object({
+        //     name: z.string(),
+        //     qte: z.number(),
+        //     price:z.string(),
+        //     discount: z.string().optional(),
+        //     goodpay: z.string().optional(),
+        //     brand: z.string().optional(),
+        //     description: z.string(),
+        //     tag: z.string().optional(),
+        //     images: z.array(z.string()),
+        //     itemId: z.string(),
+        //     featured:z.boolean().optional(),
+        //     slugproduct:z.string(),
+        //     staticVariant: z.array(
+        //         z.object({
+        //             size: z.string().optional(), 
+        //             color: z.string().optional(), 
+        //             price: z.string().optional()  
+        //         })
+        //     ).optional(),
+        //     dynamicVariant: z.record(z.unknown()).optional()
+
+        // });
         const schema = z.object({
             name: z.string(),
             qte: z.number(),
-            price:z.string(),
-            oldPrice:z.string().optional(),
+            price: z.string(),
             discount: z.string().optional(),
             goodpay: z.string().optional(),
-            color: z.array(z.string()).optional(),
-            size: z.array(z.string()).optional(),
-            prices: z.array(z.string()).optional(),
             brand: z.string().optional(),
             description: z.string(),
             tag: z.string().optional(),
             images: z.array(z.string()),
             itemId: z.string(),
-            featured:z.boolean().optional(),
-            slugproduct:z.string()
-
+            featured: z.boolean().optional(),
+            slugproduct: z.string(),
+            staticVariant: z.array(
+                z.object({
+                    size: z.string().optional(), 
+                    color: z.string().optional(), 
+                    price: z.string().optional()  
+                })
+            ).default([]),
+            dynamicVariant: z.record(z.any()).optional()
         });
+        
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
      
@@ -128,8 +155,7 @@ export async function updateProduct(req: Request, res: Response) {
         const schema = z.object({
             name: z.string().optional(),
             qte: z.number().optional(),
-            price:z.string(),
-            oldPrice:z.string().optional(),
+            price:z.string().optional(),
             discount: z.string().optional(),
             goodpay: z.string().optional(),
             tag: z.string().optional(),
