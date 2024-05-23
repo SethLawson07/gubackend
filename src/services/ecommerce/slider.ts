@@ -5,12 +5,15 @@ import { prisma } from "../../server";
 
 
 export async function addSlider(req: Request, res: Response) {
-    try {
+    try { 
         const schema = z.object({
+            title: z.string(),
             file: z.string(),
             type: z.string(),
             link: z.string(),
+            area: z.string(),
             position: z.string(),
+            description: z.string(),
             featured:z.boolean().optional()
         });
         const validation = schema.safeParse(req.body);
@@ -60,10 +63,13 @@ export async function updateSlider(req: Request, res: Response) {
     try {
         let id = req.params.id
         const schema = z.object({
+            title: z.string(),
             file: z.string(),
             type: z.string(),
             link: z.string(),
+            area: z.string(),
             position: z.string(),
+            description: z.string(),
             featured:z.boolean().optional()
         });
         const validation = schema.safeParse(req.body);

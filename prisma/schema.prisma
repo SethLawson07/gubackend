@@ -276,7 +276,7 @@ model Product {
     section        Section          @relation(fields: [sectionId], references: [id])
     sectionId      String           @default("nop") @db.ObjectId
     ProductVariant ProductVariant[]
-    staticVariant Json[] @default([])
+    staticVariant  Json[]           @default([])
     dynamicVariant Json?
 }
 
@@ -392,13 +392,16 @@ model ItemService {
 }
 
 model Slider {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    file      String
-    type      String //video or image
-    link      String
-    position  String
-    featured  Boolean  @default(true)
-    createdat DateTime @default(now())
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    file        String
+    type        String //video or image
+    link        String
+    area        String
+    position    String
+    description String
+    featured    Boolean  @default(true)
+    createdat   DateTime @default(now())
 }
 
 model PromoCode {
