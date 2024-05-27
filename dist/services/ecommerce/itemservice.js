@@ -23,6 +23,9 @@ function addItemService(req, res) {
                 description: zod_1.z.string(),
                 typeServiceId: zod_1.z.string(),
                 slugitemservice: zod_1.z.string(),
+                day: zod_1.z.string(),
+                starttime: zod_1.z.string(),
+                endtime: zod_1.z.string(),
                 featured: zod_1.z.boolean().optional()
             });
             const validation = schema.safeParse(req.body);
@@ -74,7 +77,10 @@ function updateItemService(req, res) {
                 description: zod_1.z.string().optional(),
                 typeServiceId: zod_1.z.string().optional(),
                 featured: zod_1.z.boolean().optional(),
-                sectionArea: zod_1.z.number().optional()
+                sectionArea: zod_1.z.number().optional(),
+                day: zod_1.z.string(),
+                starttime: zod_1.z.string(),
+                endtime: zod_1.z.string()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)

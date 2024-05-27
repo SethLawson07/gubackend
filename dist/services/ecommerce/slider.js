@@ -18,6 +18,7 @@ function addSlider(req, res) {
         try {
             const schema = zod_1.z.object({
                 title: zod_1.z.string(),
+                type: zod_1.z.string(),
                 file: zod_1.z.string(),
                 link: zod_1.z.string(),
                 position: zod_1.z.string(),

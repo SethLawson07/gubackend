@@ -256,7 +256,7 @@ model Product {
     price          String
     // oldPrice       String?          @default("")
     discount       String?          @default("")
-    goodpay        String?          @default("")
+    goodpay        Int?          @default(0)
     rating         String           @default("4")
     // color          String[]         @default([])
     // size           String[]         @default([])
@@ -382,6 +382,9 @@ model ItemService {
     price           String
     description     String
     slugitemservice String
+    day             String
+    starttime       String
+    endtime         String
     section         Section     @relation(fields: [sectionId], references: [id])
     featured        Boolean     @default(true)
     createdat       DateTime    @default(now())
@@ -394,6 +397,7 @@ model ItemService {
 model Slider {
     id          String   @id @default(auto()) @map("_id") @db.ObjectId
     title       String
+    type        String
     file        String
     link        String
     position    String

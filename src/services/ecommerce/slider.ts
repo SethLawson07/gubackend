@@ -8,6 +8,7 @@ export async function addSlider(req: Request, res: Response) {
     try { 
         const schema = z.object({
             title: z.string(),
+            type: z.string(),
             file: z.string(),
             link: z.string(),
             position: z.string(),
