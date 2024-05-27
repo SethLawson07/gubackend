@@ -164,7 +164,6 @@ export async function updateProduct(req: Request, res: Response) {
             brand: z.string().optional(),
             description: z.string(),
             featured:z.boolean(),
-
            
         });
         const validation = schema.safeParse(req.body);
