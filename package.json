@@ -15,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@bull-board/express": "^5.10.2",
-    "@prisma/client": "^5.14.0",
+    "@prisma/client": "^5.13.0",
     "agenda": "^5.0.0",
     "axios": "^1.3.6",
     "bcrypt": "^5.1.0",
@@ -32,6 +32,7 @@
     "mongodb": "^5.5.0",
     "mongoose": "^8.0.4",
     "morgan": "^1.10.0",
+    "prisma": "^5.13.0",
     "prisma-slug": "^1.0.0-beta.1",
     "slugify": "^1.6.6",
     "swagger-ui-express": "^4.6.2",
@@ -48,7 +49,6 @@
     "@types/swagger-ui-express": "^4.1.3",
     "concurrently": "^8.0.1",
     "nodemon": "^3.0.1",
-    "prisma": "^5.14.0",
     "typescript": "^5.0.4"
   }
 }
