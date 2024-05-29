@@ -13,9 +13,11 @@ export async function addItemService(req: Request, res: Response) {
             description:z.string(),
             typeServiceId:z.string(),
             slugitemservice:z.string(),
-            day: z.string(),
-            starttime: z.string(),
-            endtime:z.string(),
+            timeslots:z.array(z.object({
+                day:z.string(),
+                starttime:z.string(),
+                endtime:z.string()
+            })),
             featured:z.boolean().optional()
         });
         const validation = schema.safeParse(req.body);
@@ -60,11 +62,14 @@ export async function updateItemService(req: Request, res: Response) {
             price:z.string().optional(),
             description:z.string().optional(),
             typeServiceId:z.string().optional(),
-            featured:z.boolean().optional(),
             sectionArea:z.number().optional(),
-            day: z.string(),
-            starttime: z.string(),
-            endtime:z.string()
+            timeslots:z.array(z.object({
+                day:z.string(),
+                starttime:z.string(),
+                endtime:z.string()
+            })),
+            featured:z.boolean().optional()
+
 
 
         });

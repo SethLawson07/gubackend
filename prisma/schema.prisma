@@ -274,7 +274,7 @@ model Product {
     Order          OrderProduct[]
     // productVariant ProductVariant[]
     section        Section          @relation(fields: [sectionId], references: [id])
-    sectionId      String           @default("nop") @db.ObjectId
+    sectionId      String           @default("9607efd6402ae180193f11e2") @db.ObjectId
     ProductVariant ProductVariant[]
     staticVariant  Json[]           @default([])
     dynamicVariant Json?
@@ -382,9 +382,7 @@ model ItemService {
     price           String
     description     String
     slugitemservice String
-    day             String
-    starttime       String
-    endtime         String
+    timeslots Json[]
     section         Section     @relation(fields: [sectionId], references: [id])
     featured        Boolean     @default(true)
     createdat       DateTime    @default(now())
