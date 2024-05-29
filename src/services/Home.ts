@@ -14,10 +14,9 @@ export async function siteHome(req: Request, res: Response) {
       const areaTwo = await prisma.area.findMany({ where: { title: "two" },include:{Section:{include:{Product:true}}} });
       const services = await prisma.service.findMany({ where: { featured: true }, include: { TypeService:{include:{ItemService:true}} } });
       const areaThree = await prisma.area.findMany({ where: { title: "three" },include:{Section:{include:{ItemService:true}}} });
-      // const categories = await prisma.category.findMany({ where: { featured: true }, include: { SubCategory: { include: { Item: true } } } });
       const categories = await prisma.category.findMany({where: { featured: true },include:{SubCategory:{include:{Item:{include:{Product:{include:{ProductVariant:true}}}}}}}})
+      const sliders = await prisma.slider.findMany({where:{featured:true}});
 
-      
       const responseData = {
       
         "latest": latestProducts,
@@ -26,6 +25,7 @@ export async function siteHome(req: Request, res: Response) {
         "services": services,
         "areaThree": areaThree,
         "categories": categories,
+        "slider": sliders,
       };
   
       return res.status(200).send({ error: false, message: "ok", data: [responseData] });
