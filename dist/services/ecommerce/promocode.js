@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePromoCode = exports.updatePromoCode = exports.active = exports.all = exports.addPromoCode = void 0;
+exports.deletePromoCode = exports.updatePromoCode = exports.active = exports.all = exports.applyPromoCode = exports.addPromoCode = void 0;
 const zod_1 = require("zod");
 const zod_validation_error_1 = require("zod-validation-error");
 const server_1 = require("../../server");
@@ -34,6 +34,36 @@ function addPromoCode(req, res) {
     });
 }
 exports.addPromoCode = addPromoCode;
+function applyPromoCode(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const schema = zod_1.z.object({
+                code: zod_1.z.string(),
+                userId: zod_1.z.string(),
+            });
+            const validation = schema.safeParse(req.body);
+            if (!validation.success)
+                return res.status(400).send({ status: 400, error: true, message: (0, zod_validation_error_1.fromZodError)(validation.error).message, data: {} });
+            const promocode = yield server_1.prisma.promoCode.findFirst({ where: { name: validation.data.code } });
+            const verifyCodeId = yield server_1.prisma.verifyCode.findFirst({ where: { promoCodeId: promocode === null || promocode === void 0 ? void 0 : promocode.id, userId: validation.data.userId } });
+            if (verifyCodeId) {
+                return res.status(400).send({ status: 400, error: true, message: "Vous avez déjà utilisé le code promo " + validation.data.code + " !", data: [] });
+            }
+            else {
+                const verifyData = {
+                    userId: validation.data.userId,
+                    promoCodeId: promocode.id
+                };
+                const savedVerifyCode = yield server_1.prisma.verifyCode.create({ data: verifyData });
+                return res.status(200).send({ status: 200, error: false, message: "Vous venez d'appliquer le code promo " + validation.data.code + " !", data: promocode === null || promocode === void 0 ? void 0 : promocode.discountpercentage });
+            }
+        }
+        catch (err) {
+            return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite op " + err, data: {} });
+        }
+    });
+}
+exports.applyPromoCode = applyPromoCode;
 function all(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {

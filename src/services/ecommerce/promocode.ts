@@ -21,7 +21,35 @@ export async function addPromoCode(req: Request, res: Response) {
     }
 }
 
+export async function applyPromoCode(req: Request, res: Response) {
+    try {
+        const schema = z.object({
+            code: z.string(),
+            userId: z.string(),
+        });
+        const validation = schema.safeParse(req.body);
+        if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
+      
+        const promocode = await prisma.promoCode.findFirst({where:{name:validation.data.code}})
+        const verifyCodeId = await prisma.verifyCode.findFirst({where:{promoCodeId:promocode?.id,userId:validation.data.userId} })
+        
+        if(verifyCodeId){
+            return res.status(400).send({ status: 400, error: true, message: "Vous avez déjà utilisé le code promo "+validation.data.code+" !", data: [] });
 
+        }else{
+            
+            const verifyData = {
+                userId   :validation.data.userId,
+                promoCodeId : promocode.id
+            }
+            const savedVerifyCode = await prisma.verifyCode.create({ data: verifyData });
+            return res.status(200).send({ status: 200, error: false, message: "Vous venez d'appliquer le code promo "+validation.data.code+" !", data: promocode?.discountpercentage });
+        }
+   
+    } catch (err) {
+        return res.status(500).send({ status: 500, error: true, message: "Une erreur s'est produite op "+err, data: {} });
+    }
+}
 
 export async function all(req: Request, res: Response) {
     try {

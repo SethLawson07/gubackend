@@ -13,7 +13,8 @@ export async function addCollection(req: Request, res: Response) {
             long: z.string(),
             day: z.string(),
             starttime: z.string(),
-            endtime:z.string()
+            endtime:z.string(),
+            price:z.string(),
         });
         const validation = schema.safeParse(req.body);
         if (!validation.success) return res.status(400).send({ status: 400, error: true, message: fromZodError(validation.error).message, data: {} });
@@ -52,12 +53,14 @@ export async function updateCollection(req: Request, res: Response) {
         let id = req.params.id
         const schema = z.object({
             place: z.string(),
-            address: z.string(),
-            lat: z.string(),
-            long: z.string(),
+            address: z.string().optional(),
+            lat: z.string().optional(),
+            long: z.string().optional(),
             day: z.string(),
             starttime: z.string(),
-            endtime:z.string(),            featured:z.boolean()
+            endtime:z.string(),           
+            price:z.string(),  
+            featured:z.boolean()
 
         });
         const validation = schema.safeParse(req.body);

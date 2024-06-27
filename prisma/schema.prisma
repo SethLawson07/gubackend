@@ -38,6 +38,7 @@ model User {
     Account         Account[]
     OrderProduct    OrderProduct[]
     OrderService    OrderService[]
+    VerifyCode      VerifyCode[]
 }
 
 model Account {
@@ -254,14 +255,10 @@ model Product {
     name           String
     qte            Int
     price          String
-    // oldPrice       String?          @default("")
+    deliverycost   String
     discount       String?          @default("")
-    goodpay        Int?          @default(0)
+    goodpay        Int?             @default(0)
     rating         String           @default("4")
-    // color          String[]         @default([])
-    // size           String[]         @default([])
-    // weight         String[]         @default([])
-    // prices         String[]         @default([])
     brand          String?          @default("")
     description    String
     tag            String?
@@ -382,7 +379,7 @@ model ItemService {
     price           String
     description     String
     slugitemservice String
-    timeslots Json[]
+    timeslots       Json[]
     section         Section     @relation(fields: [sectionId], references: [id])
     featured        Boolean     @default(true)
     createdat       DateTime    @default(now())
@@ -405,12 +402,23 @@ model Slider {
 }
 
 model PromoCode {
-    id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+    id                 String       @id @default(auto()) @map("_id") @db.ObjectId
     name               String
     discountpercentage String
-    expirationdate     DateTime @default(now())
-    featured           Boolean  @default(true)
-    createdat          DateTime @default(now())
+    expirationdate     DateTime     @default(now())
+    featured           Boolean      @default(true)
+    createdat          DateTime     @default(now())
+    VerifyCode         VerifyCode[]
+}
+
+model VerifyCode {
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    promoCode   PromoCode @relation(fields: [promoCodeId], references: [id])
+    user        User      @relation(fields: [userId], references: [id])
+    featured    Boolean   @default(true)
+    createdat   DateTime  @default(now())
+    userId      String    @db.ObjectId()
+    promoCodeId String    @db.ObjectId
 }
 
 model collection {
@@ -422,6 +430,7 @@ model collection {
     day       String
     starttime String
     endtime   String
+    price     String
     featured  Boolean  @default(true)
     createdat DateTime @default(now())
 }

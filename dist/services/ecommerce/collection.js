@@ -23,7 +23,8 @@ function addCollection(req, res) {
                 long: zod_1.z.string(),
                 day: zod_1.z.string(),
                 starttime: zod_1.z.string(),
-                endtime: zod_1.z.string()
+                endtime: zod_1.z.string(),
+                price: zod_1.z.string(),
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)
@@ -69,12 +70,14 @@ function updateCollection(req, res) {
             let id = req.params.id;
             const schema = zod_1.z.object({
                 place: zod_1.z.string(),
-                address: zod_1.z.string(),
-                lat: zod_1.z.string(),
-                long: zod_1.z.string(),
+                address: zod_1.z.string().optional(),
+                lat: zod_1.z.string().optional(),
+                long: zod_1.z.string().optional(),
                 day: zod_1.z.string(),
                 starttime: zod_1.z.string(),
-                endtime: zod_1.z.string(), featured: zod_1.z.boolean()
+                endtime: zod_1.z.string(),
+                price: zod_1.z.string(),
+                featured: zod_1.z.boolean()
             });
             const validation = schema.safeParse(req.body);
             if (!validation.success)

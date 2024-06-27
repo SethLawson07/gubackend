@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { Auth, UserIsAdmin } from "../../utils/middlewares";
-import { addPromoCode,all,active, updatePromoCode, deletePromoCode } from "../../services/ecommerce/promocode";
+import { addPromoCode,all,active, updatePromoCode, deletePromoCode, applyPromoCode } from "../../services/ecommerce/promocode";
 
 const router = Router();
 
 router.route("/add").post(Auth, UserIsAdmin, addPromoCode);
+
+router.route("/apply").post(Auth, applyPromoCode);
 
 router.route("/all").get(Auth, UserIsAdmin,all);
 
